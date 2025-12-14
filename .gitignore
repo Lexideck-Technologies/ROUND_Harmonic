@@ -1,22 +1,16 @@
-# Windows
-desktop.ini
-Thumbs.db
-.BIN/
 
 # Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
+*.py[cod]
+*$py.class
 venv/
-.venv
 .env
 
-# MacOS
+# Windows / Google Drive
+desktop.ini
+Thumbs.db
+$RECYCLE.BIN/
 .DS_Store
 
-# Editor
+# IDE
 .vscode/
-.idea/
