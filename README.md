@@ -176,10 +176,10 @@ After extensive tuning, the **"Minimalist Rail"** configuration (`Harmonics [1, 
 | **Parity** | 16-bit XOR Chain | **100.0%** | ~93.0% | Solved. Stable. |
 | **Topology** | 2D Winding | **100.0%** | ~99.0% | Instant lock-in. |
 
-![Parity](benchmark_parity.png)
-![Modulo-8](benchmark_clock.png)
-![Brackets](benchmark_brackets.png)
-![Topology](benchmark_topology.png)
+![Parity](data/benchmark_parity_d64b3466.png)
+![Modulo-8](data/benchmark_clock_d64b3466.png)
+![Brackets](data/benchmark_brackets_d64b3466.png)
+![Topology](data/benchmark_topology_d64b3466.png)
 
 ---
 
