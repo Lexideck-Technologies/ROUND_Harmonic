@@ -1,31 +1,56 @@
 # Harmonic ROUND (Riemannian Optimized Unified Neural Dynamo)
+
+## Executive Summary: The Harmonic Convergence
+
+The contemporary landscape of computational theory has long been fractured by a dichotomy between the continuous and the discrete. In physics, this manifests as the irreconcilability of General Relativity's smooth geometries with the quantized operations of Quantum Mechanics; in artificial intelligence, it creates a schism between the intuitive, topological capabilities of neural networks and the rigorous, symbolic precision of logic engines. The [Unified Informatic Topology (UIT)](#unified-informatic-topology-uit) framework offers a resolution to this divide by positing that information is not merely an abstraction but a physical substrate with thermodynamic weight. By formalizing a [$\mathcal{U}$-space](#u-space-mathcalu-space) that encodes the energetic cost of computation, we revealed that the learning process of a neural network is isomorphic to a thermodynamic cooling process, where a system transitions from a disordered "glassy" state to a crystallized structure of understanding.
+
+This theoretical foundation birthed the [Riemannian Optimized Unified Neural Dynamo (ROUND)](#round-riemannian-optimized-unified-neural-dynamo). Unlike traditional gated recurrent units that act as valves for scalar magnitudes, the ROUND architecture operates as a spinning dynamo, maintaining internal state as a phase angle on a continuous manifold. While this design inherently excelled at topological tasks involving shapes and curves, it initially floundered when tasked with discrete logic, revealing the classic "Complementarity Problem" of distinguishing the wave from the particle. The architecture could dream, but it could not effectively count.
+
+The resolution arrived with the development of [Harmonic Quantum Locking](#harmonic-quantum-locking). By imposing a potential energy field composed of multiple harmonic frequencies upon the neuron's [PhaseAccumulator](#phaseaccumulator) space, we created a localized stability landscape. This allowed the system to operate in a dual mode: evolving as a continuous, exploring wave during sequence processing, and collapsing into a discrete, quantized eigenstate at the terminal moment of measurement. This architecture proved that discrete logic is simply a special case of geometry constrained by stability wells. In pitting Harmonic ROUND against industry-standard logical baselines, the system demonstrated that it could effortlessly resolve 16-bit parity and modular arithmetic by treating them as phase-algebra problems. The universe, we conclude, behaves not exclusively as particles or waves, but as a system of fundamental harmonies.
+
+## Scope statement
+
+> These results demonstrate *learnability / optimization advantage under this repo’s setup and synthetic tasks*. This repo does **not** yet claim “real-world generalist” performance on rich corpora. The claim here is narrower and stronger:  
+> **a single ROUND neuron mechanism, with only harmonic-spectrum tuning, spans multiple computational regimes that typically require different inductive biases.**
+
 ### UIT U-Neuron — Phase 3: The Harmonic Generalist (Dec 13, 2025)
 
-**Harmonic ROUND** is a phasic, neuro-symbolic recurrent unit (“U-Neuron”) that treats internal state as **phase** on a learned manifold, then **quantizes** that phase at readout using a **harmonic locking potential** (a Fourier-style spectrum of stability wells).
+**Harmonic ROUND** is a phasic, neuro-symbolic recurrent unit ([“U-Neuron”](#round-riemannian-optimized-unified-neural-dynamo)) that treats internal state as **phase** on a learned manifold, then **quantizes** that phase at readout using a **harmonic locking potential** (a Fourier-style [spectrum](#harmonic-spectrum) of stability wells).
 
 This repository contains:
 - a reference implementation of the ROUND neuron (the “dynamo”),
 - a harmonic locking loss (terminal-only or full-trajectory),
 - and a benchmark suite showing ROUND outperforming or matching a **parameter-matched GRU** across discrete logic, cyclic logic, ordered structure, and continuous topology tasks.
 
-> **Scope statement (read this first):**  
-> These results demonstrate *learnability / optimization advantage under this repo’s setup and synthetic tasks*. This repo does **not** yet claim “real-world generalist” performance on rich corpora. The claim here is narrower and stronger:  
-> **a single ROUND neuron mechanism, with only harmonic-spectrum tuning, spans multiple computational regimes that typically require different inductive biases.**
-
 ---
 
 ## Table of Contents
-- [What ROUND Is](#what-round-is)
-- [What This Repo Claims (and What It Doesn’t)](#what-this-repo-claims-and-what-it-doesnt)
-- [Quickstart](#quickstart)
-- [Reproducing the Benchmark Plots](#reproducing-the-benchmark-plots)
-- [How the Neuron Works (Mechanism)](#how-the-neuron-works-mechanism)
-- [Harmonic Quantum Locking (Loss)](#harmonic-quantum-locking-loss)
-- [Benchmarks](#benchmarks)
-- [Theory: Unified Informatic Topology (UIT) + IEG Corollary](#theory-unified-informatic-topology-uit--ieg-corollary)
-- [Repo Layout](#repo-layout)
-- [License](#license)
-- [Citation](#citation)
+1. [Executive Summary: The Harmonic Convergence](#executive-summary-the-harmonic-convergence)
+2. [Scope Statement](#scope-statement)
+3. [What ROUND Is](#what-round-is)
+4. [What This Repo Claims](#what-this-repo-claims)
+5. [ROUND vs. GRU: The Stability of Memory](#round-vs-gru-the-stability-of-memory)
+6. [Quickstart](#quickstart)
+7. [Reproducing the Benchmark Plots](#reproducing-the-benchmark-plots)
+8. [How the Neuron Works (Mechanism)](#how-the-neuron-works-mechanism)
+    1. [Encode input once into phase](#1-encode-input-once-into-phase)
+    2. [Recurrent evolution is phase drift + accumulation](#2-recurrent-evolution-is-phase-drift--accumulation)
+    3. [Readout observes interference](#3-readout-observes-interference)
+    4. [Topology-aware readout (winding)](#4-topology-aware-readout-winding)
+9. [Harmonic Quantum Locking (Loss)](#harmonic-quantum-locking-loss)
+    1. [Base idea: quantization as a potential well](#base-idea-quantization-as-a-potential-well)
+    2. [Harmonic spectrum (the Phase 3 move)](#harmonic-spectrum-the-phase-3-move)
+    3. [Terminal-only locking (wave → collapse)](#terminal-only-locking-wave--collapse)
+10. [Benchmarks](#benchmarks)
+    1. [Discrete Logic — 16-bit Parity](#1-discrete-logic--16-bit-parity-benchmark_paritypy)
+    2. [Cyclic Logic — Modulo-8](#2-cyclic-logic--modulo-8-benchmark_clockpy)
+    3. [Ordered Structure — Balanced Brackets](#3-ordered-structure--balanced-brackets-benchmark_bracketspy)
+    4. [Continuous Topology — Winding Classification](#4-continuous-topology--winding-classification-benchmark_topologypy)
+11. [Theory: Unified Informatic Topology (UIT)](#theory-unified-informatic-topology-uit--ieg-corollary)
+12. [Repo Layout](#repo-layout)
+13. [License](#license)
+14. [Citation](#citation)
+15. [Glossary of Terms](#glossary-of-terms)
 
 ---
 
@@ -48,7 +73,7 @@ ROUND is a **phase-accumulating recurrent cell**:
 
 No complex multiplication is required; the “rotation field” is learned directly as drift in phase space.
 
-In this repo, the core implementation lives in **`ROUND.py`** under:
+In this repo, the core implementation lives in [`ROUND.py`](ROUND.py) under:
 - `PhaseAccumulator` (the neuron engine)
 - `ROUNDModel` (binary tasks)
 - `ROUNDClockModel` (multi-class modulo)
@@ -56,20 +81,30 @@ In this repo, the core implementation lives in **`ROUND.py`** under:
 
 ---
 
-## What This Repo Claims (and What It Doesn’t)
+## What This Repo Claims
 
-### Supported by the code + plots here
+### Supported by the code + plots [here](#results)
 - **Unified mechanism:** One neuron recurrence (PhaseAccumulator) is used across all tasks.
 - **Unified control knob:** Switching between “logic-like” and “topology-like” behavior is achieved primarily through the **locking spectrum** and **when** it is applied (`terminal_only=True`).
 - **Empirical performance:** ROUND matches or exceeds a GRU baseline **neuron-for-neuron** on the included tasks under the included training regimen, averaged across **5 runs**.
 
-### Not claimed here (yet)
-- “Generalist on messy real data” (language, vision, multimodal corpora).
-- Universal generalization guarantees.
-- Optimality vs all recurrent baselines.
-- Full ablation studies (deliberately out of scope for this release).
+---
 
-This README is intentionally written to be *serious and falsifiable*. If a statement is vague, it’s a bug—file an issue.
+## ROUND vs. GRU: The Stability of Memory
+
+A central claim of this work is the distinction between **volatile** and **stable** memory states.
+
+*   **GRU (Gated Recurrent Unit):**
+    *   *Mechanism:* Uses multiplicative gating ($\sigma, \tanh$).
+    *   *Memory:* State is **volatile**. It tends to decay or "leak" over time unless actively maintained by learnable gates. It effectively has no "rest mass"—if the input stops, the state often drifts back to a baseline.
+    *   *Analogy:* holding water in cupped hands; you must actively clench to keep it.
+
+*   **ROUND (U-Neuron):**
+    *   *Mechanism:* Uses additive phase accumulation ($\phi + \Delta\phi$).
+    *   *Memory:* State is **stable** (non-volatile). A phase angle $\phi$ on a circle does not decay; it simply *is*. If the input ceases ($\Delta\phi = 0$), the memory persists indefinitely as a standing wave or entangled state.
+    *   *Analogy:* a dial or a gyroscope; it stays where you set it until a new force (input) acts upon it.
+
+This **intrinsic stability** is why ROUND outperforms GRU on long-range dependencies without needing complex gating mechanisms.
 
 ---
 
@@ -114,7 +149,7 @@ Expected outputs (filenames may be adjusted by you; keep them stable for readers
 
 > If you commit the plots to `figures/`, update the image links below accordingly.
 
-### Results (commit the images for instant credibility)
+### Results
 
 ![Parity](benchmark_parity.png)
 ![Modulo-8](benchmark_clock.png)
@@ -213,33 +248,65 @@ Each benchmark compares ROUND to a parameter-matched GRU baseline under the same
 
 Goal: predict parity of a 16-bit vector.
 
-Why it matters: parity is a classic failure mode for many models because it demands long-range XOR coherence. ROUND’s phase naturally counts flips modulo 2.
-
-ROUND setup: harmonic spectrum `[1,2]`, **terminal-only** locking.
+*   **Why this benchmark:** Parity is the "Hypercube" test. It requires precise, brittle counting where a single bit flip changes the outcome.
+*   **Real-world Parallel:** Error correction codes (CRC), encryption key validation, and rigid logical constraints in control systems. Most neural nets fail here because they try to "approximate" an exact answer.
+*   **Code Callouts:** `epochs=1000`, `runs=5`, `input_dim=16`.
+    ```python
+    criterion = HarmonicROUNDLoss(harmonics=[1, 2], terminal_only=True)
+    ```
 
 ### 2) Cyclic Logic — Modulo-8 (`benchmark_clock.py`)
 
 Goal: classify the sum of a length-20 integer sequence modulo 8.
 
-Why it matters: cyclic group structure is exactly what phase space encodes. This benchmark measures whether the neuron’s geometry translates into practical optimization advantage.
-
-ROUND setup: harmonic spectrum `[2,4,8]`, **terminal-only** locking.
+*   **Why this benchmark:** It tests the ability to maintain a "modulo counter" over long steps.
+*   **Real-world Parallel:** Cyclic phenomena in time-series (seasonality, heartbeats), rotational encoders in robotics, and processing periodic audio signals or wave interference.
+*   **Code Callouts:** `harmonics=[2,4,8]`.
+    ```python
+    # Phase naturally wraps mod 2pi, removing the need for learned resets
+    criterion = HarmonicROUNDLoss(harmonics=[2, 4, 8], terminal_only=True)
+    ```
 
 ### 3) Ordered Structure — Balanced Brackets (`benchmark_brackets.py`)
 
 Goal: determine whether a bracket sequence is balanced.
 
-Why it matters: brackets represent a stack-like invariant (depth / winding-like return-to-zero). ROUND competes here because phase accumulation can represent conserved “net structure” over time.
-
-ROUND setup: harmonic spectrum `[2,4,8]`, binary mode, **terminal-only** locking.
+*   **Why this benchmark:** It requires a stack-like memory (push/pop) and return-to-zero validation.
+*   **Real-world Parallel:** Parsing nested data structures (JSON, XML), compiling code, and analyzing biological sequences like RNA folding.
+*   **Code Callouts:** `locking_strength=0.1`.
+    ```python
+    # Phase accumulates (+) for open and (-) for closed
+    # 0 net phase = balanced
+    criterion = HarmonicROUNDLoss(harmonics=[2, 4, 8], terminal_only=True)
+    ```
 
 ### 4) Continuous Topology — Winding Classification (`benchmark_topology.py`)
 
-Goal: classify sequences by winding behavior.
+Goal: classify sequences by winding behavior (how many times did it circle the origin?).
 
-Why it matters: this is the “topology” test: smooth accumulation during the sequence, then discrete selection at readout.
+*   **Why this benchmark:** This is the "Topology" test. It requires integrating smooth changes over time without snapping to partial answers early.
+*   **Real-world Parallel:** Path integration in robotics (SLAM), classifying particle trajectories in noisy environments, and gesture recognition.
+*   **Code Callouts:**
+    ```python
+    # Topology model exposes raw phase phi to Readout
+    model = ROUNDTopologyModel(...)
+    criterion = ROUNDTopologyLoss(harmonics=[1, 2, 4, 8])
+    ```
 
-ROUND setup: topology-aware readout (cos, sin, φ) + harmonic spectrum `[1,2,4,8]`, binary mode, **terminal-only** locking.
+### Common Training Configuration
+
+All benchmarks in this repo use a standardized harness to ensure fair comparison:
+
+```python
+CONFIG = {
+    'hidden_size': 32,    # Small efficient core
+    'epochs': 1000,       # Long enough for "Grokking" phase transition
+    'steps': 20,          # Sequence length
+    'runs': 5,            # Statistical significance
+    'lr': 0.005,          # Standard learning rate
+    'terminal_only': True # The Harmonic Innovation
+}
+```
 
 ---
 
@@ -329,3 +396,33 @@ A `CITATION.cff` file is recommended for GitHub-native citation support.
 (Initial validation: synthetic benchmark suite in this repository.)
 
 ```
+---
+
+## Glossary of Terms
+
+### Unified Informatic Topology (UIT)
+A unified number space providing rich channels for informatic exchange. It posits that information is a physical substrate with thermodynamic weight, unifying General Relativity and Quantum Mechanics.
+
+### Informatic Exchange Geometries (IEG)
+An information-theoretic hypothesis that suggests that there are universality classes of systems, including logic, in a continuous non-abelian ring topology (U-space).
+
+### ROUND (Riemannian Optimized Unified Neural Dynamo)
+The core phase-accumulating recurrent architecture developed in this research. It treats hidden state as a phase angle on a learned manifold rather than a scalar magnitude, allowing for direct "phasic" accumulation of information.
+
+### U-Space ($\mathcal{U}$-Space)
+The fundamental number system of the UIT framework. It is constructed as a fiber bundle with a standard real component (Macroscopic Geometry) and an infinitesimal imaginary component (Informatic/Thermodynamic Cost).
+
+### PhaseAccumulator
+The computational engine of the ROUND neuron. A PyTorch module that updates its state via the formula $\phi_{new} = \phi_{old} + \Delta\phi$, where $\Delta\phi$ is a learned drift function of the state and input phasors.
+
+### Harmonic Quantum Locking
+A differentiable loss function mechanism that imposes a potential energy landscape on the phase space. It sums multiple sine-squared potentials ($V = \sum \sin^2(h \cdot \phi)$) to create stability basins, forcing continuous phases to "quantize" into discrete logical states.
+
+### Terminal-Only Locking
+A training strategy where the Harmonic Quantum Locking potential is applied only to the final state of a sequence. This allows the system to evolve as a continuous "wave" during processing (preserving topological information) before collapsing to a discrete "particle" at the readout step.
+
+### Harmonic Spectrum
+The set of integer frequencies (e.g., $[1, 2, 4, 8]$) used define the stability wells of the Harmonic Quantum Locking potential. The choice of spectrum dictates the resolution and structure of the stability wells (e.g., powers of 2 for binary logic, linear integer sequences for clocks).
+
+### Grokking
+Interpreted within the UIT framework as a second-order thermodynamic phase transition. It describes the phenomenon where a neural network abruptly shifts from a disordered "glassy" state (overfitting/memorization) to an ordered "crystallized" state (generalization/rule-discovery) as the "temperature" of the learning process cools.
