@@ -1,0 +1,21 @@
+# Windows
+desktop.ini
+Thumbs.db
+$RECYCLE.BIN/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+
+# MacOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
