@@ -169,12 +169,12 @@ Expected outputs (filenames may be adjusted by you; keep them stable for readers
 
 After extensive tuning, the **"Minimalist Rail"** configuration (`Harmonics [1, 2]`, `Strength 0.03125`, `Floor 0.032`) has been identified as the universal stable state.
 
-| Benchmark | Task | ROUND (Harmonic) | GRU (Standard) | Notes |
+| **Task** | **Description** | **ROUND (Harmonic)** | **GRU (Standard)** | **Notes** |
 | :--- | :--- | :--- | :--- | :--- |
-| **Brackets** | Dyck-1 Language | **100.0%** | ~98.5% | ROUND exhibits perfect stability with zero dropouts. |
-| **Clock** | Modulo-8 Arithmetic | **~63.0%** | ~45.0% | Inference of Mod-8 from Mod-2/4 rail beats GRU significantly. |
-| **Parity** | 16-bit XOR Chain | **100.0%** | ~93.0% | Solved. Stable. |
-| **Topology** | 2D Winding | **100.0%** | ~99.0% | Instant lock-in. |
+| **Logic (Brackets)** | Dyck Language (Checking) | **100.0%** | ~100.0% | Both solve it easily. |
+| **Arithmetic (Clock)** | Modulo-8 Addition | **100.0%** | ~56.0% | ROUND generalizes perfectly via phase. |
+| **Parity** | 16-bit XOR Chain | **100.0%** | ~81.0% | GRU struggles with long-range XOR. |
+| **Topology** | 2D Winding | **100.0%** | ~100.0% | Instant lock-in for ROUND. |
 
 ![Parity](data/benchmark_parity_d64b3466.png)
 ![Modulo-8](data/benchmark_clock_d64b3466.png)
@@ -260,7 +260,7 @@ Goal: predict parity of a 16-bit vector.
 *   **Real-world Parallel:** Error correction codes (CRC), encryption key validation, and rigid logical constraints in control systems. Most neural nets fail here because they try to "approximate" an exact answer.
 *   **Code Callouts:** `epochs=1000`, `runs=5`, `input_dim=16`.
     ```python
-    criterion = HarmonicROUNDLoss(harmonics=[1, 2], terminal_only=True)
+    criterion = HarmonicROUNDLoss(locking_strength=0.03125, harmonics=[1, 2], weights=[1, 2], terminal_only=True)
     ```
 
 ### 2) Cyclic Logic — Modulo-8 (`benchmark_clock.py`)
@@ -272,7 +272,7 @@ Goal: classify the sum of a length-20 integer sequence modulo 8.
 *   **Code Callouts:** `harmonics=[2,4,8]`.
     ```python
     # Phase naturally wraps mod 2pi, removing the need for learned resets
-    criterion = HarmonicROUNDLoss(harmonics=[2, 4, 8], terminal_only=True)
+    criterion = HarmonicROUNDLoss(locking_strength=0.03125, harmonics=[1, 2], weights=[1, 2], terminal_only=True)
     ```
 
 ### 3) Ordered Structure — Balanced Brackets (`benchmark_brackets.py`)
@@ -285,7 +285,7 @@ Goal: determine whether a bracket sequence is balanced.
     ```python
     # Phase accumulates (+) for open and (-) for closed
     # 0 net phase = balanced
-    criterion = HarmonicROUNDLoss(harmonics=[2, 4, 8], terminal_only=True)
+    criterion = HarmonicROUNDLoss(locking_strength=0.03125, harmonics=[1, 2], weights=[1, 2], terminal_only=True)
     ```
 
 ### 4) Continuous Topology — Winding Classification (`benchmark_topology.py`)
@@ -298,7 +298,7 @@ Goal: classify sequences by winding behavior (how many times did it circle the o
     ```python
     # Topology model exposes raw phase phi to Readout
     model = ROUNDTopologyModel(...)
-    criterion = ROUNDTopologyLoss(harmonics=[1, 2, 4, 8])
+    criterion = HarmonicROUNDLoss(locking_strength=0.03125, harmonics=[1, 2], weights=[1, 2], terminal_only=True)
     ```
 
 ### Common Training Configuration
@@ -307,11 +307,11 @@ All benchmarks in this repo use a standardized harness to ensure fair comparison
 
 ```python
 CONFIG = {
-    'hidden_size': 32,    # Small efficient core
+    'hidden_size': 32,    # Small efficient core (64 for Brackets)
     'epochs': 1000,       # Long enough for "Grokking" phase transition
-    'steps': 20,          # Sequence length
+    'steps': 20,          # Sequence length (30 for Brackets/Topology)
     'runs': 5,            # Statistical significance
-    'lr': 0.005,          # Standard learning rate
+    'lr': 0.005,          # Standard learning rate (0.002 for Brackets)
     'terminal_only': True # The Harmonic Innovation
 }
 ```
