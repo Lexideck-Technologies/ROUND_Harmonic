@@ -395,7 +395,6 @@ A `CITATION.cff` file is recommended for GitHub-native citation support.
 **Validated: Dec 13, 2025 — Lexideck Research Team**
 (Initial validation: synthetic benchmark suite in this repository.)
 
-```
 ---
 
 ## Glossary of Terms
