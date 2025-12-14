@@ -1,7 +1,7 @@
 # Windows
 desktop.ini
 Thumbs.db
-$RECYCLE.BIN/
+.BIN/
 
 # Python
 __pycache__/
@@ -20,6 +20,3 @@ venv/
 # Editor
 .vscode/
 .idea/
-
-# GitIgnore
-.gitignore
