@@ -19,3 +19,6 @@ venv/
 # Editor
 .vscode/
 .idea/
+
+# GitIgnore
+.gitignore

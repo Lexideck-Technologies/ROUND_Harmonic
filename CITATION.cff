@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Gus"
+  given-names: "The User"
+- family-names: "Lexideck"
+  given-names: "Research Team"
+title: "Harmonic ROUND: The Phasic Neuro-Symbolic Generalist"
+version: 0.1.0
+date-released: 2025-12-13
+url: "https://github.com/Lexideck/ROUND_Harmonic"
+license: MIT
