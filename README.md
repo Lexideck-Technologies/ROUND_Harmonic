@@ -63,15 +63,15 @@ ROUND is a **phase-accumulating recurrent cell**:
 - It represents hidden state as a phase vector **φ** (radians).
 - It updates state via **accumulation** (addition), not gating:
   
-\[
+$$
 \phi_{t+1} = \phi_t + \Delta\phi_t
-\]
+$$
 
-- The learned drift \(\Delta\phi_t\) is computed from **phasor features** (cos/sin) of the state and the (stationary) encoded input:
+- The learned drift $\Delta\phi_t$ is computed from **phasor features** (cos/sin) of the state and the (stationary) encoded input:
 
-\[
+$$
 \Delta\phi_t = W\,[\cos(\phi_t),\sin(\phi_t),\cos(\phi_{in}),\sin(\phi_{in})] + b
-\]
+$$
 
 No complex multiplication is required; the “rotation field” is learned directly as drift in phase space.
 
@@ -165,10 +165,10 @@ Expected outputs (filenames may be adjusted by you; keep them stable for readers
 ### 1) Encode input once into phase
 
 Input (x) is mapped to an initial phase vector:
-[
+$$
 \phi_{in} = \text{Encoder}(x)
-]
-and converted into phasors ((\cos\phi_{in}, \sin\phi_{in})).
+$$
+and converted into phasors $(\cos\phi_{in}, \sin\phi_{in})$.
 
 In the reference implementation, this “input wave” is **stationary** during recurrence steps: ROUND spins the dynamo against a fixed interference pattern.
 
@@ -176,28 +176,28 @@ In the reference implementation, this “input wave” is **stationary** during 
 
 At each step:
 
-* compute state phasors ((\cos\phi_t, \sin\phi_t)),
+* compute state phasors $(\cos\phi_t, \sin\phi_t)$,
 * concatenate them with the input phasors,
-* compute drift (\Delta\phi_t),
-* accumulate: (\phi_{t+1}=\phi_t+\Delta\phi_t).
+* compute drift $\Delta\phi_t$,
+* accumulate: $\phi_{t+1}=\phi_t+\Delta\phi_t$.
 
 This makes “counting on a circle” native: parity and modular arithmetic become phase-algebra problems rather than brittle long-range XOR chains.
 
 ### 3) Readout observes interference
 
 For binary tasks, readout uses final cos/sin features:
-[
+$$
 \text{features} = [\cos(\phi_T),\sin(\phi_T)]
-]
+$$
 and maps them to logits.
 
 ### 4) Topology-aware readout (winding)
 
-Cos/sin projection identifies (0 \equiv 2\pi), which destroys winding information.
+Cos/sin projection identifies $0 \equiv 2\pi$, which destroys winding information.
 For winding tasks, `ROUNDTopologyModel` exposes **raw phase φ** to the readout:
-[
+$$
 \text{features} = [\cos(\phi_T),\sin(\phi_T),\phi_T]
-]
+$$
 This is not “cheating”; it is the minimal representation required to distinguish wrapped states.
 
 ---
@@ -209,23 +209,23 @@ ROUND pairs task loss with a **locking potential**—a differentiable quantizati
 ### Base idea: quantization as a potential well
 
 For binary snapping (two basins), the potential is:
-[
+$$
 V(\phi)=\sin^2(\phi)
-]
-(minima at (k\pi)).
+$$
+(minima at $k\pi$).
 
-For an (N)-state “clock,” the potential becomes:
-[
-V_N(\phi)=\sin^2!\left(\frac{N}{2}\phi\right)
-]
-(minima at (k\cdot 2\pi/N)).
+For an $N$-state “clock,” the potential becomes:
+$$
+V_N(\phi)=\sin^2\left(\frac{N}{2}\phi\right)
+$$
+(minima at $k\cdot 2\pi/N$).
 
 ### Harmonic spectrum (the Phase 3 move)
 
 Instead of one frequency, we sum a spectrum:
-[
-V_{\mathcal{H}}(\phi)=\frac{1}{|\mathcal{H}|}\sum_{h\in\mathcal{H}}w_h,\sin^2!\left(\frac{h}{2}\phi\right)
-]
+$$
+V_{\mathcal{H}}(\phi)=\frac{1}{|\mathcal{H}|}\sum_{h\in\mathcal{H}}w_h \sin^2\left(\frac{h}{2}\phi\right)
+$$
 
 In code: `HarmonicROUNDLoss(...)` in **`ROUND.py`**.
 
@@ -405,7 +405,7 @@ A `CITATION.cff` file is recommended for GitHub-native citation support.
 A unified number space providing rich channels for informatic exchange. It posits that information is a physical substrate with thermodynamic weight, unifying General Relativity and Quantum Mechanics.
 
 ### Informatic Exchange Geometries (IEG)
-An information-theoretic hypothesis that suggests that there are universality classes of systems, including logic, in a continuous non-abelian ring topology (U-space).
+An information-theoretic hypothesis that suggests that there are universality classes of systems, including logic, in a continuous non-abelian ring topology ($\mathcal{U}$-space).
 
 ### ROUND (Riemannian Optimized Unified Neural Dynamo)
 The core phase-accumulating recurrent architecture developed in this research. It treats hidden state as a phase angle on a learned manifold rather than a scalar magnitude, allowing for direct "phasic" accumulation of information.
