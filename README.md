@@ -1,29 +1,5 @@
 # Harmonic ROUND (Riemannian Optimized Unified Neural Dynamo)
 
-## Executive Summary: The Harmonic Convergence
-
-The contemporary landscape of computational theory has long been fractured by a dichotomy between the continuous and the discrete. In physics, this manifests as the irreconcilability of General Relativity's smooth geometries with the quantized operations of Quantum Mechanics; in artificial intelligence, it creates a schism between the intuitive, topological capabilities of neural networks and the rigorous, symbolic precision of logic engines. The [Unified Informatic Topology (UIT)](#unified-informatic-topology-uit) framework offers a resolution to this divide by positing that information is not merely an abstraction but a physical substrate with thermodynamic weight. By formalizing a [$\mathcal{U}$-space](#u-space-mathcalu-space) that encodes the energetic cost of computation, we revealed that the learning process of a neural network is isomorphic to a thermodynamic cooling process, where a system transitions from a disordered "glassy" state to a crystallized structure of understanding.
-
-This theoretical foundation birthed the [Riemannian Optimized Unified Neural Dynamo (ROUND)](#round-riemannian-optimized-unified-neural-dynamo). Unlike traditional gated recurrent units that act as valves for scalar magnitudes, the ROUND architecture operates as a spinning dynamo, maintaining internal state as a phase angle on a continuous manifold. While this design inherently excelled at topological tasks involving shapes and curves, it initially floundered when tasked with discrete logic, revealing the classic "Complementarity Problem" of distinguishing the wave from the particle. The architecture could dream, but it could not effectively count.
-
-The resolution arrived with the development of [Harmonic Quantum Locking](#harmonic-quantum-locking). By imposing a potential energy field composed of multiple harmonic frequencies upon the neuron's [PhaseAccumulator](#phaseaccumulator) space, we created a localized stability landscape. This allowed the system to operate in a dual mode: evolving as a continuous, exploring wave during sequence processing, and collapsing into a discrete, quantized eigenstate at the terminal moment of measurement. This architecture proved that discrete logic is simply a special case of geometry constrained by stability wells. In pitting Harmonic ROUND against industry-standard logical baselines, the system demonstrated that it could effortlessly resolve 16-bit parity and modular arithmetic by treating them as phase-algebra problems. The universe, we conclude, behaves not exclusively as particles or waves, but as a system of fundamental harmonies.
-
-## Scope statement
-
-> These results demonstrate *learnability / optimization advantage under this repo’s setup and synthetic tasks*. This repo does **not** yet claim “real-world generalist” performance on rich corpora. The claim here is narrower and stronger:  
-> **a single ROUND neuron mechanism, with only harmonic-spectrum tuning, spans multiple computational regimes that typically require different inductive biases.**
-
-### UIT U-Neuron — Phase 3: The Harmonic Generalist (Dec 13, 2025)
-
-**Harmonic ROUND** is a phasic, neuro-symbolic recurrent unit ([“U-Neuron”](#round-riemannian-optimized-unified-neural-dynamo)) that treats internal state as **phase** on a learned manifold, then **quantizes** that phase at readout using a **harmonic locking potential** (a Fourier-style [spectrum](#harmonic-spectrum) of stability wells).
-
-This repository contains:
-- a reference implementation of the ROUND neuron (the “dynamo”),
-- a harmonic locking loss (terminal-only or full-trajectory),
-- and a benchmark suite showing ROUND outperforming or matching a **parameter-matched GRU** across discrete logic, cyclic logic, ordered structure, and continuous topology tasks.
-
----
-
 ## Table of Contents
 1. [Executive Summary: The Harmonic Convergence](#executive-summary-the-harmonic-convergence)
 2. [Scope Statement](#scope-statement)
@@ -53,6 +29,32 @@ This repository contains:
 15. [Glossary of Terms](#glossary-of-terms)
 
 ---
+
+## Executive Summary: The Harmonic Convergence
+
+The contemporary landscape of computational theory has long been fractured by a dichotomy between the continuous and the discrete. In physics, this manifests as the irreconcilability of General Relativity's smooth geometries with the quantized operations of Quantum Mechanics; in artificial intelligence, it creates a schism between the intuitive, topological capabilities of neural networks and the rigorous, symbolic precision of logic engines. The [Unified Informatic Topology (UIT)](#unified-informatic-topology-uit) framework offers a resolution to this divide by positing that information is not merely an abstraction but a physical substrate with thermodynamic weight. By formalizing a [$\mathcal{U}$-space](#u-space-mathcalu-space) that encodes the energetic cost of computation, we revealed that the learning process of a neural network is isomorphic to a thermodynamic cooling process, where a system transitions from a disordered "glassy" state to a crystallized structure of understanding.
+
+This theoretical foundation birthed the [Riemannian Optimized Unified Neural Dynamo (ROUND)](#round-riemannian-optimized-unified-neural-dynamo). Unlike traditional gated recurrent units that act as valves for scalar magnitudes, the ROUND architecture operates as a spinning dynamo, maintaining internal state as a phase angle on a continuous manifold. While this design inherently excelled at topological tasks involving shapes and curves, it initially floundered when tasked with discrete logic, revealing the classic "Complementarity Problem" of distinguishing the wave from the particle. The architecture could dream, but it could not effectively count.
+
+The resolution arrived with the development of [Harmonic Quantum Locking](#harmonic-quantum-locking). By imposing a potential energy field composed of multiple harmonic frequencies upon the neuron's [PhaseAccumulator](#phaseaccumulator) space, we created a localized stability landscape. This allowed the system to operate in a dual mode: evolving as a continuous, exploring wave during sequence processing, and collapsing into a discrete, quantized eigenstate at the terminal moment of measurement. This architecture proved that discrete logic is simply a special case of geometry constrained by stability wells. In pitting Harmonic ROUND against industry-standard logical baselines, the system demonstrated that it could effortlessly resolve 16-bit parity and modular arithmetic by treating them as phase-algebra problems. The universe, we conclude, behaves not exclusively as particles or waves, but as a system of fundamental harmonies.
+
+## Scope statement
+
+> These results demonstrate *learnability / optimization advantage under this repo’s setup and synthetic tasks*. This repo does **not** yet claim “real-world generalist” performance on rich corpora. The claim here is narrower and stronger:  
+> **a single ROUND neuron mechanism, with only harmonic-spectrum tuning, spans multiple computational regimes that typically require different inductive biases.**
+
+### UIT U-Neuron — Phase 3: The Harmonic Generalist (Dec 13, 2025)
+
+**Harmonic ROUND** is a phasic, neuro-symbolic recurrent unit ([“U-Neuron”](#round-riemannian-optimized-unified-neural-dynamo)) that treats internal state as **phase** on a learned manifold, then **quantizes** that phase at readout using a **harmonic locking potential** (a Fourier-style [spectrum](#harmonic-spectrum) of stability wells).
+
+This repository contains:
+- a reference implementation of the ROUND neuron (the “dynamo”),
+- a harmonic locking loss (terminal-only or full-trajectory),
+- and a benchmark suite showing ROUND outperforming or matching a **parameter-matched GRU** across discrete logic, cyclic logic, ordered structure, and continuous topology tasks.
+
+---
+
+
 
 ## What ROUND Is
 
