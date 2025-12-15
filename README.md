@@ -1,10 +1,7 @@
 # Harmonic ROUND (Riemannian Optimized Unified Neural Dynamo) v0.3.2
 
-<div align="center">
-  <video src="media/The_U-Neuron.mp4" controls="controls" muted="muted" style="max-width: 100%;"></video>
-  <br/>
-  <em>The U-Neuron: A 2-minute Explainer</em>
-</div>
+[![The U-Neuron](media/round_video_thumbnail.png)](media/The_U-Neuron.mp4)
+<div align="center"><em>Click the thumbnail above to watch the 2-minute explainer.</em></div>
 
 ## Table of Contents
 1. [Executive Summary: The Harmonic Convergence](#executive-summary-the-harmonic-convergence)
