@@ -179,10 +179,12 @@ After discovering the **Harmonic Learning Rate** ($2^{-9} \approx 0.00195$), we 
 | **Structure (Masked)** | Sequential Brackets | **100.0%** | ~99.0% | **New:** ROUND can solve Dyck-2 in a purely streaming context (no global viewing). |
 | **Topology (Winding)** | 2D Winding | **100.0%** | ~100.0% | Both solve it, but ROUND locks in earlier (E50). |
 
-![Parity](data/benchmark_parity_36fea372.png)
-![Modulo-8](data/benchmark_clock_36fea372.png)
-![Brackets](data/benchmark_brackets_36fea372.png)
-![Topology](data/benchmark_topology_36fea372.png)
+![Parity](data/bcbf8621/benchmark_parity_bcbf8621.png)
+![Modulo-8](data/bcbf8621/benchmark_clock_bcbf8621.png)
+![Brackets](data/bcbf8621/benchmark_brackets_bcbf8621.png)
+![Sequential Brackets](data/bcbf8621/benchmark_brackets_masked_bcbf8621.png)
+> **Note on Sequential Brackets:** This test mimics streaming inputs by masking future tokens, proving ROUND doesn't need global attention to solve structural recursion.
+![Topology](data/bcbf8621/benchmark_topology_bcbf8621.png)
 
 ### Common Training Configuration
 
