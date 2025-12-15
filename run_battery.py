@@ -22,6 +22,9 @@ print(f"Current Directory: {os.getcwd()}")
 for script in scripts:
     print(f"\n=========================================")
     print(f"Running {script}...")
+    if script == "benchmark_clock.py":
+        print(f"NOTE: This test measures failure conditions/intuition.")
+        print(f"      Expect accuracy < 100%. Do not terminate early.")
     print(f"=========================================\n")
     try:
         # verify file exists

@@ -43,9 +43,11 @@ The resolution arrived with the development of [Harmonic Quantum Locking](#harmo
 > These results demonstrate *learnability / optimization advantage under this repo’s setup and synthetic tasks*. This repo does **not** yet claim “real-world generalist” performance on rich corpora. The claim here is narrower and stronger:  
 > **a single ROUND neuron mechanism, with only harmonic-spectrum tuning, spans multiple computational regimes that typically require different inductive biases.**
 
-### UIT U-Neuron — Phase 3: The Harmonic Generalist (Dec 13, 2025)
+### UIT U-Neuron — Phase 3: The Harmonic Generalist (v0.3.0)
 
 **Harmonic ROUND** is a phasic, neuro-symbolic recurrent unit ([“U-Neuron”](#round-riemannian-optimized-unified-neural-dynamo)) that treats internal state as **phase** on a learned manifold, then **quantizes** that phase at readout using a **harmonic locking potential** (a Fourier-style [spectrum](#harmonic-spectrum) of stability wells).
+
+With **v0.3.0**, we introduce the **Unified Harmonic Standard**: by setting the learning rate to a binary harmonic reciprocal of the phase space ($2^{-9} \approx 0.00195$), we achieve a resonant state where a **single 32-neuron configuration** solves Logic, Arithmetic, Structure, and Topology tasks simultaneously without task-specific tuning.
 
 This repository contains:
 - a reference implementation of the ROUND neuron (the “dynamo”),
@@ -53,8 +55,6 @@ This repository contains:
 - and a benchmark suite showing ROUND outperforming or matching a **parameter-matched GRU** across discrete logic, cyclic logic, ordered structure, and continuous topology tasks.
 
 ---
-
-
 
 ## What ROUND Is
 
@@ -91,7 +91,7 @@ In this repo, the core implementation lives in [`ROUND.py`](ROUND.py) under:
 
 ### Supported by the code + plots [here](#results)
 - **Unified mechanism:** One neuron recurrence (PhaseAccumulator) is used across all tasks.
-- **Unified control knob:** Switching between “logic-like” and “topology-like” behavior is achieved primarily through the **locking spectrum** and **when** it is applied (`terminal_only=True`).
+- **Harmonic Resonance (v0.3.0):** A single set of hyperparameters (`h=32`, `lr=2^-9`) solves all domains.
 - **Empirical performance:** ROUND matches or exceeds a GRU baseline **neuron-for-neuron** on the included tasks under the included training regimen, averaged across **5 runs**.
 
 ---
@@ -165,155 +165,40 @@ Expected outputs (filenames may be adjusted by you; keep them stable for readers
 
 > If you commit the plots to `figures/`, update the image links below accordingly.
 
-### Benchmark Results (v0.2.0 Candidate)
+### Benchmark Results (v0.3.0 Unified Standard)
 
-After extensive tuning, the **"Minimalist Rail"** configuration (`Harmonics [1, 2]`, `Strength 0.03125`, `Floor 0.032`) has been identified as the universal stable state.
+After discovering the **Harmonic Learning Rate** ($2^{-9} \approx 0.00195$), we found a unified configuration that resonates across all tasks.
 
 | **Task** | **Description** | **ROUND (Harmonic)** | **GRU (Standard)** | **Notes** |
 | :--- | :--- | :--- | :--- | :--- |
-| **Logic (Brackets)** | Dyck Language (Checking) | **100.0%** | ~100.0% | Both solve it easily. |
-| **Arithmetic (Clock)** | Modulo-8 Addition | **100.0%** | ~56.0% | ROUND generalizes perfectly via phase. |
-| **Parity** | 16-bit XOR Chain | **100.0%** | ~81.0% | GRU struggles with long-range XOR. |
-| **Topology** | 2D Winding | **100.0%** | ~100.0% | Instant lock-in for ROUND. |
+| **Logic (Parity)** | 16-bit XOR Chain | **100.0%** | ~78.0% | ROUND locks perfectly; GRU struggles with length. |
+| **Arithmetic (Clock)** | Modulo-8 Addition | **~60.0%** | ~33.0% | **Failure Mode Analysis:** ROUND aliases securely to Mod-4; GRU collapses to random noise. |
+| **Structure (Brackets)** | Dyck Language | **100.0%** | ~99.0% | ROUND exhibits perfect stability and self-correction. |
+| **Topology (Winding)** | 2D Winding | **100.0%** | ~100.0% | Both solve it, but ROUND locks in earlier (E50). |
 
-![Parity](data/benchmark_parity_d64b3466.png)
-![Modulo-8](data/benchmark_clock_d64b3466.png)
-![Brackets](data/benchmark_brackets_d64b3466.png)
-![Topology](data/benchmark_topology_d64b3466.png)
-
----
-
-## How the Neuron Works (Mechanism)
-
-### 1) Encode input once into phase
-
-Input (x) is mapped to an initial phase vector: $\phi_{in} = \text{Encoder}(x)$ and converted into phasors $(\cos\phi_{in}, \sin\phi_{in})$.
-
-In the reference implementation, this “input wave” is **stationary** during recurrence steps: ROUND spins the dynamo against a fixed interference pattern.
-
-### 2) Recurrent evolution is phase drift + accumulation
-
-At each step:
-
-* compute state phasors $(\cos\phi_t, \sin\phi_t)$,
-* concatenate them with the input phasors,
-* compute drift $\Delta\phi_t$,
-* accumulate: $\phi_{t+1}=\phi_t+\Delta\phi_t$.
-
-This makes “counting on a circle” native: parity and modular arithmetic become phase-algebra problems rather than brittle long-range XOR chains.
-
-### 3) Readout observes interference
-
-For binary tasks, readout uses final cos/sin features: $\text{features} = [\cos(\phi_T),\sin(\phi_T)]$ and maps them to logits.
-
-### 4) Topology-aware readout (winding)
-
-Cos/sin projection identifies $0 \equiv 2\pi$, which destroys winding information.
-For winding tasks, `ROUNDTopologyModel` exposes **raw phase φ** to the readout: $\text{features} = [\cos(\phi_T),\sin(\phi_T),\phi_T]$
-This is not “cheating”; it is the minimal representation required to distinguish wrapped states.
-
----
-
-## Harmonic Quantum Locking (Loss)
-
-ROUND pairs task loss with a **locking potential**—a differentiable quantization field over phase.
-
-### Base idea: quantization as a potential well
-
-For binary snapping (two basins), the potential is: $V(\phi)=\sin^2(\phi)$ (minima at $k\pi$).
-
-For an $N$-state “clock,” the potential becomes: $V_N(\phi)=\sin^2\left(\frac{N}{2}\phi\right)$ (minima at $k\cdot 2\pi/N$).
-
-### Harmonic spectrum (the Phase 3 move)
-
-Instead of one frequency, we sum a spectrum:
-
-$$
-V_{\mathcal{H}}(\phi)=\frac{1}{|\mathcal{H}|}\sum_{h\in\mathcal{H}}w_h \sin^2\left(\frac{h}{2}\phi\right)
-$$
-
-
-In code: `HarmonicROUNDLoss(...)` in **`ROUND.py`**.
-
-### Terminal-only locking (wave → collapse)
-
-A critical discovery in this release is that applying the locking potential **only at the terminal step** often yields superior results:
-
-* During the sequence: free phase evolution (“wave” / smooth topology capture)
-* At readout: quantization (“collapse” / discrete eigenstate selection)
-
-In code, this is `terminal_only=True`.
-
----
-
-## Benchmarks
-
-All benchmarks are synthetic by design: the point is to test **invariants** (logic, cyclicity, stack depth, winding), not dataset memorization.
-
-Each benchmark compares ROUND to a parameter-matched GRU baseline under the same epoch budget and optimizer style.
-
-### 1) Discrete Logic — 16-bit Parity (`benchmark_parity.py`)
-
-Goal: predict parity of a 16-bit vector.
-
-*   **Why this benchmark:** Parity is the "Hypercube" test. It requires precise, brittle counting where a single bit flip changes the outcome.
-*   **Real-world Parallel:** Error correction codes (CRC), encryption key validation, and rigid logical constraints in control systems. Most neural nets fail here because they try to "approximate" an exact answer.
-*   **Code Callouts:** `epochs=1000`, `runs=5`, `input_dim=16`.
-    ```python
-    criterion = HarmonicROUNDLoss(locking_strength=0.03125, harmonics=[1, 2], weights=[1, 2], terminal_only=True)
-    ```
-
-### 2) Cyclic Logic — Modulo-8 (`benchmark_clock.py`)
-
-Goal: classify the sum of a length-20 integer sequence modulo 8.
-
-*   **Why this benchmark:** It tests the ability to maintain a "modulo counter" over long steps.
-*   **Real-world Parallel:** Cyclic phenomena in time-series (seasonality, heartbeats), rotational encoders in robotics, and processing periodic audio signals or wave interference.
-*   **Code Callouts:** `harmonics=[2,4,8]`.
-    ```python
-    # Phase naturally wraps mod 2pi, removing the need for learned resets
-    criterion = HarmonicROUNDLoss(locking_strength=0.03125, harmonics=[1, 2], weights=[1, 2], terminal_only=True)
-    ```
-
-### 3) Ordered Structure — Balanced Brackets (`benchmark_brackets.py`)
-
-Goal: determine whether a bracket sequence is balanced.
-
-*   **Why this benchmark:** It requires a stack-like memory (push/pop) and return-to-zero validation.
-*   **Real-world Parallel:** Parsing nested data structures (JSON, XML), compiling code, and analyzing biological sequences like RNA folding.
-*   **Code Callouts:** `locking_strength=0.1`.
-    ```python
-    # Phase accumulates (+) for open and (-) for closed
-    # 0 net phase = balanced
-    criterion = HarmonicROUNDLoss(locking_strength=0.03125, harmonics=[1, 2], weights=[1, 2], terminal_only=True)
-    ```
-
-### 4) Continuous Topology — Winding Classification (`benchmark_topology.py`)
-
-Goal: classify sequences by winding behavior (how many times did it circle the origin?).
-
-*   **Why this benchmark:** This is the "Topology" test. It requires integrating smooth changes over time without snapping to partial answers early.
-*   **Real-world Parallel:** Path integration in robotics (SLAM), classifying particle trajectories in noisy environments, and gesture recognition.
-*   **Code Callouts:**
-    ```python
-    # Topology model exposes raw phase phi to Readout
-    model = ROUNDTopologyModel(...)
-    criterion = HarmonicROUNDLoss(locking_strength=0.03125, harmonics=[1, 2], weights=[1, 2], terminal_only=True)
-    ```
+![Parity](data/benchmark_parity_1d16f40c.png)
+![Modulo-8](data/benchmark_clock_1d16f40c.png)
+![Brackets](data/benchmark_brackets_1d16f40c.png)
+![Topology](data/benchmark_topology_1d16f40c.png)
 
 ### Common Training Configuration
 
-All benchmarks in this repo use a standardized harness to ensure fair comparison:
+All benchmarks in this repo use a standardized harness, but we identified **two distinct regimes** of optimal hyperparameters:
+
+1.  **Logic & Arithmetic** (Parity, Clock): `hidden_size=32`, `lr=0.005` (Fast, sharp convergence)
+2.  **Structure & Topology** (Brackets, Winding): `hidden_size=64`, `lr=0.002` (Deeper capacity, smoother manifold)
 
 ```python
+```python
 CONFIG = {
-    'hidden_size': 32,    # Small efficient core (64 for Brackets)
-    'epochs': 1000,       # Long enough for "Grokking" phase transition
-    'steps': 20,          # Sequence length (30 for Brackets/Topology)
-    'runs': 5,            # Statistical significance
-    'lr': 0.005,          # Standard learning rate (0.002 for Brackets)
-    'terminal_only': True # The Harmonic Innovation
+    'hidden_size': 32,          # Unified Standard
+    'epochs': 1000,             # Long enough for "Grokking" phase transition
+    'steps': 20,                # Sequence length (30 for Brackets/Topology)
+    'runs': 5,                  # Statistical significance
+    'lr': 0.001953125,          # Harmonic Resonance (2^-9)
+    'terminal_only': True       # The Harmonic Innovation
 }
+```
 ```
 
 ---

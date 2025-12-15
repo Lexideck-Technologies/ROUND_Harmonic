@@ -1,5 +1,5 @@
 
-# version 0.2.0
+# version 0.3.0
 import torch,torch.nn as nn,torch.optim as optim,numpy as np,matplotlib.pyplot as plt,os,random,uuid
 from ROUND import ROUNDModel,ROUNDLoss,ROUNDTopologyLoss,ROUNDTopologyModel,PhaseAccumulator,HarmonicROUNDLoss
 if not os.path.exists('data'):os.makedirs('data')
@@ -7,7 +7,7 @@ UID=os.environ.get('ROUND_BATCH_UID',str(uuid.uuid4())[:8])
 L_FILE=open(f'data/log_topology_{UID}.txt','w')
 def P(s):print(s);L_FILE.write(str(s)+'\n');L_FILE.flush()
 P(f"Batch UID: {UID}")
-C={'task':'winding','seq_len':30,'hidden_size':32,'steps':30,'epochs':1000,'batch_size':64,'dataset_size':3000,'runs':5,'lr':0.005,'device':'cuda' if torch.cuda.is_available() else 'cpu'}
+C={'task':'winding','seq_len':30,'hidden_size':32,'steps':30,'epochs':1000,'batch_size':64,'dataset_size':3000,'runs':5,'lr':0.001953125,'device':'cuda' if torch.cuda.is_available() else 'cpu'}
 def generate_winding_data(n,l):
     X,Y=[],[]
     for _ in range(n):
@@ -49,7 +49,14 @@ if __name__=="__main__":
     ax.set_title(f"Harmonic ROUND vs GRU: 2D Topology (Winding)\nstrength=0.03125, harmonics=[1,2], floor=0.032", fontsize=14, color='white')
     ax.set_xlabel('Epochs', fontsize=12, color='gray')
     ax.set_ylabel('Accuracy', fontsize=12, color='gray')
-    ax.set_ylim(-0.05, 1.05)
+    
+    # Dynamic Scaling for Failure Mode Analysis
+    max_acc = max(np.max(rm), np.max(gm))
+    if max_acc < 0.95:
+        ax.set_ylim(-0.05, min(1.05, max_acc + 0.1))
+    else:
+        ax.set_ylim(-0.05, 1.05)
+
     ax.grid(True, alpha=0.1)
 
     ax.fill_between(ep, rm-rs, rm+rs, color='#FF4B4B', alpha=0.1)
