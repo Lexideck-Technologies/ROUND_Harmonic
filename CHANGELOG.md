@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.2] - 2025-12-14
+### Added
+- **Dynamic Braking Mechanism:** Implemented an "Active Brake" that modulates the loss gradient magnitude based on the phase correlation metric (`K`). The brake scales linearly (0.001 to 1.0) when `K` falls into the settling range (0.387 - 0.5), allowing rapid initial exploration followed by stabilized fine-tuning as the system "locks" into harmonic wells.
+- **Sequential Test Harness:** Added `benchmark_brackets_masked.py` featuring a `SequentialROUNDModel` to validate that ROUND can solve structural tasks in a strictly streaming manner (token-by-token) without access to future context, confirming its recurrent "dynamo" nature.
+
+### Fixed
+- **Metric Calculation:** Corrected the phase correlation metric (`pc`) calculation in all benchmarking scripts. Removed incorrect `*torch.pi` scaling factor, ensuring the metric correctly reflects phase alignment in natural radian space ($\sin^2(\theta)$) rather than a distorted domain.
+- **Braking Logic:** Updated the braking formula from a static `tanh` function to a dynamic clamp `clamp((pc-0.387)/0.113, 0.001, 1.0)`, ensuring the brake actively engages when the phase distribution begins to settle.
+
+### Tuned
+- **Golden Configuration:** Standardization of `locking_strength` to `0.0625` (up from 0.03125) and harmonic spectrum to `[1, 2, 4, 8]` with reciprocal weights `[1, 0.5, 0.25, 0.125]`. This configuration proved robust across all functional benchmarks while correctly failing the negative control (Clock/Modulo-8).
+
 ## [0.3.1] - 2025-12-14
 ### Fixed
 - **Environment:** Updated `.gitignore` to exclude `.venv` and other system artifacts.

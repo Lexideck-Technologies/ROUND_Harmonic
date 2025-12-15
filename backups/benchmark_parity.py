@@ -1,46 +1,34 @@
 
-# version 0.3.2
-import torch,torch.nn as nn,torch.optim as optim,numpy as np,matplotlib.pyplot as plt,os,random,uuid
-from ROUND import ROUNDModel,ROUNDLoss,PhaseAccumulator,HarmonicROUNDLoss
+# version 0.3.1
+import torch,torch.nn as nn,torch.optim as optim,numpy as np,matplotlib.pyplot as plt,os,uuid
+from ROUND import ROUNDModel,ROUNDLoss,HarmonicROUNDLoss
 if not os.path.exists('data'):os.makedirs('data')
 UID=os.environ.get('ROUND_BATCH_UID',str(uuid.uuid4())[:8])
-output_dir = os.environ.get('ROUND_OUTPUT_DIR', 'data')
-if not os.path.exists(output_dir): os.makedirs(output_dir)
-L_FILE=open(f'{output_dir}/log_topology_{UID}.txt','w')
+L_FILE=open(f'data/log_parity_{UID}.txt','w')
 def P(s):print(s);L_FILE.write(str(s)+'\n');L_FILE.flush()
 P(f"Batch UID: {UID}")
-C={'task':'winding','seq_len':30,'hidden_size':32,'steps':30,'epochs':1000,'batch_size':64,'dataset_size':3000,'runs':5,'lr':0.001953125,'device':'cuda' if torch.cuda.is_available() else 'cpu'}
-def generate_winding_data(n,l):
-    X,Y=[],[]
-    for _ in range(n):
-        lbl=0 if random.random()<0.5 else 1;td=2*np.pi if lbl==1 else 0
-        ts=random.uniform(0,2*np.pi);t=np.linspace(0,1,l);tp=ts+t*td
-        tp+=0.5*np.sin(t*np.pi*2*random.random()*5);x=np.stack([np.cos(tp),np.sin(tp)],1).flatten()
-        X.append(torch.tensor(x).float());Y.append(float(lbl))
-    return torch.stack(X),torch.tensor(Y).unsqueeze(1)
+C={'task':'parity_16','input_dim':16,'hidden_size':32,'steps':20,'epochs':1000,'batch_size':64,'dataset_size':2000,'runs':5,'lr':0.001953125,'device':'cuda' if torch.cuda.is_available() else 'cpu'}
+def generate_parity_data(n,b):X=torch.randint(0,2,(n,b)).float();return X,(X.sum(1)%2).unsqueeze(1).float()
 class GRUModel(nn.Module):
-    def __init__(self,i,h,o=1):super().__init__();self.gru=nn.GRU(2,h,batch_first=True);self.fc=nn.Linear(h,o)
-    def forward(self,x):_,h=self.gru(x.view(x.size(0),-1,2));return self.fc(h[-1])
+    def __init__(self,i,h,o=1):super().__init__();self.gru=nn.GRU(i,h,batch_first=True);self.fc=nn.Linear(h,o)
+    def forward(self,x):_,h=self.gru(x.unsqueeze(-1));return self.fc(h[-1])
 def train_round(rid,X,Y,d):
-    m=ROUNDModel(hidden_size=C['hidden_size'],input_dim=C['seq_len']*2).to(d)
-    c=HarmonicROUNDLoss(locking_strength=0.0625,harmonics=[1,2],weights=[1,2],mode='binary',terminal_only=True,floor_clamp=0.032);o=optim.Adam(m.parameters(),lr=C['lr']);ah=[]
+    m=ROUNDModel(hidden_size=C['hidden_size'],input_dim=C['input_dim']).to(d)
+    c=HarmonicROUNDLoss(locking_strength=0.03125,harmonics=[1,2],weights=[1,2],mode='binary',terminal_only=True,floor_clamp=0.032);o=optim.Adam(m.parameters(),lr=C['lr']);ah=[]
     for e in range(C['epochs']):
-        o.zero_grad();out,h=m(X,steps=C['steps']);l,_,_=c(out,Y,h)
-        pc=torch.mean(torch.sin(h[-1])**2);bk=torch.clamp((pc-0.387)/0.113,0.001,1.0).detach()
-        (l*bk).backward();o.step()
-        p=(torch.sigmoid(out)>0.5).float();acc=(p==Y).float().mean().item();ah.append(acc)
-        if e%100==0:P(f"R{rid} E{e}: A={acc:.2f} | K={pc:.4f} | B={bk.item():.5f}")
-        if acc==1.0 and bk.item()<0.001:P(f"--> LOCKED E{e}");break
-    return ah,p,Y
+        o.zero_grad();out,h=m(X,steps=C['steps']);l,_,_=c(out,Y,h);l.backward();o.step()
+        preds=(torch.sigmoid(out)>0.5).float();acc=(preds==Y).float().mean().item();ah.append(acc)
+        if e%100==0:P(f"R{rid} E{e}: L={l.item():.4f}, A={acc:.2f}")
+    return ah,preds,Y
 def train_gru(rid,X,Y,d):
-    m=GRUModel(2,C['hidden_size']).to(d);c=nn.BCEWithLogitsLoss();o=optim.Adam(m.parameters(),lr=C['lr']);ah=[]
+    m=GRUModel(1,C['hidden_size']).to(d);c=nn.BCEWithLogitsLoss();o=optim.Adam(m.parameters(),lr=C['lr']);ah=[]
     for e in range(C['epochs']):
         o.zero_grad();out=m(X);l=c(out,Y);l.backward();o.step()
         preds=(torch.sigmoid(out)>0.5).float();acc=(preds==Y).float().mean().item();ah.append(acc)
         if e%100==0:P(f"G{rid} E{e}: L={l.item():.4f}, A={acc:.2f}")
     return ah,preds,Y
 if __name__=="__main__":
-    d=torch.device(C['device']);P(f"Dev: {d}");X,Y=generate_winding_data(C['dataset_size'],C['seq_len']);X,Y=X.to(d),Y.to(d)
+    d=torch.device(C['device']);P(f"Dev: {d}");X,Y=generate_parity_data(C['dataset_size'],C['input_dim']);X,Y=X.to(d),Y.to(d)
     rr,gr,ap,ft=[],[],[],Y.cpu().numpy();P("Training ROUND")
     for i in range(C['runs']):a,p,_=train_round(i+1,X,Y,d);rr.append(a);ap.append(p.detach().cpu().numpy().flatten())
     P("Training GRU")
@@ -51,7 +39,7 @@ if __name__=="__main__":
     gm, gs = np.mean(gr, 0), np.std(gr, 0)
     ep = np.arange(C['epochs'])
 
-    ax.set_title(f"Harmonic ROUND vs GRU: 2D Topology (Winding)\nstrength=0.03125, harmonics=[1,2], floor=0.032", fontsize=14, color='white')
+    ax.set_title(f"Harmonic ROUND vs GRU: 16-bit Parity (XOR)\nstrength=0.03125, harmonics=[1,2], floor=0.032", fontsize=14, color='white')
     ax.set_xlabel('Epochs', fontsize=12, color='gray')
     ax.set_ylabel('Accuracy', fontsize=12, color='gray')
     
@@ -75,7 +63,7 @@ if __name__=="__main__":
     ax.legend(loc='lower right')
     
     plt.tight_layout()
-    plt.savefig(f'{output_dir}/benchmark_topology_{UID}.png', dpi=300)
+    plt.savefig(f'data/benchmark_parity_{UID}.png', dpi=300)
 
     # Correlation Plot
     ds = np.vstack([np.stack(ap), ft.flatten()])
@@ -84,7 +72,7 @@ if __name__=="__main__":
     
     plt.figure(figsize=(8, 6))
     plt.imshow(corr, interpolation='nearest', cmap='coolwarm', vmin=0, vmax=1)
-    plt.title(f'ROUND Consistency: Topology\nBatch {UID}')
+    plt.title(f'ROUND Consistency: Parity\nBatch {UID}')
     plt.colorbar()
     tick_marks = np.arange(len(labels))
     plt.xticks(tick_marks, labels, rotation=45)
@@ -93,6 +81,6 @@ if __name__=="__main__":
         for j in range(len(labels)):
             text = plt.text(j, i, f"{corr[i, j]:.2f}", ha="center", va="center", color="black" if 0.3 < corr[i, j] < 0.7 else "white")
     plt.tight_layout()
-    plt.savefig(f'{output_dir}/correlation_topology_{UID}.png', dpi=300)
+    plt.savefig(f'data/correlation_parity_{UID}.png', dpi=300)
     P("Done.")
     L_FILE.close()

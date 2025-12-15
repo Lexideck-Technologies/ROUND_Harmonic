@@ -1,5 +1,5 @@
 
-# version 0.3.2
+# version 0.2.0
 import subprocess
 import os
 import sys
@@ -7,7 +7,6 @@ import uuid
 
 scripts = [
     "benchmark_brackets.py",
-    "benchmark_brackets_masked.py",
     "benchmark_clock.py",
     "benchmark_parity.py",
     "benchmark_topology.py"
@@ -16,13 +15,7 @@ scripts = [
 print("Starting Full Test Battery...")
 BATCH_UID = str(uuid.uuid4())[:8]
 os.environ["ROUND_BATCH_UID"] = BATCH_UID
-OUTPUT_DIR = os.path.join("data", BATCH_UID)
-if not os.path.exists(OUTPUT_DIR):
-    os.makedirs(OUTPUT_DIR)
-os.environ["ROUND_OUTPUT_DIR"] = OUTPUT_DIR
-
 print(f"Batch UUID: {BATCH_UID}")
-print(f"Output Directory: {OUTPUT_DIR}")
 print(f"Current Directory: {os.getcwd()}")
 
 

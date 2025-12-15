@@ -1,12 +1,10 @@
 
-# version 0.3.2
+# version 0.3.1
 import torch,torch.nn as nn,torch.optim as optim,numpy as np,matplotlib.pyplot as plt,os,random,uuid
 from ROUND import ROUNDModel,ROUNDLoss,PhaseAccumulator,HarmonicROUNDLoss
 if not os.path.exists('data'):os.makedirs('data')
 UID=os.environ.get('ROUND_BATCH_UID',str(uuid.uuid4())[:8])
-output_dir = os.environ.get('ROUND_OUTPUT_DIR', 'data')
-if not os.path.exists(output_dir): os.makedirs(output_dir)
-L_FILE=open(f'{output_dir}/log_topology_{UID}.txt','w')
+L_FILE=open(f'data/log_topology_{UID}.txt','w')
 def P(s):print(s);L_FILE.write(str(s)+'\n');L_FILE.flush()
 P(f"Batch UID: {UID}")
 C={'task':'winding','seq_len':30,'hidden_size':32,'steps':30,'epochs':1000,'batch_size':64,'dataset_size':3000,'runs':5,'lr':0.001953125,'device':'cuda' if torch.cuda.is_available() else 'cpu'}
@@ -23,15 +21,12 @@ class GRUModel(nn.Module):
     def forward(self,x):_,h=self.gru(x.view(x.size(0),-1,2));return self.fc(h[-1])
 def train_round(rid,X,Y,d):
     m=ROUNDModel(hidden_size=C['hidden_size'],input_dim=C['seq_len']*2).to(d)
-    c=HarmonicROUNDLoss(locking_strength=0.0625,harmonics=[1,2],weights=[1,2],mode='binary',terminal_only=True,floor_clamp=0.032);o=optim.Adam(m.parameters(),lr=C['lr']);ah=[]
+    c=HarmonicROUNDLoss(locking_strength=0.03125,harmonics=[1,2],weights=[1,2],mode='binary',terminal_only=True,floor_clamp=0.032);o=optim.Adam(m.parameters(),lr=C['lr']);ah=[]
     for e in range(C['epochs']):
-        o.zero_grad();out,h=m(X,steps=C['steps']);l,_,_=c(out,Y,h)
-        pc=torch.mean(torch.sin(h[-1])**2);bk=torch.clamp((pc-0.387)/0.113,0.001,1.0).detach()
-        (l*bk).backward();o.step()
-        p=(torch.sigmoid(out)>0.5).float();acc=(p==Y).float().mean().item();ah.append(acc)
-        if e%100==0:P(f"R{rid} E{e}: A={acc:.2f} | K={pc:.4f} | B={bk.item():.5f}")
-        if acc==1.0 and bk.item()<0.001:P(f"--> LOCKED E{e}");break
-    return ah,p,Y
+        o.zero_grad();out,h=m(X,steps=C['steps']);l,_,_=c(out,Y,h);l.backward();o.step()
+        preds=(torch.sigmoid(out)>0.5).float();acc=(preds==Y).float().mean().item();ah.append(acc)
+        if e%100==0:P(f"R{rid} E{e}: L={l.item():.4f}, A={acc:.2f}")
+    return ah,preds,Y
 def train_gru(rid,X,Y,d):
     m=GRUModel(2,C['hidden_size']).to(d);c=nn.BCEWithLogitsLoss();o=optim.Adam(m.parameters(),lr=C['lr']);ah=[]
     for e in range(C['epochs']):
@@ -75,7 +70,7 @@ if __name__=="__main__":
     ax.legend(loc='lower right')
     
     plt.tight_layout()
-    plt.savefig(f'{output_dir}/benchmark_topology_{UID}.png', dpi=300)
+    plt.savefig(f'data/benchmark_topology_{UID}.png', dpi=300)
 
     # Correlation Plot
     ds = np.vstack([np.stack(ap), ft.flatten()])
@@ -93,6 +88,6 @@ if __name__=="__main__":
         for j in range(len(labels)):
             text = plt.text(j, i, f"{corr[i, j]:.2f}", ha="center", va="center", color="black" if 0.3 < corr[i, j] < 0.7 else "white")
     plt.tight_layout()
-    plt.savefig(f'{output_dir}/correlation_topology_{UID}.png', dpi=300)
+    plt.savefig(f'data/correlation_topology_{UID}.png', dpi=300)
     P("Done.")
     L_FILE.close()

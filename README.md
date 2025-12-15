@@ -1,4 +1,4 @@
-# Harmonic ROUND (Riemannian Optimized Unified Neural Dynamo) v0.3.1
+# Harmonic ROUND (Riemannian Optimized Unified Neural Dynamo) v0.3.2
 
 ## Table of Contents
 1. [Executive Summary: The Harmonic Convergence](#executive-summary-the-harmonic-convergence)
@@ -17,10 +17,11 @@
     1. [Base idea: quantization as a potential well](#base-idea-quantization-as-a-potential-well)
     2. [Harmonic spectrum (the Phase 3 move)](#harmonic-spectrum-the-phase-3-move)
     3. [Terminal-only locking (wave → collapse)](#terminal-only-locking-wave--collapse)
+    4. [Dynamic Active Braking](#4-dynamic-active-braking)
 10. [Benchmarks](#benchmarks)
     1. [Discrete Logic — 16-bit Parity](#1-discrete-logic--16-bit-parity-benchmark_paritypy)
     2. [Cyclic Logic — Modulo-8](#2-cyclic-logic--modulo-8-benchmark_clockpy)
-    3. [Ordered Structure — Balanced Brackets](#3-ordered-structure--balanced-brackets-benchmark_bracketspy)
+    3. [Ordered Structure — Balanced Brackets (Seq & Masked)](#3-ordered-structure--balanced-brackets-benchmark_bracketspy)
     4. [Continuous Topology — Winding Classification](#4-continuous-topology--winding-classification-benchmark_topologypy)
 11. [Theory: Unified Informatic Topology (UIT)](#theory-unified-informatic-topology-uit--ieg-corollary)
 12. [Repo Layout](#repo-layout)
@@ -143,6 +144,7 @@ Each benchmark script trains ROUND and a GRU baseline for **1000 epochs**, avera
 python benchmark_parity.py     # 16-bit parity (binary)
 python benchmark_clock.py      # modulo-8 sum (8-way classification)
 python benchmark_brackets.py   # balanced brackets (binary)
+python benchmark_brackets_masked.py # sequential/masked brackets (binary)
 python benchmark_topology.py   # winding classification (binary)
 ```
 
@@ -165,7 +167,7 @@ Expected outputs (filenames may be adjusted by you; keep them stable for readers
 
 > If you commit the plots to `figures/`, update the image links below accordingly.
 
-### Benchmark Results (v0.3.0 Unified Standard)
+### Benchmark Results (v0.3.2 Unified Standard)
 
 After discovering the **Harmonic Learning Rate** ($2^{-9} \approx 0.00195$), we found a unified configuration that resonates across all tasks.
 
@@ -174,6 +176,7 @@ After discovering the **Harmonic Learning Rate** ($2^{-9} \approx 0.00195$), we 
 | **Logic (Parity)** | 16-bit XOR Chain | **100.0%** | ~78.0% | ROUND locks perfectly; GRU struggles with length. |
 | **Arithmetic (Clock)** | Modulo-8 Addition | **~60.0%** | ~33.0% | **Failure Mode Analysis:** ROUND aliases securely to Mod-4; GRU collapses to random noise. |
 | **Structure (Brackets)** | Dyck Language | **100.0%** | ~99.0% | ROUND exhibits perfect stability and self-correction. |
+| **Structure (Masked)** | Sequential Brackets | **100.0%** | ~99.0% | **New:** ROUND can solve Dyck-2 in a purely streaming context (no global viewing). |
 | **Topology (Winding)** | 2D Winding | **100.0%** | ~100.0% | Both solve it, but ROUND locks in earlier (E50). |
 
 ![Parity](data/benchmark_parity_36fea372.png)
@@ -183,10 +186,7 @@ After discovering the **Harmonic Learning Rate** ($2^{-9} \approx 0.00195$), we 
 
 ### Common Training Configuration
 
-All benchmarks in this repo use a standardized harness, but we identified **two distinct regimes** of optimal hyperparameters:
-
-1.  **Logic & Arithmetic** (Parity, Clock): `hidden_size=32`, `lr=0.005` (Fast, sharp convergence)
-2.  **Structure & Topology** (Brackets, Winding): `hidden_size=64`, `lr=0.002` (Deeper capacity, smoother manifold)
+All benchmarks in this repo use a standardized harness with the **Unified Harmonic Standard** configuration ($h=32$, $lr \approx 0.002$):
 
 ```python
 CONFIG = {
@@ -222,6 +222,18 @@ The U-Neuron is a **phasic neuro-symbolic** unit designed to bridge continuous g
 * high-frequency harmonics for sharp snapping (digital precision),
 * low-frequency harmonics for global orientation (smooth topology capture),
 * and terminal-only application to preserve continuous evolution until measurement.
+
+### 4. Dynamic Active Braking
+
+To maximize stability, v0.3.2 introduces an **Active Brake** mechanism. 
+
+The training loop monitors a phase correlation metric $K = \text{mean}(\sin^2(\phi))$. When $K$ drops into a "settling range" (roughly $0.38 - 0.50$), it indicates the system is finding resonance in the harmonic wells. The brake then dynamically scales the loss gradient:
+
+$$
+\text{Brake} = \text{clamp}\left(\frac{K - 0.387}{0.113}, 0.001, 1.0\right)
+$$
+
+This essentially says: "If we are far from the wells ($K>0.5$), learn at full speed ($B=1.0$). If we are settling into the wells ($K<0.5$), reduce the 'temperature' (learning rate impact) to crystallize the solution ($B \to 0$)."
 
 ### “The Sphere Contains the Cube”
 
@@ -271,6 +283,9 @@ The GRU can simulate cyclic structure, but often pays parameter and optimization
 
 * `benchmark_brackets.py`
   Balanced brackets benchmark (ROUND vs GRU).
+
+* `benchmark_brackets_masked.py`
+  Sequential / Token-streaming brackets benchmark (ROUND vs GRU).
 
 * `benchmark_topology.py`
   Winding benchmark (ROUND vs GRU).
