@@ -1,5 +1,5 @@
 
-# version 0.3.0
+# version 0.3.1
 import torch,torch.nn as nn,torch.optim as optim,numpy as np,matplotlib.pyplot as plt,os,uuid
 from ROUND import ROUNDClockModel,ROUNDClockLoss,HarmonicROUNDLoss
 if not os.path.exists('data'):os.makedirs('data')

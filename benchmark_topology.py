@@ -1,5 +1,5 @@
 
-# version 0.3.0
+# version 0.3.1
 import torch,torch.nn as nn,torch.optim as optim,numpy as np,matplotlib.pyplot as plt,os,random,uuid
 from ROUND import ROUNDModel,ROUNDLoss,ROUNDTopologyLoss,ROUNDTopologyModel,PhaseAccumulator,HarmonicROUNDLoss
 if not os.path.exists('data'):os.makedirs('data')

@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.1] - 2025-12-14
+### Fixed
+- **Environment:** Updated `.gitignore` to exclude `.venv` and other system artifacts.
+- **Cleanup:** Minor housekeeping on the Python package structure (`__init__.py`).
+
 ## [0.3.0] - 2025-12-14
 ### Added
 - **Unified Harmonic Standard Configuration:** Discovered that setting the learning rate to a harmonic reciprocal of the phase space ($2^{-9} \approx 0.00195$) allows a single architecture configuration (`h=32`, `lr=0.001953125`) to solve all benchmark tasks (Logic, Arithmetic, Structure, Topology) without task-specific tuning.

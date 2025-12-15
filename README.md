@@ -1,4 +1,4 @@
-# Harmonic ROUND (Riemannian Optimized Unified Neural Dynamo)
+# Harmonic ROUND (Riemannian Optimized Unified Neural Dynamo) v0.3.1
 
 ## Table of Contents
 1. [Executive Summary: The Harmonic Convergence](#executive-summary-the-harmonic-convergence)
@@ -176,10 +176,10 @@ After discovering the **Harmonic Learning Rate** ($2^{-9} \approx 0.00195$), we 
 | **Structure (Brackets)** | Dyck Language | **100.0%** | ~99.0% | ROUND exhibits perfect stability and self-correction. |
 | **Topology (Winding)** | 2D Winding | **100.0%** | ~100.0% | Both solve it, but ROUND locks in earlier (E50). |
 
-![Parity](data/benchmark_parity_1d16f40c.png)
-![Modulo-8](data/benchmark_clock_1d16f40c.png)
-![Brackets](data/benchmark_brackets_1d16f40c.png)
-![Topology](data/benchmark_topology_1d16f40c.png)
+![Parity](data/benchmark_parity_36fea372.png)
+![Modulo-8](data/benchmark_clock_36fea372.png)
+![Brackets](data/benchmark_brackets_36fea372.png)
+![Topology](data/benchmark_topology_36fea372.png)
 
 ### Common Training Configuration
 
@@ -188,7 +188,6 @@ All benchmarks in this repo use a standardized harness, but we identified **two 
 1.  **Logic & Arithmetic** (Parity, Clock): `hidden_size=32`, `lr=0.005` (Fast, sharp convergence)
 2.  **Structure & Topology** (Brackets, Winding): `hidden_size=64`, `lr=0.002` (Deeper capacity, smoother manifold)
 
-```python
 ```python
 CONFIG = {
     'hidden_size': 32,          # Unified Standard
@@ -199,7 +198,16 @@ CONFIG = {
     'terminal_only': True       # The Harmonic Innovation
 }
 ```
-```
+
+### Protocol: The Release Run
+
+For each version release (e.g., `v0.3.0`), this repository follows a strict **"Artifact Freeze"** protocol:
+1.  All code changes are committed.
+2.  The `data/` directory is wiped.
+3.  `run_battery.py` is executed linearly without interruption.
+4.  The resulting logs (`.txt`) and plots (`.png`) are committed as the **Golden Record** for that version.
+
+This ensures complete reproducibility. Users modifying the code can run the battery and diff their results against the committed logs to verify improvements or regressions.
 
 ---
 
