@@ -1,4 +1,4 @@
-# version 0.5.0 - Harmonic Monism (ASCII)
+# version 0.6.0 - Harmonic Monism (ASCII)
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -136,7 +136,7 @@ def train_model(model_name, model_class, device, input_bits, target_tensor, loop
         acc = correct / total
         acc_history.append(acc.item())
         
-        if epoch % 100 == 0:
+        if epoch % 100 == 0 or epoch == epochs - 1:
             pred_bytes = pred_indices[0].cpu().tolist()
             pred_str = "".join([chr(c) if 32 <= c <= 126 else '?' for c in pred_bytes])
             P(f"{model_name} E{epoch:4d} | Acc: {acc:.2f} | Loss: {stats_loss:.4f} | Out: '{pred_str}'")

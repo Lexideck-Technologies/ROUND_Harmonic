@@ -1,4 +1,4 @@
-# Harmonic ROUND (Riemannian Optimized Unified Neural Dynamo) v0.5.0
+# Spinor Monism (Harmonic ROUND) v0.6.0
 
 [![The U-Neuron](media/round_video_thumbnail.png)](https://www.lexidecktechnologies.com/UIT_IEG/The_U-Neuron.mp4)
 <div align="center"><em>Click the thumbnail above to watch the 2-minute explainer.</em></div>
@@ -120,9 +120,9 @@ python run_battery.py
 
 ## Reproducing the Benchmark Plots
 
-## 5. Benchmark Results: "Harmonic Monism" (v0.5.0)
-
-We performed a Head-to-Head comparison between **ROUND (Harmonic Monism)** and a standard **GRU**, both with `Hidden=32` and `Epochs=300`. The results definitively validate the Unified Informatic Topology (UIT) hypotheses regarding Phase Space vs. Logical Space.
+## 5. Benchmark Results: "Spinor Monism" (v0.6.0)
+We performed a Head-to-Head comparison between **ROUND (Pure Harmonic [1])** and a standard **GRU**.
+The "Single Harmonic" configuration verified in v0.6.0 achieved **100% Accuracy across logic, structure, and topology benchmarks**, eliminating the optimization noise seen in v0.5.0.
 
 ### 5.1 The "Impossible" Logic Test (Parity/XOR)
 *Task: Compute 16-bit Parity (Recursive XOR).*

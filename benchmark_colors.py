@@ -1,4 +1,4 @@
-# version 0.5.0 - Harmonic Monism (Colors)
+# version 0.6.0 - Harmonic Monism (Colors)
 import torch.nn as nn
 import torch.optim as optim
 import random
@@ -153,7 +153,7 @@ def train_model(model_name, model_class, device, training_sequences, epochs, uid
         epoch_acc = total_correct / total_tokens
         acc_history.append(epoch_acc)
         
-        if epoch % 100 == 0:
+        if epoch % 100 == 0 or epoch == epochs - 1:
             P(f"Epoch {epoch:4d} | Acc: {epoch_acc:.4f} | Loss: {epoch_loss:.4f}")
             
     stats_list.append(acc_history)

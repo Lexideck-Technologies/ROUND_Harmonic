@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.0] - "Spinor Monism" (Refined) - 2025-12-17
+### The Great Simplification
+Experiments in the "Pure Harmonic" test battery revealed that the higher-order harmonics (`[2, 4, 8]`) introduced in v0.5.0 were actually adding optimization noise (rugged potential landscapes) that caused jitter in convergence.
+
+We discovered that **Spinor Features** ($4\pi$ Double Cover) provide sufficient topological complexity to solve "Twist" problems (Logic/Parity) without needing higher-order harmonic wells.
+*   **Verdict:** **Harmonic [1] is Universal.**
+*   **Result:** All benchmarks now converge to **100% Accuracy** with a single smooth potential well.
+
+### Changed
+*   **Configuration:** `HARMONICS` set to `[1]` globally in `config.py`.
+*   **Stability:** Removed the fractal noise of higher harmonics, resulting in faster and more monotonic convergence curves.
+
 ## [0.5.0] - "Harmonic Monism" - 2025-12-17
 ### Total Overhaul
 This release marks the transition from experimental tuning to a stable **Harmonic Monism** architecture. By aligning the U-Neuron's thermodynamic locking parameters with the "Geometric Resonance" principles of the **Unified Informatic Topology (UIT)** framework, we have achieved a universal configuration that solves Logic, Topology, and Structure tasks without per-task hyperparameter tuning.

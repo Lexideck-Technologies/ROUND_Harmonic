@@ -1,4 +1,4 @@
-# version 0.5.0 - Harmonic Monism (Topology)
+# version 0.6.0 - Harmonic Monism (Topology)
 import torch,torch.nn as nn,torch.optim as optim,numpy as np,matplotlib.pyplot as plt,os,uuid
 from ROUND import SequentialROUNDModel,HarmonicROUNDLoss
 from config import TOPOLOGY_CONFIG, get_lock_strength
@@ -86,7 +86,8 @@ def train_round(rid,X,Y,Xt,Yt,d):
             pt = (torch.sigmoid(out_t)>0.5).float()
             acc_t = (pt == Yt).float().mean().item()
         ah.append(acc_t)
-        if e%100==0:P(f"R{rid} E{e}: TestAcc={acc_t:.2f} | Lock={lk:.4f}")
+        if e % 100 == 0 or e == TC['EPOCHS'] - 1:
+            P(f"R{rid} E{e}: TestAcc={acc_t:.2f} | Lock={lk:.4f}")
     return ah,pt,Yt
 
 def train_gru(rid,X,Y,Xt,Yt,d):
@@ -98,7 +99,8 @@ def train_gru(rid,X,Y,Xt,Yt,d):
             pt = (torch.sigmoid(out_t)>0.5).float()
             acc_t = (pt == Yt).float().mean().item()
         ah.append(acc_t)
-        if e%100==0:P(f"G{rid} E{e}: L={l.item():.4f}, TestAcc={acc_t:.2f}")
+        if e % 100 == 0 or e == TC['EPOCHS'] - 1:
+            P(f"G{rid} E{e}: L={l.item():.4f}, TestAcc={acc_t:.2f}")
     return ah,pt,Yt
 
 if __name__=="__main__":

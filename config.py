@@ -1,4 +1,4 @@
-
+# version 0.6.0 - Harmonic Monism (Config)
 import math
 
 # ROUND Configuration
@@ -24,7 +24,7 @@ def get_lock_strength(epoch, total_epochs, peak_strength=0.0625, floor_strength=
 # ==============================================================================
 HIDDEN_SIZE = 32
 PEAK_LOCKING_STRENGTH = 0.0625  # Standard (1/16) - The Golden Setting
-HARMONICS = [1, 2, 4, 8]        # Standard Spectrum
+HARMONICS = [1]        # Pure Fundamental
 LR = 0.001953125 # 2^-9
 EPOCHS_SHORT = 300
 EPOCHS_LONG = 300
@@ -42,7 +42,7 @@ LOCKING_STRENGTH = PEAK_LOCKING_STRENGTH
 TOPOLOGY_CONFIG = {
     'HIDDEN_SIZE': 32,
     'PEAK_LOCKING_STRENGTH': 0.0625, # 1/16
-    'HARMONICS': [1, 2, 4, 8],       # Full Spectrum
+    'HARMONICS': [1],       # Pure Fundamental
     'EPOCHS': 300,
     'FLOOR': 0.005,
     'LR': 0.001953125,
@@ -54,7 +54,7 @@ TOPOLOGY_CONFIG = {
 PARITY_CONFIG = {
     'HIDDEN_SIZE': 32,
     'PEAK_LOCKING_STRENGTH': 0.0625, # 1/16 (Harmonic) - Replaces 0.1
-    'HARMONICS': [1, 2, 4, 8],       # Full Spectrum
+    'HARMONICS': [1],       # Pure Fundamental
     'EPOCHS': 300,
     'FLOOR': 0.01,
     'LR': 0.01,
@@ -65,7 +65,7 @@ PARITY_CONFIG = {
 BRACKETS_CONFIG = {
     'HIDDEN_SIZE': 32,
     'PEAK_LOCKING_STRENGTH': 0.0625, # 1/16 (Harmonic) - Replaces 0.5
-    'HARMONICS': [1, 2, 4, 8],       # Full Spectrum
+    'HARMONICS': [1],       # Pure Fundamental
     'EPOCHS': 300,
     'LR': 0.001953125,
     'TERMINAL_ONLY': True
@@ -75,7 +75,7 @@ BRACKETS_CONFIG = {
 COLORS_CONFIG = {
     'HIDDEN_SIZE': 32,
     'PEAK_LOCKING_STRENGTH': 0.0625,
-    'HARMONICS': [1, 2, 4, 8],
+    'HARMONICS': [1],
     'EPOCHS': 300,
     'LR': 0.001953125,
     'TERMINAL_ONLY': False
@@ -85,7 +85,7 @@ COLORS_CONFIG = {
 ASCII_CONFIG = {
     'HIDDEN_SIZE': 32,
     'PEAK_LOCKING_STRENGTH': 0.0625,
-    'HARMONICS': [1, 2, 4, 8],
+    'HARMONICS': [1],
     'EPOCHS': 300,
     'LR': 0.001953125,
     'TERMINAL_ONLY': False
@@ -95,7 +95,7 @@ ASCII_CONFIG = {
 ORACLE_CONFIG = {
     'HIDDEN_SIZE': 32,
     'PEAK_LOCKING_STRENGTH': 0.0625,
-    'HARMONICS': [1, 2, 4, 8],
+    'HARMONICS': [1],
     'EPOCHS': 300,
     'LR': 0.001953125,
     'TERMINAL_ONLY': True

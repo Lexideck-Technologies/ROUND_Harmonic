@@ -1,0 +1,4 @@
+--- Creative Benchmark: Semantic Algebra (Colors) ---
+Batch UID: 122a927e
+Run Config: {'HIDDEN_SIZE': 32, 'PEAK_LOCKING_STRENGTH': 0.0625, 'HARMONICS': [1], 'EPOCHS': 300, 'LR': 0.001953125, 'TERMINAL_ONLY': False}
+Task: Learn Symbolic Logic (A+B=C) from 12 examples.

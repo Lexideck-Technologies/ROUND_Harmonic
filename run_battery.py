@@ -1,5 +1,5 @@
 
-# version 0.5.0
+# version 0.6.0 - Harmonic Monism
 import subprocess
 import os
 import sys

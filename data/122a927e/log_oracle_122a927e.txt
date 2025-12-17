@@ -1,0 +1,82 @@
+--- Benchmark: The Oracle (QA Consistency) ---
+Batch UID: 122a927e
+Run Config: {'HIDDEN_SIZE': 32, 'PEAK_LOCKING_STRENGTH': 0.0625, 'HARMONICS': [1], 'EPOCHS': 300, 'LR': 0.001953125, 'TERMINAL_ONLY': True}
+Device: cuda
+Training ROUND (5 Runs)...
+
+--- ROUND Run 1 ---
+ROUND R1 E   0 | Loss: 70.5025 | Acc: 0%
+ROUND R1 E 100 | Loss: 8.2365 | Acc: 76%
+ROUND R1 E 200 | Loss: 0.1592 | Acc: 100%
+ROUND R1 E 299 | Loss: 0.0687 | Acc: 100%
+ROUND R1 Final Acc: 100.0%
+
+--- ROUND Run 2 ---
+ROUND R2 E   0 | Loss: 57.8794 | Acc: 0%
+ROUND R2 E 100 | Loss: 5.3896 | Acc: 88%
+ROUND R2 E 200 | Loss: 0.1586 | Acc: 100%
+ROUND R2 E 299 | Loss: 0.0570 | Acc: 100%
+ROUND R2 Final Acc: 100.0%
+
+--- ROUND Run 3 ---
+ROUND R3 E   0 | Loss: 11.6369 | Acc: 59%
+ROUND R3 E 100 | Loss: 5.3172 | Acc: 88%
+ROUND R3 E 200 | Loss: 0.0678 | Acc: 100%
+ROUND R3 E 299 | Loss: 0.0350 | Acc: 100%
+ROUND R3 Final Acc: 100.0%
+
+--- ROUND Run 4 ---
+ROUND R4 E   0 | Loss: 28.5914 | Acc: 6%
+ROUND R4 E 100 | Loss: 3.2646 | Acc: 94%
+ROUND R4 E 200 | Loss: 0.0907 | Acc: 100%
+ROUND R4 E 299 | Loss: 0.0472 | Acc: 100%
+ROUND R4 Final Acc: 100.0%
+
+--- ROUND Run 5 ---
+ROUND R5 E   0 | Loss: 20.4736 | Acc: 47%
+ROUND R5 E 100 | Loss: 12.8437 | Acc: 59%
+ROUND R5 E 200 | Loss: 0.4317 | Acc: 100%
+ROUND R5 E 299 | Loss: 0.0771 | Acc: 100%
+ROUND R5 Final Acc: 100.0%
+Training GRU (5 Runs)...
+
+--- GRU Run 1 ---
+GRU R1 E   0 | Loss: 17.6972 | Acc: 47%
+GRU R1 E 100 | Loss: 4.2834 | Acc: 94%
+GRU R1 E 200 | Loss: 0.1112 | Acc: 100%
+GRU R1 E 299 | Loss: 0.0415 | Acc: 100%
+GRU R1 Final Acc: 100.0%
+
+--- GRU Run 2 ---
+GRU R2 E   0 | Loss: 17.9822 | Acc: 53%
+GRU R2 E 100 | Loss: 7.2876 | Acc: 76%
+GRU R2 E 200 | Loss: 0.1969 | Acc: 100%
+GRU R2 E 299 | Loss: 0.0467 | Acc: 100%
+GRU R2 Final Acc: 100.0%
+
+--- GRU Run 3 ---
+GRU R3 E   0 | Loss: 17.7191 | Acc: 53%
+GRU R3 E 100 | Loss: 7.3653 | Acc: 82%
+GRU R3 E 200 | Loss: 0.1259 | Acc: 100%
+GRU R3 E 299 | Loss: 0.0415 | Acc: 100%
+GRU R3 Final Acc: 100.0%
+
+--- GRU Run 4 ---
+GRU R4 E   0 | Loss: 19.5425 | Acc: 0%
+GRU R4 E 100 | Loss: 7.1370 | Acc: 82%
+GRU R4 E 200 | Loss: 0.0465 | Acc: 100%
+GRU R4 E 299 | Loss: 0.0213 | Acc: 100%
+GRU R4 Final Acc: 100.0%
+
+--- GRU Run 5 ---
+GRU R5 E   0 | Loss: 19.2079 | Acc: 0%
+GRU R5 E 100 | Loss: 6.2743 | Acc: 88%
+GRU R5 E 200 | Loss: 0.5971 | Acc: 100%
+GRU R5 E 299 | Loss: 0.0929 | Acc: 100%
+GRU R5 Final Acc: 100.0%
+Plot saved to benchmark_oracle_122a927e.png
+Correlation plot saved to correlation_oracle_122a927e.png
+Q: ARE YOU A LANGUAGE MODEL? | A: YES (90.1%)
+Q: IS MATHEMATICS REAL? | A: YES (53.6%)
+Q: ARE YOU ALIVE? | A: YES (63.3%)
+Q: IS THE UNIVERSE INFINITE? | A: YES (99.5%)

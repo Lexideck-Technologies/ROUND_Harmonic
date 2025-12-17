@@ -1,5 +1,5 @@
 
-# version 0.5.0 - Harmonic Monism (Masked Brackets)
+# version 0.6.0 - Harmonic Monism (Masked Brackets)
 import torch,torch.nn as nn,torch.optim as optim,numpy as np,matplotlib.pyplot as plt,os,uuid
 from ROUND import SequentialROUNDModel,HarmonicROUNDLoss
 from config import BRACKETS_CONFIG, get_lock_strength
@@ -84,7 +84,8 @@ def train_round_seq(rid,X,Y,Xt,Yt,d):
             acc_t = (pt == Yt).float().mean().item()
             
         ah.append(acc_t)
-        if e%100==0:P(f"SeqR{rid} E{e}: A={acc_t:.2f} | K={lk:.4f}")
+        if e % 100 == 0 or e == TC['EPOCHS'] - 1:
+            P(f"SeqR{rid} E{e}: A={acc_t:.2f} | K={lk:.4f}")
         
     return ah,pt,Yt
 
@@ -97,7 +98,8 @@ def train_gru(rid,X,Y,Xt,Yt,d):
             pt = (torch.sigmoid(out_t)>0.5).float()
             acc_t = (pt == Yt).float().mean().item()
         ah.append(acc_t)
-        if e%100==0:P(f"G{rid} E{e}: L={l.item():.4f}, TestAcc={acc_t:.2f}")
+        if e % 100 == 0 or e == TC['EPOCHS'] - 1:
+            P(f"G{rid} E{e}: L={l.item():.4f}, TestAcc={acc_t:.2f}")
     return ah,pt,Yt
 
 if __name__=="__main__":

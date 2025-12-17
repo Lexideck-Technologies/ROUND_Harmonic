@@ -1,5 +1,5 @@
 
-# version 0.5.0 - Harmonic Monism (Oracle)
+# version 0.6.0 - Harmonic Monism (Oracle)
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -154,7 +154,7 @@ def train_model_run(run_id, model_class, device, output_dir, L_FILE):
         acc = correct / len(QA_PAIRS)
         acc_history.append(acc)
         
-        if epoch % 100 == 0:
+        if epoch % 100 == 0 or epoch == TC['EPOCHS'] - 1:
             P(f"{model_name} R{run_id} E{epoch:4d} | Loss: {total_loss:.4f} | Acc: {acc*100:.0f}%")
             
     P(f"{model_name} R{run_id} Final Acc: {acc_history[-1]*100:.1f}%")
