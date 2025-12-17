@@ -1,4 +1,5 @@
 # version 0.6.0 - Harmonic Monism (Colors)
+import torch
 import torch.nn as nn
 import torch.optim as optim
 import random

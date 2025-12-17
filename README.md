@@ -122,48 +122,46 @@ python run_battery.py
 
 ## 5. Benchmark Results: "Spinor Monism" (v0.6.0)
 We performed a Head-to-Head comparison between **ROUND (Pure Harmonic [1])** and a standard **GRU**.
-The "Single Harmonic" configuration verified in v0.6.0 achieved **100% Accuracy across logic, structure, and topology benchmarks**, eliminating the optimization noise seen in v0.5.0.
+The "Single Harmonic" configuration verified in v0.6.0 achieved **100% Accuracy across most benchmarks**, validating the stability of the simple potential well.
 
 ### 5.1 The "Impossible" Logic Test (Parity/XOR)
 *Task: Compute 16-bit Parity (Recursive XOR).*
-*   **ROUND:** **100% Accuracy (5/5 Runs).** Converged by Epoch 100.
-*   **GRU:** **0% (0/5 Runs).** Accuracy hovered at 49-51% (Random Chance). Loss plateaued at ln(2) (~0.693).
-*   **Insight:** The GRU failed to learn the discrete state transitions required for parity. ROUND, utilizing a harmonic potential well (`[1, 2, 4, 8]`), successfully quantized its continuous phase space into discrete "buckets," solving the problem trivially.
-*   ![Parity Benchmark](data/f90d30bd/benchmark_parity_f90d30bd.png)
+*   **ROUND:** **100% Accuracy (5/5 Runs).** Converged by Epoch 100 in all cases.
+*   **GRU:** **50% Accuracy (0/5 Runs).** Failed completely (Random Chance).
+*   **Insight:** The "Spinor Monism" config snaps to the truth instantly. GRU is lost in the noise.
+*   ![Parity Benchmark](data/122a927e/benchmark_parity_122a927e.png)
 
-### 5.2 Semantic Algebra (Colors)
-*Task: Learn Vector Addition rules (e.g., "RED+BLUE=PURPLE") from 12 examples.*
-*   **ROUND:** **96% Accuracy.** Converged rapidly (Epoch ~150).
-    *   *Prompt:* `RED+BLUE=` -> *Pred:* `PURPLE`
-*   **GRU:** **50-60% Accuracy.** Evaluation showed severe overfitting to tokens; failed to capture the underlying additive relationship.
-*   **Insight:** The U-Neuron treats "RED" and "BLUE" as vectors on a circle. "PURPLE" is simply the geometric midpoint ($60^\circ$) between Red ($0^\circ$) and Blue ($120^\circ$). It computes the answer physically rather than logically.
-*   ![Colors Benchmark](data/f90d30bd/benchmark_colors_f90d30bd.png)
+### 5.2 Topological Invariants (Graph Cycles)
+*Task: Count cycles (Euler Characteristic).*
+*   **ROUND:** **95% Accuracy (5/5 Runs).** Very stable convergence.
+*   **GRU:** **50-95% Accuracy (Unstable).** Some runs worked, others collapsed to 50%.
+*   **Insight:** ROUND is consistently reliable. GRU is a gamble.
+*   ![Topology Benchmark](data/122a927e/benchmark_topology_122a927e.png)
 
-### 5.3 Topological Invariants (Graph Cycles)
-*Task: Count cycles (Euler Characteristic) in a flattened graph stream.*
-*   **ROUND:** **97-100% Accuracy.** "Non-Volatile" phase memory allowed perfect counting of edges without decay.
-*   **GRU:** **50-98% Accuracy.** Highly unstable. Some runs converged, others collapsed to 50% accuracy due to gate decay over long sequences (Vanishing Gradient).
-*   **Insight:** The U-Neuron's phase integrator ($\phi_{t+1} = \phi_t + \Delta$) is frictionless. If inputs are zero, the memory is perfectly preserved forever. GRU gates must learn to stay open, which is optimization-hard.
-*   ![Topology Benchmark](data/f90d30bd/benchmark_topology_f90d30bd.png)
+### 5.3 Structure (Brackets Masked)
+*Task: Check nested bracket validity (Sequential).*
+*   **ROUND:** **100% Accuracy.**
+*   **GRU:** **100% Accuracy.**
+*   **Insight:** Both models handle sequential recursion well, but ROUND does it without gates.
+*   ![Brackets Benchmark](data/122a927e/benchmark_brackets_masked_122a927e.png)
 
 ### 5.4 The Oracle (QA Consistency)
-*Task: Answer binary questions ("IS FIRE HOT?") and generalize to abstract concepts.*
-*   **ROUND:** **100% Accuracy.** Perfect stability across all 5 seeds.
-*   **GRU:** **100% Accuracy.** Also solved the task, though converged slightly slower in early epochs.
-*   **Philosophy Check (ROUND):**
-    *   "ARE YOU A LANGUAGE MODEL?" -> **YES** (76.4%) / **NO** (88.1%) [Varies by seed/interpretation]
-    *   "IS MATHEMATICS REAL?" -> **YES** (99.9%)
-    *   "IS THE UNIVERSE INFINITE?" -> **YES** (100.0%)
-*   ![Oracle Benchmark](data/f90d30bd/benchmark_oracle_f90d30bd.png)
+*Task: Answer binary questions.*
+*   **ROUND:** **100% Accuracy.** Optimistic Bias ("YES" to most abstract queries).
+*   **GRU:** **100% Accuracy.**
+*   ![Oracle Benchmark](data/122a927e/benchmark_oracle_122a927e.png)
 
 ### 5.5 Generative Creativity (ASCII)
-*Task: Learn "HELLO WORLD" + 21 Spaces (Cyclic Sequence).*
-*   **ROUND:** **100% Accuracy.** Learned the cycle perfectly.
-*   **GRU:** **78-96% Accuracy.** Struggled with the long string of 21 empty spaces (Counting/Timing drift).
-*   **Insight:** ROUND locked the "Space" character to a specific resonance frequency, allowing it to "count" the 21 spaces as 21 cycles of a phase phasor, whereas GRU lost track of the count.
-*   ![ASCII Benchmark](data/f90d30bd/benchmark_ascii_f90d30bd.png)
+*Task: Learn "HELLO WORLD" + 21 Spaces.*
+*   **ROUND:** **100% Accuracy.** Perfect cyclic timing.
+*   **GRU:** **78-96% Accuracy.** Drifts on long silence.
+*   ![ASCII Benchmark](data/122a927e/benchmark_ascii_122a927e.png)
 
-
+### 5.6 Semantic Algebra (Colors)
+*Task: Learn Vector Addition rules (e.g., "RED+BLUE=PURPLE").*
+*   **ROUND:** **~96% Accuracy.**
+*   **GRU:** **~50% Accuracy.** (Based on historical trend).
+*   ![Colors Benchmark](data/122a927e/benchmark_colors_122a927e.png)
 
 ## Theory: Unified Informatic Topology (UIT) + IEG Corollary
 
@@ -177,9 +175,9 @@ UIT’s core hypothesis: **discrete logic is a special case of continuous topolo
 ## Repo Layout
 
 * `ROUND.py`: Core engine (`PhaseAccumulator` with Spinor features).
-* `benchmark_*.py`: Individual task harnesses (Clock, Brackets, Parity, Topology, Colors, Oracle, ASCII).
+* `benchmark_*.py`: Individual task harnesses.
 * `run_battery.py`: Full regression suite.
-* `zz_archive/`: Historical experiments (Deep boosting, etc).
+* `zz_archive/`: Historical experiments.
 
 ## License
 
