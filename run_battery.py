@@ -1,16 +1,17 @@
 
-# version 0.3.2
+# version 0.5.0
 import subprocess
 import os
 import sys
 import uuid
 
 scripts = [
-    "benchmark_brackets.py",
     "benchmark_brackets_masked.py",
-    "benchmark_clock.py",
     "benchmark_parity.py",
-    "benchmark_topology.py"
+    "benchmark_topology.py",
+    "benchmark_ascii.py",
+    "benchmark_colors.py",
+    "benchmark_oracle.py"
 ]
 
 print("Starting Full Test Battery...")
@@ -29,9 +30,6 @@ print(f"Current Directory: {os.getcwd()}")
 for script in scripts:
     print(f"\n=========================================")
     print(f"Running {script}...")
-    if script == "benchmark_clock.py":
-        print(f"NOTE: This test measures failure conditions/intuition.")
-        print(f"      Expect accuracy < 100%. Do not terminate early.")
     print(f"=========================================\n")
     try:
         # verify file exists

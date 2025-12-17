@@ -1,98 +1,161 @@
+# version 0.5.0 - Harmonic Monism (Topology)
+import torch,torch.nn as nn,torch.optim as optim,numpy as np,matplotlib.pyplot as plt,os,uuid
+from ROUND import SequentialROUNDModel,HarmonicROUNDLoss
+from config import TOPOLOGY_CONFIG, get_lock_strength
 
-# version 0.3.2
-import torch,torch.nn as nn,torch.optim as optim,numpy as np,matplotlib.pyplot as plt,os,random,uuid
-from ROUND import ROUNDModel,ROUNDLoss,PhaseAccumulator,HarmonicROUNDLoss
 if not os.path.exists('data'):os.makedirs('data')
 UID=os.environ.get('ROUND_BATCH_UID',str(uuid.uuid4())[:8])
 output_dir = os.environ.get('ROUND_OUTPUT_DIR', 'data')
 if not os.path.exists(output_dir): os.makedirs(output_dir)
 L_FILE=open(f'{output_dir}/log_topology_{UID}.txt','w')
 def P(s):print(s);L_FILE.write(str(s)+'\n');L_FILE.flush()
+
 P(f"Batch UID: {UID}")
-C={'task':'winding','seq_len':30,'hidden_size':32,'steps':30,'epochs':1000,'batch_size':64,'dataset_size':3000,'runs':5,'lr':0.001953125,'device':'cuda' if torch.cuda.is_available() else 'cpu'}
-def generate_winding_data(n,l):
-    X,Y=[],[]
-    for _ in range(n):
-        lbl=0 if random.random()<0.5 else 1;td=2*np.pi if lbl==1 else 0
-        ts=random.uniform(0,2*np.pi);t=np.linspace(0,1,l);tp=ts+t*td
-        tp+=0.5*np.sin(t*np.pi*2*random.random()*5);x=np.stack([np.cos(tp),np.sin(tp)],1).flatten()
-        X.append(torch.tensor(x).float());Y.append(float(lbl))
-    return torch.stack(X),torch.tensor(Y).unsqueeze(1)
+# Load Config
+TC = TOPOLOGY_CONFIG
+P(f"Run Config: {TC}")
+C={'task':'euler_char',
+   'seq_len':100, # Matches generated flatten size
+   'hidden_size':TC['HIDDEN_SIZE'],
+   'epochs':TC['EPOCHS'],
+   'runs':5, # Standard
+   'lr':TC['LR'],
+   'dataset_size':2000,
+   'device':'cuda' if torch.cuda.is_available() else 'cpu'}
+
+def generate_topology_data(n,seq_len):
+    # Generates Flattened Adjacency Matrices for Graphs (Nodes=10, Len=100)
+    # Class 0: Tree (No Cycles) | Class 1: Cyclic (Cycle present)
+    X=torch.zeros(n,seq_len)
+    Y=torch.zeros(n,1)
+    
+    for i in range(n):
+        adj=np.zeros((10,10))
+        # Build a Tree (Edges = Nodes - 1 = 9)
+        edges=[]
+        nodes=list(range(10))
+        np.random.shuffle(nodes)
+        visited=[nodes[0]]
+        unvisited=nodes[1:]
+        while unvisited:
+            u=np.random.choice(visited)
+            v=unvisited.pop()
+            edges.append((u,v))
+            adj[u,v]=adj[v,u]=1
+            visited.append(v)
+        label=0
+        if np.random.rand()>0.5:
+            label=1
+            n_extra=np.random.randint(1,4)
+            for _ in range(n_extra):
+                u,v=np.random.choice(10,2,replace=False)
+                if u!=v and adj[u,v]==0:
+                    adj[u,v]=adj[v,u]=1
+        Y[i]=label
+        X[i] = torch.tensor(adj.flatten()).float()
+    return X,Y
+
 class GRUModel(nn.Module):
-    def __init__(self,i,h,o=1):super().__init__();self.gru=nn.GRU(2,h,batch_first=True);self.fc=nn.Linear(h,o)
-    def forward(self,x):_,h=self.gru(x.view(x.size(0),-1,2));return self.fc(h[-1])
-def train_round(rid,X,Y,d):
-    m=ROUNDModel(hidden_size=C['hidden_size'],input_dim=C['seq_len']*2).to(d)
-    c=HarmonicROUNDLoss(locking_strength=0.0625,harmonics=[1,2],weights=[1,2],mode='binary',terminal_only=True,floor_clamp=0.032);o=optim.Adam(m.parameters(),lr=C['lr']);ah=[]
+    def __init__(self,i,h,o=1):super().__init__();self.gru=nn.GRU(i,h,batch_first=True);self.fc=nn.Linear(h,o)
+    def forward(self,x):_,h=self.gru(x);return self.fc(h[-1])
+
+def train_round(rid,X,Y,Xt,Yt,d):
+    m=SequentialROUNDModel(hidden_size=TC['HIDDEN_SIZE'],input_dim=1,output_classes=1,wobble=TC['WOBBLE']).to(d)
+    
+    # HARMONICS TEST CONFIGURATION
+    c=HarmonicROUNDLoss(locking_strength=TC['PEAK_LOCKING_STRENGTH'],
+                        harmonics=TC['HARMONICS'],
+                        weights=[1.0]*len(TC['HARMONICS']), 
+                        mode='binary',
+                        terminal_only=True)
+                        
+    o=optim.Adam(m.parameters(),lr=TC['LR'])
+    ah=[];locked=False
+    for e in range(TC['EPOCHS']):
+        c.locking_strength = get_lock_strength(e, TC['EPOCHS'], TC['PEAK_LOCKING_STRENGTH'], TC['FLOOR'])
+        
+        o.zero_grad()
+        # Input Dim 1. X is [Batch, 30] so unsqueeze to [Batch, 30, 1]
+        out,h=m(X.unsqueeze(-1))
+        l,tk,lk=c(out,Y,h)
+        l.backward()
+        o.step()
+        
+        with torch.no_grad():
+            out_t, _ = m(Xt.unsqueeze(-1))
+            pt = (torch.sigmoid(out_t)>0.5).float()
+            acc_t = (pt == Yt).float().mean().item()
+        ah.append(acc_t)
+        if e%100==0:P(f"R{rid} E{e}: TestAcc={acc_t:.2f} | Lock={lk:.4f}")
+    return ah,pt,Yt
+
+def train_gru(rid,X,Y,Xt,Yt,d):
+    m=GRUModel(1,C['hidden_size']).to(d);c=nn.BCEWithLogitsLoss();o=optim.Adam(m.parameters(),lr=C['lr']);ah=[];locked=False
     for e in range(C['epochs']):
-        o.zero_grad();out,h=m(X,steps=C['steps']);l,_,_=c(out,Y,h)
-        pc=torch.mean(torch.sin(h[-1])**2);bk=torch.clamp((pc-0.387)/0.113,0.001,1.0).detach()
-        (l*bk).backward();o.step()
-        p=(torch.sigmoid(out)>0.5).float();acc=(p==Y).float().mean().item();ah.append(acc)
-        if e%100==0:P(f"R{rid} E{e}: A={acc:.2f} | K={pc:.4f} | B={bk.item():.5f}")
-        if acc==1.0 and bk.item()<0.001:P(f"--> LOCKED E{e}");break
-    return ah,p,Y
-def train_gru(rid,X,Y,d):
-    m=GRUModel(2,C['hidden_size']).to(d);c=nn.BCEWithLogitsLoss();o=optim.Adam(m.parameters(),lr=C['lr']);ah=[]
-    for e in range(C['epochs']):
-        o.zero_grad();out=m(X);l=c(out,Y);l.backward();o.step()
-        preds=(torch.sigmoid(out)>0.5).float();acc=(preds==Y).float().mean().item();ah.append(acc)
-        if e%100==0:P(f"G{rid} E{e}: L={l.item():.4f}, A={acc:.2f}")
-    return ah,preds,Y
+        o.zero_grad();out=m(X.unsqueeze(-1));l=c(out,Y);l.backward();o.step()
+        with torch.no_grad():
+            out_t = m(Xt.unsqueeze(-1))
+            pt = (torch.sigmoid(out_t)>0.5).float()
+            acc_t = (pt == Yt).float().mean().item()
+        ah.append(acc_t)
+        if e%100==0:P(f"G{rid} E{e}: L={l.item():.4f}, TestAcc={acc_t:.2f}")
+    return ah,pt,Yt
+
 if __name__=="__main__":
-    d=torch.device(C['device']);P(f"Dev: {d}");X,Y=generate_winding_data(C['dataset_size'],C['seq_len']);X,Y=X.to(d),Y.to(d)
-    rr,gr,ap,ft=[],[],[],Y.cpu().numpy();P("Training ROUND")
-    for i in range(C['runs']):a,p,_=train_round(i+1,X,Y,d);rr.append(a);ap.append(p.detach().cpu().numpy().flatten())
-    P("Training GRU")
-    for i in range(C['runs']):a,p,_=train_gru(i+1,X,Y,d);gr.append(a)
+    d=torch.device(C['device']);P(f"Dev: {d}")
+    # Train Split
+    X,Y=generate_topology_data(C['dataset_size'],C['seq_len']);X,Y=X.to(d),Y.to(d)
+    
+    # FILTER ZEROS STRATEGY (SORTING)
+    if TC.get('SORT_INPUTS', False):
+        X, _ = torch.sort(X, descending=True, dim=1)
+        # Truncate to Max Edges + Buffer (30)
+        X = X[:, :30]
+        
+    # Test Split
+    Xt,Yt=generate_topology_data(1000,C['seq_len']);Xt,Yt=Xt.to(d),Yt.to(d)
+    if TC.get('SORT_INPUTS', False):
+        Xt, _ = torch.sort(Xt, descending=True, dim=1)
+        Xt = Xt[:, :30]
+        
+    rr,gr,ap,ft=[],[],[],Yt.cpu().numpy();P("Training ROUND (Test Validation)")
+    for i in range(C['runs']):a,p,_=train_round(i+1,X,Y,Xt,Yt,d);rr.append(a);ap.append(p.detach().cpu().numpy().flatten())
+    P("Training GRU (Test Validation)")
+    for i in range(C['runs']):a,p,_=train_gru(i+1,X,Y,Xt,Yt,d);gr.append(a)
+    
     plt.style.use('dark_background')
     fig, ax = plt.subplots(figsize=(12, 6))
     rm, rs = np.mean(rr, 0), np.std(rr, 0)
     gm, gs = np.mean(gr, 0), np.std(gr, 0)
     ep = np.arange(C['epochs'])
 
-    ax.set_title(f"Harmonic ROUND vs GRU: 2D Topology (Winding)\nstrength=0.03125, harmonics=[1,2], floor=0.032", fontsize=14, color='white')
+    ax.set_title(f"Harmonic ROUND vs GRU: Graph Cycle (Topology) - Harmonics Test\nstrength={TC['PEAK_LOCKING_STRENGTH']}, harmonics={TC['HARMONICS']}", fontsize=14, color='white')
     ax.set_xlabel('Epochs', fontsize=12, color='gray')
     ax.set_ylabel('Accuracy', fontsize=12, color='gray')
     
-    # Dynamic Scaling for Failure Mode Analysis
     max_acc = max(np.max(rm), np.max(gm))
-    if max_acc < 0.95:
-        ax.set_ylim(-0.05, min(1.05, max_acc + 0.1))
-    else:
-        ax.set_ylim(-0.05, 1.05)
-
+    if max_acc < 0.95: ax.set_ylim(-0.05, min(1.05, max_acc + 0.1))
+    else: ax.set_ylim(-0.05, 1.05)
     ax.grid(True, alpha=0.1)
-
     ax.fill_between(ep, rm-rs, rm+rs, color='#FF4B4B', alpha=0.1)
     ax.fill_between(ep, gm-gs, gm+gs, color='#4B4BFF', alpha=0.1)
-    
     for r in rr: ax.plot(r, color='#FF4B4B', alpha=0.15, linewidth=1)
     for r in gr: ax.plot(r, color='#4B4BFF', alpha=0.15, linewidth=1)
-    
-    ax.plot(rm, color='#FF4B4B', linewidth=2.5, label='ROUND (Harmonic)')
+    ax.plot(rm, color='#FF4B4B', linewidth=2.5, label='ROUND (Harmonics Test)')
     ax.plot(gm, color='#4B4BFF', linewidth=2.5, label='GRU (Standard)')
     ax.legend(loc='lower right')
-    
     plt.tight_layout()
-    plt.savefig(f'{output_dir}/benchmark_topology_{UID}.png', dpi=300)
-
+    plt.savefig(os.path.join(output_dir, f'benchmark_topology_{UID}.png'), dpi=300)
+    
     # Correlation Plot
     ds = np.vstack([np.stack(ap), ft.flatten()])
     corr = np.corrcoef(ds)
     labels = [f'R{i+1}' for i in range(C['runs'])] + ['GT']
-    
     plt.figure(figsize=(8, 6))
     plt.imshow(corr, interpolation='nearest', cmap='coolwarm', vmin=0, vmax=1)
     plt.title(f'ROUND Consistency: Topology\nBatch {UID}')
     plt.colorbar()
-    tick_marks = np.arange(len(labels))
-    plt.xticks(tick_marks, labels, rotation=45)
-    plt.yticks(tick_marks, labels)
-    for i in range(len(labels)):
-        for j in range(len(labels)):
-            text = plt.text(j, i, f"{corr[i, j]:.2f}", ha="center", va="center", color="black" if 0.3 < corr[i, j] < 0.7 else "white")
     plt.tight_layout()
-    plt.savefig(f'{output_dir}/correlation_topology_{UID}.png', dpi=300)
+    plt.savefig(os.path.join(output_dir, f'correlation_topology_{UID}.png'), dpi=300)
     P("Done.")
     L_FILE.close()

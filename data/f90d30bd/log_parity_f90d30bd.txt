@@ -1,0 +1,36 @@
+Batch UID: f90d30bd
+Run Config: {'HIDDEN_SIZE': 32, 'PEAK_LOCKING_STRENGTH': 0.0625, 'HARMONICS': [1, 2, 4, 8], 'EPOCHS': 300, 'FLOOR': 0.01, 'LR': 0.01, 'DELAYED_LOCKING': 0.4}
+Dev: cuda
+Training ROUND (Test Validation)
+R1 E0: TestAcc=0.50 | Lock=0.1247
+R1 E100: TestAcc=1.00 | Lock=0.4176
+R1 E200: TestAcc=1.00 | Lock=0.4161
+R2 E0: TestAcc=0.10 | Lock=0.1247
+R2 E100: TestAcc=1.00 | Lock=0.5350
+R2 E200: TestAcc=1.00 | Lock=0.5349
+R3 E0: TestAcc=0.74 | Lock=0.1247
+R3 E100: TestAcc=1.00 | Lock=0.4347
+R3 E200: TestAcc=1.00 | Lock=0.4216
+R4 E0: TestAcc=0.24 | Lock=0.1247
+R4 E100: TestAcc=1.00 | Lock=0.4823
+R4 E200: TestAcc=1.00 | Lock=0.4612
+R5 E0: TestAcc=1.00 | Lock=0.1247
+R5 E100: TestAcc=1.00 | Lock=0.4046
+R5 E200: TestAcc=1.00 | Lock=0.4158
+Training GRU (Test Validation)
+G1 E0: L=0.8153, TestAcc=0.51
+G1 E100: L=0.6926, TestAcc=0.49
+G1 E200: L=0.6925, TestAcc=0.49
+G2 E0: L=0.7422, TestAcc=0.51
+G2 E100: L=0.6926, TestAcc=0.49
+G2 E200: L=0.6926, TestAcc=0.49
+G3 E0: L=0.7403, TestAcc=0.49
+G3 E100: L=0.6925, TestAcc=0.49
+G3 E200: L=0.6924, TestAcc=0.49
+G4 E0: L=0.7912, TestAcc=0.49
+G4 E100: L=0.6926, TestAcc=0.49
+G4 E200: L=0.6926, TestAcc=0.49
+G5 E0: L=0.6999, TestAcc=0.49
+G5 E100: L=0.6924, TestAcc=0.49
+G5 E200: L=0.6922, TestAcc=0.49
+Done.

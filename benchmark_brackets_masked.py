@@ -1,7 +1,8 @@
 
-# version 0.3.2 - Masked/Sequential Test
-import torch,torch.nn as nn,torch.optim as optim,numpy as np,matplotlib.pyplot as plt,os,random,uuid
-from ROUND import PhaseAccumulator, HarmonicROUNDLoss
+# version 0.5.0 - Harmonic Monism (Masked Brackets)
+import torch,torch.nn as nn,torch.optim as optim,numpy as np,matplotlib.pyplot as plt,os,uuid
+from ROUND import SequentialROUNDModel,HarmonicROUNDLoss
+from config import BRACKETS_CONFIG, get_lock_strength
 
 if not os.path.exists('data'):os.makedirs('data')
 UID=os.environ.get('ROUND_BATCH_UID',str(uuid.uuid4())[:8])
@@ -9,153 +10,129 @@ output_dir = os.environ.get('ROUND_OUTPUT_DIR', 'data')
 if not os.path.exists(output_dir): os.makedirs(output_dir)
 L_FILE=open(f'{output_dir}/log_brackets_masked_{UID}.txt','w')
 def P(s):print(s);L_FILE.write(str(s)+'\n');L_FILE.flush()
+
 P(f"Batch UID: {UID}")
-C={'task':'brackets_masked','input_dim':20,'hidden_size':32,'steps':20,'epochs':1000,'batch_size':64,'dataset_size':4000,'runs':5,'lr':0.001953125,'device':'cuda' if torch.cuda.is_available() else 'cpu'}
+# Load Config
+TC = BRACKETS_CONFIG
+P(f"Run Config: {TC}")
+C={'task':'dyck_2','seq_len':20,'hidden_size':TC['HIDDEN_SIZE'],'steps':20,'epochs':TC['EPOCHS'],
+   'batch_size':64,'dataset_size':2000,'runs':5,'lr':TC['LR'],'device':'cuda' if torch.cuda.is_available() else 'cpu'}
 
-# --- Data Generation (Same as benchmark_brackets.py) ---
-def is_balanced(seq):
-    b=0
-    for c in seq:
-        b+=1 if c==0 else -1
-        if b<0:return False
-    return b==0
+def generate_dyck_data(n, l):
+    X, Y = [], []
+    def gen_valid(length):
+        if length == 0: return []
+        s = []
+        bal = 0
+        for i in range(length):
+            rem = length - 1 - i
+            opts = []
+            if bal < rem: opts.append(1.0)
+            if bal > 0: opts.append(-1.0)
+            if not opts: return [1.0]*length
+            c = opts[np.random.randint(len(opts))]
+            s.append(c)
+            bal += int(c)
+        return s
+    
+    for i in range(n):
+        if i % 2 == 0: # Valid
+            s = gen_valid(l)
+            Y.append(1.0)
+        else: # Invalid
+            s = gen_valid(l)
+            idx = np.random.randint(l)
+            s[idx] *= -1
+            bal = 0; v = True
+            for x in s:
+                bal += x
+                if bal < 0: v = False
+            if bal != 0: v = False
+            Y.append(1.0 if v else 0.0)
+        X.append(torch.tensor(s).float())
+    return torch.stack(X), torch.tensor(Y).unsqueeze(1).float()
 
-def generate_dyck_data(n,l):
-    X,Y,n_pos,n_neg=[],[],n//2,n-(n//2)
-    cp,cn=0,0
-    while cp<n_pos or cn<n_neg:
-        bs=100;x=torch.randint(0,2,(bs,l)).float()
-        for i in range(bs):
-            seq=x[i].tolist()
-            if is_balanced(seq):
-                if cp<n_pos:X.append(x[i]);Y.append(1.0);cp+=1
-            else:
-                if cn<n_neg:X.append(x[i]);Y.append(0.0);cn+=1
-        if cp<n_pos:
-            k=l//2;seq=[];ore,cre,bal=k,k,0
-            while len(seq)<l:
-                if ore>0 and(bal==0 or random.random()>0.5 or cre==0):seq.append(0);ore-=1;bal+=1
-                elif cre>0 and bal>0:seq.append(1);cre-=1;bal-=1
-                elif ore>0:seq.append(0);ore-=1;bal+=1
-                else:seq.append(1)
-            if is_balanced(seq) and cp<n_pos:X.append(torch.tensor(seq).float());Y.append(1.0);cp+=1
-    idx=list(range(n));random.shuffle(idx);X=torch.stack(X)[idx];Y=torch.tensor(Y)[idx].unsqueeze(1)
-    return X,Y
-
-# --- Sequential ROUND Model (The Test Subject) ---
-class SequentialROUNDModel(nn.Module):
-    def __init__(self, hidden_size=64, input_dim=1): # input_dim is per-token (1 for brackets)
-        super().__init__()
-        self.h = hidden_size
-        self.e = nn.Linear(input_dim, hidden_size)
-        self.c = PhaseAccumulator(hidden_size)
-        # Readout sees standard cos, sin, ph
-        self.r = nn.Linear(hidden_size*3, 1)
-
-    def forward(self, x, steps=None): # steps ignored, driven by x length
-        # x shape: [Batch, Seq_Len]
-        # We treat each element as a time step
-        batch_size, seq_len = x.size()
-        
-        ph = torch.zeros(batch_size, self.h, device=x.device)
-        H = []
-        
-        for t in range(seq_len):
-            # Extract current token: [Batch, 1]
-            xt = x[:, t].unsqueeze(1)
-            
-            # Project token to phase features
-            p = self.e(xt)
-            xp = torch.stack([torch.cos(p), torch.sin(p)], 2)
-            
-            # Update Phase Dynamics
-            ph = self.c(ph, xp)
-            H.append(ph)
-            
-        # Readout from final state
-        return self.r(torch.cat([torch.cos(ph), torch.sin(ph), ph], 1)), H
-
-# --- Models ---
 class GRUModel(nn.Module):
     def __init__(self,i,h,o=1):super().__init__();self.gru=nn.GRU(i,h,batch_first=True);self.fc=nn.Linear(h,o)
     def forward(self,x):_,h=self.gru(x.unsqueeze(-1));return self.fc(h[-1])
 
-# --- Training Logic ---
-def train_round_seq(rid,X,Y,d):
-    m=SequentialROUNDModel(hidden_size=C['hidden_size'],input_dim=1).to(d)
-    c=HarmonicROUNDLoss(locking_strength=0.0625,harmonics=[1,2,4,8],weights=[1,0.5,0.25,0.125],mode='binary',terminal_only=True,floor_clamp=0.032)
-    o=optim.Adam(m.parameters(),lr=C['lr'])
-    ah=[]
-    for e in range(C['epochs']):
-        o.zero_grad();out,h=m(X);l,_,_=c(out,Y,h)
-        pc=torch.mean(torch.sin(h[-1])**2);bk=torch.clamp((pc-0.387)/0.113,0.001,1.0).detach()
-        (l*bk).backward();o.step()
-        p=(torch.sigmoid(out)>0.5).float();acc=(p==Y).float().mean().item();ah.append(acc)
-        if e%100==0:P(f"SeqR{rid} E{e}: A={acc:.2f} | K={pc:.4f} | B={bk.item():.5f}")
-        if acc==1.0 and bk.item()<0.001:P(f"--> LOCKED E{e}");break
-    return ah,p,Y
+def train_round_seq(rid,X,Y,Xt,Yt,d):
+    # Streaming Input: Input Dim = 1
+    m=SequentialROUNDModel(hidden_size=TC['HIDDEN_SIZE'],input_dim=1).to(d)
+    c=HarmonicROUNDLoss(locking_strength=TC['PEAK_LOCKING_STRENGTH'],
+                        harmonics=TC['HARMONICS'],
+                        weights=[1.0]*len(TC['HARMONICS']),
+                        mode='binary',
+                        terminal_only=TC.get('TERMINAL_ONLY', True))
+    o=optim.Adam(m.parameters(),lr=TC['LR'])
+    ah=[];locked=False
+    for e in range(TC['EPOCHS']):
+        # Maintenance: Decay LR in second half
+        if e == (TC['EPOCHS'] // 2):
+            for g in o.param_groups: g['lr'] *= 0.1
+            
+        c.locking_strength = get_lock_strength(e, TC['EPOCHS'], TC['PEAK_LOCKING_STRENGTH'])
+        o.zero_grad()
+        out,h=m(X.unsqueeze(-1))
+        l,tk,lk=c(out,Y,h)
+        l.backward()
+        o.step()
+        
+        with torch.no_grad():
+            out_t, _ = m(Xt.unsqueeze(-1))
+            pt = (torch.sigmoid(out_t)>0.5).float()
+            acc_t = (pt == Yt).float().mean().item()
+            
+        ah.append(acc_t)
+        if e%100==0:P(f"SeqR{rid} E{e}: A={acc_t:.2f} | K={lk:.4f}")
+        
+    return ah,pt,Yt
 
-def train_gru(rid,X,Y,d):
-    m=GRUModel(1,C['hidden_size']).to(d);c=nn.BCEWithLogitsLoss();o=optim.Adam(m.parameters(),lr=C['lr']);ah=[]
+def train_gru(rid,X,Y,Xt,Yt,d):
+    m=GRUModel(1,C['hidden_size']).to(d);c=nn.BCEWithLogitsLoss();o=optim.Adam(m.parameters(),lr=C['lr']);ah=[];locked=False
     for e in range(C['epochs']):
         o.zero_grad();out=m(X);l=c(out,Y);l.backward();o.step()
-        preds=(torch.sigmoid(out)>0.5).float();acc=(preds==Y).float().mean().item();ah.append(acc)
-        if e%100==0:P(f"G{rid} E{e}: L={l.item():.4f}, A={acc:.2f}")
-    return ah,preds,Y
+        with torch.no_grad():
+            out_t = m(Xt)
+            pt = (torch.sigmoid(out_t)>0.5).float()
+            acc_t = (pt == Yt).float().mean().item()
+        ah.append(acc_t)
+        if e%100==0:P(f"G{rid} E{e}: L={l.item():.4f}, TestAcc={acc_t:.2f}")
+    return ah,pt,Yt
 
 if __name__=="__main__":
     d=torch.device(C['device']);P(f"Dev: {d}")
-    X,Y=generate_dyck_data(C['dataset_size'],C['input_dim']);X,Y=X.to(d),Y.to(d)
+    X,Y=generate_dyck_data(C['dataset_size'],C['seq_len']);X,Y=X.to(d),Y.to(d)
+    Xt,Yt=generate_dyck_data(1000,C['seq_len']);Xt,Yt=Xt.to(d),Yt.to(d)
     
-    rr,gr,ap,ft=[],[],[],Y.cpu().numpy()
+    rr,gr,ap,ft=[],[],[],Yt.cpu().numpy();P("Training Sequential ROUND (Test Validation)")
+    for i in range(C['runs']):a,p,_=train_round_seq(i+1,X,Y,Xt,Yt,d);rr.append(a);ap.append(p.detach().cpu().numpy().flatten())
+    P("Training GRU (Test Validation)")
+    for i in range(C['runs']):a,p,_=train_gru(i+1,X,Y,Xt,Yt,d);gr.append(a)
     
-    P("\nTraining Sequential ROUND (Masked/Streaming)")
-    for i in range(C['runs']):
-        a,p,_=train_round_seq(i+1,X,Y,d)
-        rr.append(a)
-        ap.append(p.detach().cpu().numpy().flatten())
-        
-    P("\nTraining GRU")
-    for i in range(C['runs']):
-        a,p,_=train_gru(i+1,X,Y,d)
-        gr.append(a)
-        
-    # Plotting
     plt.style.use('dark_background')
     fig, ax = plt.subplots(figsize=(12, 6))
     rm, rs = np.mean(rr, 0), np.std(rr, 0)
     gm, gs = np.mean(gr, 0), np.std(gr, 0)
     ep = np.arange(C['epochs'])
-
-    ax.set_title(f"Sequential ROUND vs GRU: Masked Brackets Test\nstrength=0.03125, harmonics=[1,2], floor=0.032", fontsize=14, color='white')
+    ax.set_title(f"Harmonic ROUND vs GRU: Masked Brackets (Harmonic Monism)\nstrength={TC['PEAK_LOCKING_STRENGTH']}, harmonics={TC['HARMONICS']}", fontsize=14, color='white')
     ax.set_xlabel('Epochs', fontsize=12, color='gray')
     ax.set_ylabel('Accuracy', fontsize=12, color='gray')
+    ax.plot(rm, color='#FF4B4B', linewidth=2.5, label='ROUND')
+    ax.plot(gm, color='#4B4BFF', linewidth=2.5, label='GRU')
+    ax.legend()
+    plt.savefig(os.path.join(output_dir, f'benchmark_brackets_masked_{UID}.png'), dpi=300)
     
-    max_acc = max(np.max(rm), np.max(gm))
-    ax.set_ylim(-0.05, 1.05)
-    ax.grid(True, alpha=0.1)
-
-    ax.fill_between(ep, rm-rs, rm+rs, color='#FF4B4B', alpha=0.1)
-    ax.fill_between(ep, gm-gs, gm+gs, color='#4B4BFF', alpha=0.1)
-    
-    for r in rr: ax.plot(r, color='#FF4B4B', alpha=0.15, linewidth=1)
-    for r in gr: ax.plot(r, color='#4B4BFF', alpha=0.15, linewidth=1)
-    
-    ax.plot(rm, color='#FF4B4B', linewidth=2.5, label='Sequential ROUND')
-    ax.plot(gm, color='#4B4BFF', linewidth=2.5, label='GRU (Standard)')
-    ax.legend(loc='lower right')
-    
-    plt.tight_layout()
-    plt.savefig(f'{output_dir}/benchmark_brackets_masked_{UID}.png', dpi=300)
-
     # Correlation Plot
-    ds = np.vstack([np.stack(ap), ft.flatten()])
+    # Ensure ft is flattened like ap elements
+    ft_flat = ft.flatten()
+    ds = np.vstack([np.stack(ap), ft_flat])
     corr = np.corrcoef(ds)
     labels = [f'R{i+1}' for i in range(C['runs'])] + ['GT']
     
     plt.figure(figsize=(8, 6))
     plt.imshow(corr, interpolation='nearest', cmap='coolwarm', vmin=0, vmax=1)
-    plt.title(f'ROUND Consistency: Masked Brackets\nBatch {UID}')
+    plt.title(f'ROUND Consistency: Brackets Masked\nBatch {UID}')
     plt.colorbar()
     tick_marks = np.arange(len(labels))
     plt.xticks(tick_marks, labels, rotation=45)
@@ -164,6 +141,7 @@ if __name__=="__main__":
         for j in range(len(labels)):
             text = plt.text(j, i, f"{corr[i, j]:.2f}", ha="center", va="center", color="black" if 0.3 < corr[i, j] < 0.7 else "white")
     plt.tight_layout()
-    plt.savefig(f'{output_dir}/correlation_brackets_masked_{UID}.png', dpi=300)
-    P("Done.")
+    plt.savefig(os.path.join(output_dir, f'correlation_brackets_masked_{UID}.png'), dpi=300)
+    P(f"Correlation plot saved to correlation_brackets_masked_{UID}.png")
+    
     L_FILE.close()

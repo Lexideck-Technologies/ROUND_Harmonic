@@ -16,3 +16,6 @@ $RECYCLE.BIN/
 .vscode/
 
 .venv
+
+# Archive
+zz_archive/
