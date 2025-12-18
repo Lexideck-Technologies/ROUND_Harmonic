@@ -1,4 +1,4 @@
-# version 0.6.1 - Harmonic Monism (Parity)
+# version 0.6.2 - Harmonic Monism (Parity)
 import torch,torch.nn as nn,torch.optim as optim,numpy as np,matplotlib.pyplot as plt,os,uuid
 from ROUND import SequentialROUNDModel,HarmonicROUNDLoss
 from config import PARITY_CONFIG, get_lock_strength

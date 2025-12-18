@@ -1,4 +1,4 @@
-# version 0.6.1 - Harmonic Monism (Config)
+# version 0.6.2 - Harmonic Monism (Config)
 import math
 
 # ROUND Configuration
@@ -107,6 +107,7 @@ PERMS_CONFIG = {
     'PEAK_LOCKING_STRENGTH': 0.0625,
     'HARMONICS': [1],
     'EPOCHS': 1500,
-    'LR': 0.001953125,
+    'LR': 0.0009765625,   # 2^-10 approach for maximum stability
+    'FLOOR': 0.015625,    # 2^-6 maintenance floor (Prevents Ejection)
     'RUNS': 3
 }

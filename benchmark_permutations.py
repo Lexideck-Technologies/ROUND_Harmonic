@@ -110,7 +110,7 @@ def train_model(model_name, model_class, perm_data, device, epochs, L_FILE):
         logits, hist = model(in_bits)
         
         if "ROUND" in model_name:
-            criterion.locking_strength = get_lock_strength(epoch, epochs, PEAK_LOCKING_STRENGTH)
+            criterion.locking_strength = get_lock_strength(epoch, epochs, PEAK_LOCKING_STRENGTH, floor_strength=TC.get('FLOOR', 0.0))
             loss, tk_loss, lk_loss = criterion(logits.view(-1, 256), targets.view(-1), hist)
         else:
             loss = criterion(logits.view(-1, 256), targets.view(-1))

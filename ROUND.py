@@ -1,4 +1,4 @@
-# version 0.6.0 - Harmonic Monism
+# version 0.6.2 - Order-Independent Mnemonic Memory
 import torch
 import torch.nn as nn
 

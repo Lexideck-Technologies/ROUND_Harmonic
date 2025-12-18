@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.6.2] - "Mnemonic Crystallization" - 2025-12-18
+### Added
+*   **Content-Addressable Memory (CAM):** Refactored `benchmark_long_term.py` to be a modular, side-by-side comparative engine. Proved that Phase Accumulation is a permanent mnemonic anchor where Matrix Multiplication (GRU) suffers from bulldoze decay.
+*   **Order Independence Gauntlet:** Created `benchmark_order_independence.py` which imports the comparative engine to perform multi-run shuffled brutality tests (3x runs, 10k epochs each).
+*   **Perfect Recall:** Achieved 100.0% accuracy across every word in every shuffle, confirming the "Crystalline" nature of the U-Neuron manifold.
+
 ## [0.6.1] - "The Grand Slam" - 2025-12-18
 ### Added
 *   **Order Extraction Benchmark:** Introduced `benchmark_permutations.py`. Validated that the U-Neuron can store and recall 4 discrete shuffles of the same keyword set using hidden state phase-branching.

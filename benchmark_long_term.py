@@ -1,4 +1,4 @@
-# version 0.6.1 - Harmonic Monism (Long-Term Memory Curriculum)
+# version 0.6.2 - Harmonic Monism (Long-Term Memory Curriculum)
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -7,32 +7,42 @@ import matplotlib.pyplot as plt
 import os
 import uuid
 import time
-from ROUND import PhaseAccumulator, HarmonicROUNDLoss
+import random
+from ROUND import PhaseAccumulator, WobblePhaseAccumulator, HarmonicROUNDLoss
 from config import get_lock_strength
 
 # --- Configuration ---
-HIDDEN_SIZE = 32
-LR = 0.001953125 # 2^-9
+HIDDEN_SIZE = 64
+LR = 0.00048828125 # 2^-11 (The 'Sweet Spot' for 32-Neuron Retention)
 PEAK_LOCKING_STRENGTH = 0.0625
-EPOCHS = 2000 
+FLOOR = 0.03125   # 2^-5 (Steady Maintenance Floor for 32 Neurons)
+EPOCHS = 10000 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-# Keywords for the Curriculum
-WORDS = ["CONCENTRATING", "RELIABILITY", "TOPOLOGY", "SYMMETRY", "MONISM"]
+# Keywords for the Curriculum (6-Word Deep Bake Suite)
+WORDS = ["COGITATING", "TOPOLOGY", "MONISM", "RESONANCE", "UNIVERSAL", "SYMMETRY"]
 
 class LongTermROUNDModel(nn.Module):
-    def __init__(self, hidden_size=32, input_dim=8, output_dim=256):
+    def __init__(self, hidden_size=32, input_dim=8, output_dim=256, wobble=True):
         super().__init__()
         self.h = hidden_size
+        self.wobble = wobble
         self.e = nn.Linear(input_dim, hidden_size) 
-        self.c = PhaseAccumulator(hidden_size, spinor=True)
-        # Readout: [Cos, Sin, CosS, SinS, Ph]
-        self.r = nn.Linear(hidden_size * 5, output_dim)
+        if wobble:
+            self.c = WobblePhaseAccumulator(hidden_size, spinor=True)
+            self.c.coupling = -1.0 # The Opposite Direction!
+        else:
+            self.c = PhaseAccumulator(hidden_size, spinor=True)
+            
+        # Readout: [Cos, Sin, CosS, SinS, CosW, SinW (if w), Ph]
+        num_features = 5 + (2 if wobble else 0)
+        self.r = nn.Linear(hidden_size * num_features, output_dim)
 
     def forward(self, x):
-        # x: [Batch, Seq, 8]
         B, S, D = x.shape
         ph = torch.zeros(B, self.h, device=x.device)
+        wb = torch.zeros(B, self.h, device=x.device) if self.wobble else None
+        prev_xt = None
         logits_seq = []
         hist_seq = []
 
@@ -40,19 +50,60 @@ class LongTermROUNDModel(nn.Module):
             xt = x[:, t, :]
             pt = self.e(xt)
             xpt = torch.stack([torch.cos(pt), torch.sin(pt)], 2)
-            ph = self.c(ph, xpt)
-            hist_seq.append(ph)
             
-            ph_s = 0.5 * ph
-            readout_features = torch.cat([
-                torch.cos(ph), torch.sin(ph), 
-                torch.cos(ph_s), torch.sin(ph_s), 
-                ph
-            ], 1)
+            if self.wobble:
+                # 1. Constant Mnemonic Drift (The Clock)
+                wb = wb + 0.00390625 # 2^-8 drift
+                
+                # 2. Triggered Gemination Deflection
+                is_repeat = False
+                if prev_xt is not None:
+                    is_repeat = torch.all(torch.eq(xt, prev_xt)).item()
+                
+                if is_repeat:
+                    # Accelerate wobble into the Z-axis to break the M-M parity
+                    ph, wb = self.c(ph, xpt, wb)
+                else:
+                    # Planar discovery, keeping the drift-clock steady
+                    ph, _ = self.c(ph, xpt, wb)
+                
+                prev_xt = xt
+                hist_seq.append((ph, wb))
+                ph_s = 0.5 * ph
+                readout_features = torch.cat([
+                    torch.cos(ph), torch.sin(ph), 
+                    torch.cos(ph_s), torch.sin(ph_s), 
+                    torch.cos(wb), torch.sin(wb),
+                    ph
+                ], 1)
+            else:
+                ph = self.c(ph, xpt)
+                hist_seq.append(ph)
+                ph_s = 0.5 * ph
+                readout_features = torch.cat([
+                    torch.cos(ph), torch.sin(ph), 
+                    torch.cos(ph_s), torch.sin(ph_s), 
+                    ph
+                ], 1)
+                
             logits = self.r(readout_features)
             logits_seq.append(logits)
 
         return torch.stack(logits_seq, dim=1), hist_seq
+
+class GRULongTermModel(nn.Module):
+    def __init__(self, hidden_size=64, input_dim=8, output_dim=256):
+        super().__init__()
+        self.h = hidden_size
+        self.gru = nn.GRU(input_dim, hidden_size, batch_first=True)
+        self.r = nn.Linear(hidden_size, output_dim)
+
+    def forward(self, x):
+        # x: [Batch, Seq, 8]
+        out, _ = self.gru(x)
+        # out: [Batch, Seq, H]
+        logits = self.r(out)
+        return logits, None # No phase history for GRU
 
 def str_to_bits(s):
     bits = [[int(c) for c in format(ord(ch), '08b')] for ch in s]
@@ -65,113 +116,134 @@ def get_word_data(word):
     targets = torch.tensor(targets, dtype=torch.long).unsqueeze(0).to(DEVICE)
     return input_bits, targets
 
-def train_long_term():
+def get_stochastic_payload(bits):
+    # 1. Gaussian Spreading (Spiritual/Twistor Noise)
+    # Using 2^-5 (0.03125) as the 'blur' radius
+    noise = torch.randn_like(bits) * 0.03125
+    
+    # 2. Stochastic Masking (Bit Dropout)
+    # 5% chance to lose a bit-signal, force logic redundancy
+    mask = (torch.rand_like(bits) > 0.05).float()
+    
+    return (bits + noise) * mask
+
+def run_long_term_comparison(shuffled_words, epochs=10000, hidden_size=64, p_func=print, output_dir='data'):
     UID = str(uuid.uuid4())[:8]
-    output_dir = 'data'
     if not os.path.exists(output_dir): os.makedirs(output_dir)
-    log_path = os.path.join(output_dir, f'log_long_term_{UID}.txt')
-    L_FILE = open(log_path, 'w')
     
-    def P(s): print(s); L_FILE.write(str(s) + '\n'); L_FILE.flush()
+    p_func(f"--- [ROUND vs GRU: LONG-TERM COMPARISON] ---")
+    p_func(f"Order: {shuffled_words}")
+    p_func(f"Epochs: {epochs} | Hidden: {hidden_size}")
 
-    P(f"--- [LONG-TERM MEMORY CURRICULUM v0.6.1] ---")
-    P(f"Keywords: {WORDS}")
-    P(f"Epochs: {EPOCHS} | Hidden: {HIDDEN_SIZE}")
-
-    model = LongTermROUNDModel(HIDDEN_SIZE).to(DEVICE)
-    optimizer = optim.Adam(model.parameters(), lr=LR)
-    criterion_lock = HarmonicROUNDLoss(locking_strength=PEAK_LOCKING_STRENGTH, harmonics=[1], mode='multiclass')
+    # 1. Models & Optimizers
+    model_r = LongTermROUNDModel(hidden_size, wobble=True).to(DEVICE)
+    model_g = GRULongTermModel(hidden_size).to(DEVICE)
     
-    # Store data for all words
-    word_data = {word: get_word_data(word) for word in WORDS}
+    opt_r = optim.Adam(model_r.parameters(), lr=LR)
+    opt_g = optim.Adam(model_g.parameters(), lr=LR)
     
-    # History for plotting
-    history = {word: [] for word in WORDS}
-    loss_history = []
+    harmonics = [1, 2, 4, 8]
+    weights = [1.0, 0.25, 0.0625, 0.015625]
+    crit_r = HarmonicROUNDLoss(locking_strength=PEAK_LOCKING_STRENGTH, harmonics=harmonics, weights=weights, mode='multiclass', wobble_gravity=0.1)
+    crit_g = nn.CrossEntropyLoss()
     
-    print("Beginning Artificial Memory Gradient...")
+    word_data = {word: get_word_data(word) for word in shuffled_words}
+    hist_r = {word: [] for word in shuffled_words}
+    hist_g = {word: [] for word in shuffled_words}
+    loss_r, loss_g = [], []
     
-    for epoch in range(EPOCHS):
-        model.train()
+    for epoch in range(epochs):
+        model_r.train(); model_g.train()
+        lr_factor = (0.25 ** (epoch / epochs))
+        current_lr = LR * lr_factor
+        for opt in [opt_r, opt_g]:
+            for pg in opt.param_groups: pg['lr'] = current_lr
         
-        # 1. Determine Current Dominant Word (The Curriculum Gradient)
-        # We shift focus from WORDS[0] to WORDS[-1] over time
-        # Curve: Use a sigmoid or simple linear split
-        num_words = len(WORDS)
-        phase = (epoch / EPOCHS) * num_words
+        num_words = len(shuffled_words)
+        phase = (epoch / epochs) * num_words
         current_idx = int(phase) if phase < num_words else num_words - 1
-        current_word = WORDS[current_idx]
+        current_word = shuffled_words[current_idx]
         
-        # 2. Leaky Sampling: Small chance to train on any word seen so far
-        if np.random.rand() < 0.2:
-            train_idx = np.random.randint(0, current_idx + 1)
-            train_word = WORDS[train_idx]
+        if np.random.rand() < 0.4:
+            stubborn = [w for w in shuffled_words[:current_idx+1] if len(hist_r[w]) > 0 and hist_r[w][-1] < 1.0]
+            train_word = random.choice(stubborn) if stubborn and np.random.rand() < 0.7 else shuffled_words[np.random.randint(0, current_idx + 1)]
         else:
             train_word = current_word
             
-        # 3. Training Step
-        input_bits, targets = word_data[train_word]
-        criterion_lock.locking_strength = get_lock_strength(epoch % (EPOCHS // num_words), EPOCHS // num_words, PEAK_LOCKING_STRENGTH)
+        raw_bits, targets = word_data[train_word]
+        input_bits = get_stochastic_payload(raw_bits)
+        crit_r.locking_strength = get_lock_strength(epoch % (epochs // num_words), epochs // num_words, PEAK_LOCKING_STRENGTH, floor_strength=FLOOR)
         
-        optimizer.zero_grad()
-        logits, hist = model(input_bits)
-        loss, tk_loss, lk_loss = criterion_lock(logits.view(-1, 256), targets.view(-1), hist)
-        loss.backward()
-        optimizer.step()
-        loss_history.append(tk_loss)
+        # ROUND
+        opt_r.zero_grad()
+        l_r, h_r = model_r(input_bits)
+        ls_r, tk_r, _ = crit_r(l_r.view(-1, 256), targets.view(-1), h_r)
+        ls_r.backward(); opt_r.step()
+        loss_r.append(tk_r)
         
-        # 4. Periodic "Leaky Blind Test" (Evaluate ALL words)
-        if epoch % 20 == 0 or epoch == EPOCHS - 1:
-            model.eval()
+        # GRU
+        opt_g.zero_grad()
+        l_g, _ = model_g(input_bits)
+        ls_g = crit_g(l_g.view(-1, 256), targets.view(-1))
+        ls_g.backward(); opt_g.step()
+        loss_g.append(ls_g.item())
+        
+        if epoch % 20 == 0 or epoch == epochs - 1:
+            model_r.eval(); model_g.eval()
             with torch.no_grad():
-                for word in WORDS:
+                for word in shuffled_words:
                     in_b, tgt = word_data[word]
-                    l, _ = model(in_b)
-                    acc = (torch.argmax(l, 2) == tgt).float().mean().item()
-                    history[word].append(acc)
-            
-            p_str = f"E {epoch:4d} | [Active: {train_word[:4]}] | "
-            p_str += " ".join([f"{word[0]}:{history[word][-1]:.1f}" for word in WORDS])
-            if epoch % 100 == 0: P(p_str)
+                    # ROUND
+                    l_r, _ = model_r(in_b)
+                    acc_r = (torch.argmax(l_r, 2) == tgt).float().mean().item()
+                    hist_r[word].append(acc_r)
+                    # GRU
+                    l_g, _ = model_g(in_b)
+                    acc_g = (torch.argmax(l_g, 2) == tgt).float().mean().item()
+                    hist_g[word].append(acc_g)
+            if epoch % 100 == 0:
+                p_func(f"E {epoch:4d} | R: {np.mean([hist_r[w][-1] for w in shuffled_words]):.2f} | G: {np.mean([hist_g[w][-1] for w in shuffled_words]):.2f}")
 
-    # --- Plotting Results ---
+    # Plotting
     plt.style.use('dark_background')
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10))
+    fig, (ax_r, ax_g) = plt.subplots(2, 1, figsize=(14, 12))
+    ep_axis = np.linspace(0, epochs, len(hist_r[shuffled_words[0]]))
+    colors = ['#FF4B4B', '#4B4BFF', '#FFFF4B', '#FF4BFF', '#4BFFFF', '#FFA500']
     
-    # Accuracy Plot
-    ep_axis = np.linspace(0, EPOCHS, len(history[WORDS[0]]))
-    colors = ['#FF4B4B', '#4BFF4B', '#4B4BFF', '#FFFF4B', '#FF4BFF']
+    for i, word in enumerate(shuffled_words):
+        ax_r.plot(ep_axis, hist_r[word], label=f"R: {word}", color=colors[i % len(colors)], linewidth=2)
+        ax_g.plot(ep_axis, hist_g[word], label=f"G: {word}", color=colors[i % len(colors)], linewidth=2, linestyle='--')
     
-    for i, word in enumerate(WORDS):
-        ax1.plot(ep_axis, history[word], label=word, color=colors[i % len(colors)], linewidth=2)
-    
-    # Vertical bars for curriculum stages
-    for i in range(1, num_words):
-        ax1.axvline(x=(i/num_words)*EPOCHS, color='white', linestyle='--', alpha=0.2)
-    
-    ax1.set_title("Long-Term Memory Retention (32 Neurons)", fontsize=14)
-    ax1.set_ylabel("Recall Accuracy", fontsize=12)
-    ax1.legend(loc='lower right')
-    ax1.grid(True, alpha=0.1)
-    
-    # Loss Plot
-    ax2.plot(loss_history, color='gray', alpha=0.5)
-    ax2.set_title("Learning Dynamics", fontsize=14)
-    ax2.set_xlabel("Epochs", fontsize=12)
-    ax2.set_ylabel("CrossEntropy Loss", fontsize=12)
-    ax2.grid(True, alpha=0.1)
+    ax_r.set_title("ROUND - Spinor Monism (64 Neurons)", color='#FF5555', fontsize=16)
+    ax_g.set_title("GRU - Standard Gating (64 Neurons)", color='#5555FF', fontsize=16)
+    ax_r.legend(loc='lower left', fontsize=8, ncol=3); ax_g.legend(loc='lower left', fontsize=8, ncol=3)
     
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, f'benchmark_long_term_{UID}.png'), dpi=300)
-    P(f"Results saved to data/benchmark_long_term_{UID}.png")
+    plot_path = os.path.join(output_dir, f'benchmark_long_term_{UID}.png')
+    plt.savefig(plot_path, dpi=300)
+    p_func(f"Results saved to {plot_path}")
     
-    # Final Analysis
-    P("\n--- Final Recall Audit ---")
-    for word in WORDS:
-        final_acc = history[word][-1]
-        status = "CLAMPED" if final_acc > 0.9 else "FORGOTTEN"
-        P(f"{word:12s}: {final_acc*100:6.1f}% [{status}]")
+    final_res = {word: (hist_r[word][-1], hist_g[word][-1]) for word in shuffled_words}
+    return final_res
+
+def train_long_term():
+    UID = os.environ.get('ROUND_BATCH_UID', str(uuid.uuid4())[:8])
+    output_dir = os.environ.get('ROUND_OUTPUT_DIR', 'data')
+    if not os.path.exists(output_dir): os.makedirs(output_dir)
+    log_path = os.path.join(output_dir, f'log_long_term_{UID}.txt')
+    L_FILE = open(log_path, 'w')
+    def L_P(s): print(s); L_FILE.write(str(s) + '\n'); L_FILE.flush()
+
+    shuffled_words = list(WORDS)
+    random.shuffle(shuffled_words)
+    results = run_long_term_comparison(shuffled_words, EPOCHS, HIDDEN_SIZE, L_P, output_dir)
     
+    P = L_P
+    P("\n--- Final Comparative Audit ---")
+    header = f"{'Word':12s} | {'ROUND Recall':15s} | {'GRU Recall':15s}"
+    P(header); P("-" * len(header))
+    for word, (acc_r, acc_g) in results.items():
+        P(f"{word:12s} | {acc_r*100:13.1f}% | {acc_g*100:13.1f}%")
     L_FILE.close()
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 
-# version 0.6.1 - Harmonic Monism
+# version 0.6.2 - Harmonic Monism
 import subprocess
 import os
 import sys
@@ -12,7 +12,9 @@ scripts = [
     "benchmark_ascii.py",
     "benchmark_colors.py",
     "benchmark_oracle.py",
-    "benchmark_permutations.py"
+    "benchmark_permutations.py",
+    "benchmark_long_term.py",
+    "benchmark_order_independence.py"
 ]
 
 print("Starting Full Test Battery...")
