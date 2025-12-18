@@ -29,3 +29,23 @@ ROUND R3 Final Acc: 100.0%
 ROUND R4 E   0 | Loss: 21.5819 | Acc: 53%
 ROUND R4 E 100 | Loss: 4.5658 | Acc: 94%
 ROUND R4 E 200 | Loss: 0.1011 | Acc: 100%
+ROUND R4 E 299 | Loss: 0.0575 | Acc: 100%
+ROUND R4 Final Acc: 100.0%
+
+--- ROUND Run 5 ---
+ROUND R5 E   0 | Loss: 30.1273 | Acc: 0%
+ROUND R5 E 100 | Loss: 5.6242 | Acc: 88%
+ROUND R5 E 200 | Loss: 0.3070 | Acc: 100%
+ROUND R5 E 299 | Loss: 0.0720 | Acc: 100%
+ROUND R5 Final Acc: 100.0%
+Training GRU (5 Runs)...
+
+--- GRU Run 1 ---
+GRU R1 E   0 | Loss: 20.3526 | Acc: 0%
+GRU R1 E 100 | Loss: 8.4218 | Acc: 65%
+GRU R1 E 200 | Loss: 0.2010 | Acc: 100%
+GRU R1 E 299 | Loss: 0.0437 | Acc: 100%
+GRU R1 Final Acc: 100.0%
+
+--- GRU Run 2 ---
+GRU R2 E   0 | Loss: 19.4830 | Acc: 24%
