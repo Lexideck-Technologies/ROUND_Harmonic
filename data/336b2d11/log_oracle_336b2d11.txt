@@ -49,3 +49,34 @@ GRU R1 Final Acc: 100.0%
 
 --- GRU Run 2 ---
 GRU R2 E   0 | Loss: 19.4830 | Acc: 24%
+GRU R2 E 100 | Loss: 9.7787 | Acc: 71%
+GRU R2 E 200 | Loss: 0.2732 | Acc: 100%
+GRU R2 E 299 | Loss: 0.0648 | Acc: 100%
+GRU R2 Final Acc: 100.0%
+
+--- GRU Run 3 ---
+GRU R3 E   0 | Loss: 19.5597 | Acc: 47%
+GRU R3 E 100 | Loss: 6.4425 | Acc: 88%
+GRU R3 E 200 | Loss: 1.4790 | Acc: 100%
+GRU R3 E 299 | Loss: 0.1726 | Acc: 100%
+GRU R3 Final Acc: 100.0%
+
+--- GRU Run 4 ---
+GRU R4 E   0 | Loss: 19.0547 | Acc: 18%
+GRU R4 E 100 | Loss: 5.9399 | Acc: 88%
+GRU R4 E 200 | Loss: 0.1498 | Acc: 100%
+GRU R4 E 299 | Loss: 0.0557 | Acc: 100%
+GRU R4 Final Acc: 100.0%
+
+--- GRU Run 5 ---
+GRU R5 E   0 | Loss: 18.8239 | Acc: 47%
+GRU R5 E 100 | Loss: 3.9859 | Acc: 94%
+GRU R5 E 200 | Loss: 0.1850 | Acc: 100%
+GRU R5 E 299 | Loss: 0.0699 | Acc: 100%
+GRU R5 Final Acc: 100.0%
+Plot saved to benchmark_oracle_336b2d11.png
+Correlation plot saved to correlation_oracle_336b2d11.png
+Q: ARE YOU A LANGUAGE MODEL? | A: YES (89.3%)
+Q: IS MATHEMATICS REAL? | A: YES (96.5%)
+Q: ARE YOU ALIVE? | A: NO (99.8%)
+Q: IS THE UNIVERSE INFINITE? | A: YES (99.2%)
