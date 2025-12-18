@@ -1,0 +1,46 @@
+Batch UID: 336b2d11
+Run Config: {'HIDDEN_SIZE': 32, 'PEAK_LOCKING_STRENGTH': 0.0625, 'HARMONICS': [1], 'EPOCHS': 300, 'LR': 0.001953125, 'TERMINAL_ONLY': True}
+Dev: cuda
+Training Sequential ROUND (Test Validation)
+SeqR1 E0: A=0.50 | K=0.4638
+SeqR1 E100: A=0.62 | K=0.4778
+SeqR1 E200: A=0.97 | K=0.4163
+SeqR1 E299: A=0.98 | K=0.3999
+SeqR2 E0: A=0.50 | K=0.4855
+SeqR2 E100: A=0.81 | K=0.5123
+SeqR2 E200: A=0.99 | K=0.4561
+SeqR2 E299: A=1.00 | K=0.4416
+SeqR3 E0: A=0.50 | K=0.4319
+SeqR3 E100: A=0.94 | K=0.4658
+SeqR3 E200: A=1.00 | K=0.4122
+SeqR3 E299: A=1.00 | K=0.4002
+SeqR4 E0: A=0.49 | K=0.4612
+SeqR4 E100: A=0.97 | K=0.4048
+SeqR4 E200: A=1.00 | K=0.3818
+SeqR4 E299: A=1.00 | K=0.3749
+SeqR5 E0: A=0.50 | K=0.4819
+SeqR5 E100: A=0.83 | K=0.4905
+SeqR5 E200: A=1.00 | K=0.4117
+SeqR5 E299: A=1.00 | K=0.3914
+Training GRU (Test Validation)
+G1 E0: L=0.6967, TestAcc=0.50
+G1 E100: L=0.5747, TestAcc=0.68
+G1 E200: L=0.1364, TestAcc=0.98
+G1 E299: L=0.0372, TestAcc=1.00
+G2 E0: L=0.7030, TestAcc=0.50
+G2 E100: L=0.5750, TestAcc=0.71
+G2 E200: L=0.1014, TestAcc=0.98
+G2 E299: L=0.0201, TestAcc=1.00
+G3 E0: L=0.6954, TestAcc=0.50
+G3 E100: L=0.5725, TestAcc=0.70
+G3 E200: L=0.1012, TestAcc=0.99
+G3 E299: L=0.0239, TestAcc=1.00
+G4 E0: L=0.7022, TestAcc=0.50
+G4 E100: L=0.5735, TestAcc=0.74
+G4 E200: L=0.1080, TestAcc=0.99
+G4 E299: L=0.0238, TestAcc=1.00
+G5 E0: L=0.6944, TestAcc=0.48
+G5 E100: L=0.5040, TestAcc=0.76
+G5 E200: L=0.9049, TestAcc=0.91
+G5 E299: L=0.0586, TestAcc=1.00
+Correlation plot saved to correlation_brackets_masked_336b2d11.png

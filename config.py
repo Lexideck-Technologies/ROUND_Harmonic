@@ -1,4 +1,4 @@
-# version 0.6.0 - Harmonic Monism (Config)
+# version 0.6.1 - Harmonic Monism (Config)
 import math
 
 # ROUND Configuration
@@ -45,9 +45,10 @@ TOPOLOGY_CONFIG = {
     'HARMONICS': [1],       # Pure Fundamental
     'EPOCHS': 300,
     'FLOOR': 0.005,
-    'LR': 0.001953125,
+    'LR': 0.00390625,       # 2^-8 (Moderated Harmonic Scale)
     'WOBBLE': False,
-    'SORT_INPUTS': True
+    'SORT_INPUTS': True,
+    'DELAYED_LOCKING': 0.4
 }
 
 # 2. PARITY (16-bit XOR)
@@ -99,4 +100,13 @@ ORACLE_CONFIG = {
     'EPOCHS': 300,
     'LR': 0.001953125,
     'TERMINAL_ONLY': True
+}
+# 7. PERMUTATIONS (Order Extraction)
+PERMS_CONFIG = {
+    'HIDDEN_SIZE': 64,
+    'PEAK_LOCKING_STRENGTH': 0.0625,
+    'HARMONICS': [1],
+    'EPOCHS': 1500,
+    'LR': 0.001953125,
+    'RUNS': 3
 }

@@ -1,4 +1,4 @@
-# version 0.6.0 - Harmonic Monism (ASCII)
+# version 0.6.1 - Harmonic Monism (ASCII)
 import torch
 import torch.nn as nn
 import torch.optim as optim

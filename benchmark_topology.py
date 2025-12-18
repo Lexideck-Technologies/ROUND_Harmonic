@@ -1,4 +1,4 @@
-# version 0.6.0 - Harmonic Monism (Topology)
+# version 0.6.1 - Harmonic Monism (Topology)
 import torch,torch.nn as nn,torch.optim as optim,numpy as np,matplotlib.pyplot as plt,os,uuid
 from ROUND import SequentialROUNDModel,HarmonicROUNDLoss
 from config import TOPOLOGY_CONFIG, get_lock_strength
@@ -31,8 +31,7 @@ def generate_topology_data(n,seq_len):
     
     for i in range(n):
         adj=np.zeros((10,10))
-        # Build a Tree (Edges = Nodes - 1 = 9)
-        edges=[]
+        # Build Tree
         nodes=list(range(10))
         np.random.shuffle(nodes)
         visited=[nodes[0]]
@@ -40,17 +39,19 @@ def generate_topology_data(n,seq_len):
         while unvisited:
             u=np.random.choice(visited)
             v=unvisited.pop()
-            edges.append((u,v))
             adj[u,v]=adj[v,u]=1
             visited.append(v)
+        
         label=0
         if np.random.rand()>0.5:
             label=1
             n_extra=np.random.randint(1,4)
-            for _ in range(n_extra):
+            added = 0
+            while added < n_extra:
                 u,v=np.random.choice(10,2,replace=False)
-                if u!=v and adj[u,v]==0:
+                if adj[u,v] == 0:
                     adj[u,v]=adj[v,u]=1
+                    added += 1
         Y[i]=label
         X[i] = torch.tensor(adj.flatten()).float()
     return X,Y
@@ -72,7 +73,16 @@ def train_round(rid,X,Y,Xt,Yt,d):
     o=optim.Adam(m.parameters(),lr=TC['LR'])
     ah=[];locked=False
     for e in range(TC['EPOCHS']):
-        c.locking_strength = get_lock_strength(e, TC['EPOCHS'], TC['PEAK_LOCKING_STRENGTH'], TC['FLOOR'])
+        # LR Decay from Parity
+        if e == (TC['EPOCHS'] // 2):
+            for g in o.param_groups: g['lr'] *= 0.1
+
+        # Delayed Locking from Parity
+        delay_threshold = TC.get('DELAYED_LOCKING', 0.4) * TC['EPOCHS']
+        if e < delay_threshold:
+             c.locking_strength = 0.0
+        else:
+             c.locking_strength = get_lock_strength(e, TC['EPOCHS'], TC['PEAK_LOCKING_STRENGTH'], TC['FLOOR'])
         
         o.zero_grad()
         # Input Dim 1. X is [Batch, 30] so unsqueeze to [Batch, 30, 1]

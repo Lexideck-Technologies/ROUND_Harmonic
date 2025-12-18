@@ -1,5 +1,5 @@
 
-# version 0.6.0 - Harmonic Monism (Oracle)
+# version 0.6.1 - Harmonic Monism (Oracle)
 import torch
 import torch.nn as nn
 import torch.optim as optim

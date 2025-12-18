@@ -1,0 +1,30 @@
+--- Benchmark: The Oracle (QA Consistency) ---
+Batch UID: 336b2d11
+Run Config: {'HIDDEN_SIZE': 32, 'PEAK_LOCKING_STRENGTH': 0.0625, 'HARMONICS': [1], 'EPOCHS': 300, 'LR': 0.001953125, 'TERMINAL_ONLY': True}
+Device: cuda
+Training ROUND (5 Runs)...
+
+--- ROUND Run 1 ---
+ROUND R1 E   0 | Loss: 29.6179 | Acc: 0%
+ROUND R1 E 100 | Loss: 3.6320 | Acc: 100%
+ROUND R1 E 200 | Loss: 0.1097 | Acc: 100%
+ROUND R1 E 299 | Loss: 0.0527 | Acc: 100%
+ROUND R1 Final Acc: 100.0%
+
+--- ROUND Run 2 ---
+ROUND R2 E   0 | Loss: 30.5698 | Acc: 0%
+ROUND R2 E 100 | Loss: 3.7448 | Acc: 94%
+ROUND R2 E 200 | Loss: 0.1150 | Acc: 100%
+ROUND R2 E 299 | Loss: 0.0545 | Acc: 100%
+ROUND R2 Final Acc: 100.0%
+
+--- ROUND Run 3 ---
+ROUND R3 E   0 | Loss: 25.2491 | Acc: 47%
+ROUND R3 E 100 | Loss: 1.6529 | Acc: 100%
+ROUND R3 E 200 | Loss: 0.0996 | Acc: 100%
+ROUND R3 E 299 | Loss: 0.0606 | Acc: 100%
+ROUND R3 Final Acc: 100.0%
+
+--- ROUND Run 4 ---
+ROUND R4 E   0 | Loss: 21.5819 | Acc: 53%
+ROUND R4 E 100 | Loss: 4.5658 | Acc: 94%

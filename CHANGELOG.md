@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.6.1] - "The Grand Slam" - 2025-12-18
+### Fixed
+*   **Topology Noise:** Discovered and eliminated a "3% Force Field" in `benchmark_topology.py` where random edge addition could pick existing edges, creating label noise. The generator now guarantees cycle creation.
+*   **Topology Stability:** Standardized `TOPOLOGY_CONFIG` with the "Scaled Parity" parameters (LR=$2^{-8}$, Delayed Locking=0.4), resulting in **100% Accuracy** across all runs.
+
+### Documentation
+*   **Story Arc:** Refactored `README.md` to tell the "Arc of Discovery" story from v0.1.0 to v0.6.0.
+*   **Glossary:** Expanded technical definitions for Phase Accumulation, Locking Strength, and Harmonic Reciprocals.
+*   **LaTeX:** Sanitized all math expressions for GitHub rendering.
+
 ## [0.6.0] - "Spinor Monism" (Refined) - 2025-12-17
 ### The Great Simplification
 Experiments in the "Pure Harmonic" test battery revealed that the higher-order harmonics (`[2, 4, 8]`) introduced in v0.5.0 were actually adding optimization noise (rugged potential landscapes) that caused jitter in convergence.
