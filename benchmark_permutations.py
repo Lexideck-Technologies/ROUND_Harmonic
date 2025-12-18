@@ -143,8 +143,8 @@ def train_model(model_name, model_class, perm_data, device, epochs, L_FILE):
     return model, acc_history, np.concatenate(all_preds)
 
 def run_benchmark():
-    UID = str(uuid.uuid4())[:8]
-    output_dir = 'data'
+    UID = os.environ.get('ROUND_BATCH_UID', str(uuid.uuid4())[:8])
+    output_dir = os.environ.get('ROUND_OUTPUT_DIR', 'data')
     if not os.path.exists(output_dir): os.makedirs(output_dir)
     log_path = os.path.join(output_dir, f'log_perms_vs_gru_{UID}.txt')
     L_FILE = open(log_path, 'w')
@@ -195,7 +195,7 @@ def run_benchmark():
     ax.grid(True, alpha=0.1)
     ax.legend(loc='lower right')
     plt.tight_layout()
-    plt.savefig(f"data/benchmark_perms_vs_gru_{UID}.png", dpi=300)
+    plt.savefig(os.path.join(output_dir, f'benchmark_perms_vs_gru_{UID}.png'), dpi=300)
     P(f"Learning curve saved to data/benchmark_perms_vs_gru_{UID}.png")
 
     # --- Correlation Heatmap ---
@@ -214,7 +214,7 @@ def run_benchmark():
             val = corr[i, j]
             plt.text(j, i, f"{val:.2f}", ha="center", va="center", color="black" if 0.3 < val < 0.7 else "white")
     plt.tight_layout()
-    plt.savefig(f"data/correlation_perms_{UID}.png", dpi=300)
+    plt.savefig(os.path.join(output_dir, f'correlation_perms_{UID}.png'), dpi=300)
     P(f"Correlation plot saved to data/correlation_perms_{UID}.png")
     
     L_FILE.close()

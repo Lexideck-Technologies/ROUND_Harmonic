@@ -1,14 +1,21 @@
 # Changelog
 
 ## [0.6.1] - "The Grand Slam" - 2025-12-18
+### Added
+*   **Order Extraction Benchmark:** Introduced `benchmark_permutations.py`. Validated that the U-Neuron can store and recall 4 discrete shuffles of the same keyword set using hidden state phase-branching.
+*   **Long-Term Memory Curriculum:** Added `benchmark_long_term.py` to test continual learning and recall retention over extended training gradients.
+*   **Stress Testing:** Developed `benchmark_concentration.py` to evaluate phase-state snapping and topological recovery under noise disruption.
+*   **Unified Battery:** Updated `run_battery.py` to include the Permutations test. Successfully executed the **336b2d11** regression battery with 100% accuracy across 7 tasks.
+
 ### Fixed
-*   **Topology Noise:** Discovered and eliminated a "3% Force Field" in `benchmark_topology.py` where random edge addition could pick existing edges, creating label noise. The generator now guarantees cycle creation.
+*   **Topology Noise:** Discovered and eliminated a "3% Force Field" in `benchmark_topology.py` where random edge addition could pick existing edges, creating label noise.
 *   **Topology Stability:** Standardized `TOPOLOGY_CONFIG` with the "Scaled Parity" parameters (LR=$2^{-8}$, Delayed Locking=0.4), resulting in **100% Accuracy** across all runs.
+*   **Git Metadata Corruption:** Resolved `fatal: bad object refs/desktop.ini` by recursively purging Windows/Drive metadata from the `.git` directory.
 
 ### Documentation
-*   **Story Arc:** Refactored `README.md` to tell the "Arc of Discovery" story from v0.1.0 to v0.6.0.
+*   **Story Arc:** Refactored `README.md` to tell the "Arc of Discovery" story from v0.1.0 to v0.6.1.
 *   **Glossary:** Expanded technical definitions for Phase Accumulation, Locking Strength, and Harmonic Reciprocals.
-*   **LaTeX:** Sanitized all math expressions for GitHub rendering.
+*   **LaTeX:** Sanitized all math expressions for GitHub rendering excellence.
 
 ## [0.6.0] - "Spinor Monism" (Refined) - 2025-12-17
 ### The Great Simplification

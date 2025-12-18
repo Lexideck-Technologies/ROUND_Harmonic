@@ -115,37 +115,42 @@ python run_battery.py
 
 ## Benchmark Results: v0.6.1 Grand Slam
 
-We performed a Head-to-Head comparison between **ROUND (Spinor Monism)** and a standard **GRU** across the "Decathlon" suite.
+We performed a Head-to-Head comparison between **ROUND (Spinor Monism)** and a standard **GRU** across the "Decathlon" suite. Results are from the `336b2d11` regression battery.
 
 ### 7.1 The "Impossible" Logic Test (Parity)
 *   **ROUND:** **100% Accuracy.** Snaps to the global optimum within 100 epochs.
 *   **GRU:** **50% Accuracy.** Fails completely on 16-bit XOR chains.
-*   ![Parity Benchmark](data/122a927e/benchmark_parity_122a927e.png)
+*   ![Parity Benchmark](data/336b2d11/benchmark_parity_336b2d11.png)
 
 ### 7.2 Topological Invariants (Graph Cycles)
 *   **ROUND:** **100% Accuracy.** Stable convergence on flattened graph adjacency matrices following the removal of label noise.
 *   **GRU:** **Unstable.** Wide variance across seeds; prone to mode collapse.
-*   ![Topology Benchmark](data/122a927e/benchmark_topology_122a927e.png)
+*   ![Topology Benchmark](data/336b2d11/benchmark_topology_336b2d11.png)
 
 ### 7.3 Streaming Recursion (Brackets Masked)
 *   **ROUND:** **100% Accuracy.** Handles Dyck-2 nesting in sequential mode.
 *   **GRU:** **100% Accuracy.**
-*   ![Brackets Benchmark](data/122a927e/benchmark_brackets_masked_122a927e.png)
+*   ![Brackets Benchmark](data/336b2d11/benchmark_brackets_masked_336b2d11.png)
 
 ### 7.4 The Oracle (QA Consistency)
 *   **ROUND:** **100% Accuracy.** Perfect consistency across binary classification tasks.
 *   **GRU:** **100% Accuracy.**
-*   ![Oracle Benchmark](data/122a927e/benchmark_oracle_122a927e.png)
+*   ![Oracle Benchmark](data/336b2d11/benchmark_oracle_336b2d11.png)
 
-### 7.5 Generative Creativity (ASCII)
+### 7.5 Order Extraction (Permutations)
+*   **ROUND:** **100% Accuracy.** Successfully extracts the remaining sequence order from a 4-shuffle set given a 1-word prompt.
+*   **GRU:** **Matches Performance.** Can learn fixed small-set permutations given sufficient capacity.
+*   ![Permutations Benchmark](data/336b2d11/benchmark_permutations_336b2d11.png)
+
+### 7.6 Generative Creativity (ASCII)
 *   **ROUND:** **100% Accuracy.** Perfect cyclic timing and zero drift, even over long periods of "silence" (padding).
 *   **GRU:** **78-96% Accuracy.** Drifts on long sequences, losing periodicity.
-*   ![ASCII Benchmark](data/122a927e/benchmark_ascii_122a927e.png)
+*   ![ASCII Benchmark](data/336b2d11/benchmark_ascii_336b2d11.png)
 
-### 7.6 Semantic Algebra (Colors)
+### 7.7 Semantic Algebra (Colors)
 *   **ROUND:** **~96% Accuracy.** Successfully learns vector-like relationships in symbolic space (e.g., mixing colors).
 *   **GRU:** **~50% Accuracy.** Struggles with the mapping between discrete labels and their semantic sums.
-*   ![Colors Benchmark](data/122a927e/benchmark_colors_122a927e.png)
+*   ![Colors Benchmark](data/336b2d11/benchmark_colors_336b2d11.png)
 
 ---
 
@@ -165,7 +170,7 @@ The core hypothesis of UIT is that **discrete logic is a special case of continu
 
 *   `ROUND.py`: Core engine (`PhaseAccumulator` with Spinor features).
 *   `benchmark_*.py`: Individual task harnesses (Decathlon suite).
-*   `run_battery.py`: Full regression suite for reproducing v0.6.0 logs.
+*   `run_battery.py`: Full regression suite for reproducing v0.6.1 logs.
 *   `config.py`: Centralized Golden Configuration (`HARMONICS=[1]`).
 
 ---
@@ -174,14 +179,14 @@ The core hypothesis of UIT is that **discrete logic is a special case of continu
 
 **License:** MIT License.
 
-**Citation:** Please cite **v0.6.0 Spinor Monism (The Great Simplification)**.
+**Citation:** Please cite **v0.6.1 Spinor Monism (The Grand Slam)**.
 
 ---
 
 ## Glossary of Terms
 
 ### Spinor Monism
-The finalized v0.6.0 configuration using **Fundamental Harmonic (`[1]`)** locking and **Spinor ($1/2$)** Input Features. It represents the most efficient mapping of phase-space to logical state.
+The finalized v0.6.1 configuration using **Fundamental Harmonic (`[1]`)** locking and **Spinor ($1/2$)** Input Features. It represents the most efficient mapping of phase-space to logical state.
 
 ### Phase Accumulation
 The core mechanic of the `PhaseAccumulator`. Unlike standard neurons that use multiplicative gates, ROUND updates its state via simple addition: $\phi_{t+1} = \phi_t + \Delta\phi_t$. This preserves information indefinitely unless explicitly modified.
@@ -193,7 +198,7 @@ The mathematical technique of projecting inputs onto the $4\pi$ range. This reso
 Defined by `PEAK_LOCKING_STRENGTH` in `config.py`. It represents the "gravitational pull" of the harmonic potential wells. At $0.0625$ (The Golden Setting), it provides enough force to discretize the state without trapping it in local minima.
 
 ### Harmonic Spectrum
-The set of frequencies (`HARMONICS`) used to define the potential landscape. While earlier versions used a complex spectrum like `[1, 2, 4, 8]`, v0.6.0 established that the fundamental harmonic `[1]` is universal when combined with Spinor features.
+The set of frequencies (`HARMONICS`) used to define the potential landscape. While earlier versions used a complex spectrum like `[1, 2, 4, 8]`, v0.6.1 established that the fundamental harmonic `[1]` is universal when combined with Spinor features.
 
 ### Intrinsic Annealing (Wobble)
 Implemented in the `WobblePhaseAccumulator`. When the phase is stuck at a potential barrier, the energy is converted into a rotation around the $Z$-axis (Latitude), allowing the state to slide around obstacles on the Bloch Sphere.

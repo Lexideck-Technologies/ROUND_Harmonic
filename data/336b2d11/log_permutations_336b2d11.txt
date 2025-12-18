@@ -1,0 +1,40 @@
+--- [PERMUTATION BENCHMARK: ROUND vs GRU] ---
+UID: 607667c0 | Hidden: 64 | EPOCHS: 1500 | RUNS: 3
+
+--- Training ROUND_1 ---
+E     0 | Avg Acc: 0.0500 | Loss: 5.6392
+E   500 | Avg Acc: 0.9500 | Loss: 0.3449
+E  1000 | Avg Acc: 0.2700 | Loss: 4.7241
+E  1499 | Avg Acc: 0.2300 | Loss: 21.3594
+
+--- Training ROUND_2 ---
+E     0 | Avg Acc: 0.0000 | Loss: 6.1497
+E   500 | Avg Acc: 0.8500 | Loss: 0.4103
+E  1000 | Avg Acc: 1.0000 | Loss: 0.0085
+E  1499 | Avg Acc: 1.0000 | Loss: 0.0054
+
+--- Training ROUND_3 ---
+E     0 | Avg Acc: 0.0600 | Loss: 6.4353
+E   500 | Avg Acc: 1.0000 | Loss: 0.0430
+E  1000 | Avg Acc: 1.0000 | Loss: 0.0064
+E  1499 | Avg Acc: 1.0000 | Loss: 0.0060
+
+--- Training GRU_1 ---
+E     0 | Avg Acc: 0.0000 | Loss: 5.5387
+E   500 | Avg Acc: 0.9800 | Loss: 0.1784
+E  1000 | Avg Acc: 0.9900 | Loss: 0.0467
+E  1499 | Avg Acc: 1.0000 | Loss: 0.0133
+
+--- Training GRU_2 ---
+E     0 | Avg Acc: 0.0000 | Loss: 5.5635
+E   500 | Avg Acc: 0.9600 | Loss: 0.2044
+E  1000 | Avg Acc: 1.0000 | Loss: 0.0289
+E  1499 | Avg Acc: 1.0000 | Loss: 0.0097
+
+--- Training GRU_3 ---
+E     0 | Avg Acc: 0.0100 | Loss: 5.5361
+E   500 | Avg Acc: 0.9800 | Loss: 0.1863
+E  1000 | Avg Acc: 1.0000 | Loss: 0.0257
+E  1499 | Avg Acc: 1.0000 | Loss: 0.0083
+Learning curve saved to data/benchmark_perms_vs_gru_607667c0.png
+Correlation plot saved to data/correlation_perms_607667c0.png
