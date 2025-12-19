@@ -222,7 +222,7 @@ def train():
     ax.plot(rm, color='#FF4B4B', linewidth=2.5, label='ROUND Oracle')
     ax.plot(gm, color='#4B4BFF', linewidth=2.5, label='GRU Oracle')
     
-    ax.set_title(f"Oracle Training Consistency (5 Runs)\nQA Pairs: {len(QA_PAIRS)}", fontsize=14, color='white')
+    ax.set_title(f"Oracle Training Consistency (ROUND={TC['HIDDEN_R']} Neurons, GRU={TC['HIDDEN_G']} Neurons)\nQA Pairs: {len(QA_PAIRS)}", fontsize=14, color='white')
     ax.set_xlabel('Epochs', fontsize=12, color='gray')
     ax.set_ylabel('Accuracy', fontsize=12, color='gray')
     ax.grid(True, alpha=0.1)
@@ -230,29 +230,6 @@ def train():
     
     plt.savefig(os.path.join(output_dir, f'benchmark_oracle_{UID}.png'), dpi=300)
     P(f"Plot saved to benchmark_oracle_{UID}.png")
-    
-    # Correlation Plot (ROUND Only for now, or both?)
-    # Let's do ROUND correlation as requested
-    gt = np.array([p[1] for p in QA_PAIRS])
-    ds = np.vstack([np.stack(round_preds), gt])
-    corr = np.corrcoef(ds)
-    labels = [f'R{i+1}' for i in range(RUNS)] + ['GT']
-    
-    plt.figure(figsize=(8, 6))
-    plt.imshow(corr, interpolation='nearest', cmap='coolwarm', vmin=0, vmax=1)
-    plt.title(f'ROUND Consistency: Oracle\nBatch {UID}')
-    plt.colorbar()
-    tick_marks = np.arange(len(labels))
-    plt.xticks(tick_marks, labels, rotation=45)
-    plt.yticks(tick_marks, labels)
-    for i in range(len(labels)):
-        for j in range(len(labels)):
-            val = corr[i, j]
-            if np.isnan(val): val = 0
-            text = plt.text(j, i, f"{val:.2f}", ha="center", va="center", color="black" if 0.3 < val < 0.7 else "white")
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, f'correlation_oracle_{UID}.png'), dpi=300)
-    P(f"Correlation plot saved to correlation_oracle_{UID}.png")
     
     # --- The Final Test (on last ROUND model) ---
     print("\n--- THE FINAL ORACLE (ROUND) ---")

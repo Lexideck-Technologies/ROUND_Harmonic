@@ -215,8 +215,8 @@ def run_long_term_comparison(shuffled_words, epochs=10000, hidden_size_r=64, hid
         ax_r.plot(ep_axis, hist_r[word], label=f"R: {word}", color=colors[i % len(colors)], linewidth=2)
         ax_g.plot(ep_axis, hist_g[word], label=f"G: {word}", color=colors[i % len(colors)], linewidth=2, linestyle='--')
     
-    ax_r.set_title("ROUND - Spinor Monism (64 Neurons)", color='#FF5555', fontsize=16)
-    ax_g.set_title("GRU - Standard Gating (64 Neurons)", color='#5555FF', fontsize=16)
+    ax_r.set_title(f"ROUND - Spinor Monism ({hidden_size_r} Neurons)", color='#FF5555', fontsize=16)
+    ax_g.set_title(f"GRU - Standard Gating ({hidden_size_g} Neurons)", color='#5555FF', fontsize=16)
     ax_r.legend(loc='lower left', fontsize=8, ncol=3); ax_g.legend(loc='lower left', fontsize=8, ncol=3)
     
     plt.tight_layout()

@@ -189,7 +189,7 @@ def run_benchmark():
     ax.plot(ep_axis, rm, color='#FF4B4B', linewidth=2.5, label='ROUND (Harmonic)')
     ax.plot(ep_axis, gm, color='#4B4BFF', linewidth=2.5, label='GRU (Standard)')
     
-    ax.set_title(f"Permutation Recall: ROUND vs GRU\n4 Target Shuffles, Hidden={HIDDEN_SIZE}", fontsize=14)
+    ax.set_title(f"Permutation Recall: ROUND vs GRU [ROUND={TC['HIDDEN_R']} Neurons, GRU={TC['HIDDEN_G']} Neurons]\n4 Target Shuffles", fontsize=14)
     ax.set_xlabel('Epochs', color='gray')
     ax.set_ylabel('Avg Accuracy (All Perms)', color='gray')
     ax.grid(True, alpha=0.1)
@@ -197,25 +197,6 @@ def run_benchmark():
     plt.tight_layout()
     plt.savefig(os.path.join(output_dir, f'benchmark_perms_vs_gru_{UID}.png'), dpi=300)
     P(f"Learning curve saved to data/benchmark_perms_vs_gru_{UID}.png")
-
-    # --- Correlation Heatmap ---
-    plt.figure(figsize=(8, 6))
-    ds = np.vstack([np.stack(round_all_preds), ground_truth])
-    corr = np.corrcoef(ds)
-    labels = [f'R{i+1}' for i in range(RUNS)] + ['GT']
-    plt.imshow(corr, interpolation='nearest', cmap='coolwarm', vmin=0, vmax=1)
-    plt.title(f'Normalization Consistency: Permutations\nBatch {UID}')
-    plt.colorbar()
-    tick_marks = np.arange(len(labels))
-    plt.xticks(tick_marks, labels, rotation=45)
-    plt.yticks(tick_marks, labels)
-    for i in range(len(labels)):
-        for j in range(len(labels)):
-            val = corr[i, j]
-            plt.text(j, i, f"{val:.2f}", ha="center", va="center", color="black" if 0.3 < val < 0.7 else "white")
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, f'correlation_perms_{UID}.png'), dpi=300)
-    P(f"Correlation plot saved to data/correlation_perms_{UID}.png")
     
     L_FILE.close()
 

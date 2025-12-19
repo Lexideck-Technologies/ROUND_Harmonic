@@ -210,7 +210,7 @@ def train():
     ax.plot(rm, color='#FF4B4B', linewidth=2, label='ROUND (Harmonic)')
     ax.plot(gm, color='#4B4BFF', linewidth=2, label='GRU (Standard)')
     
-    ax.set_title(f"Sequence Generation Learning Curve\nTarget: 'HELLO WORLD' (32 Steps)", fontsize=14, color='white')
+    ax.set_title(f"Sequence Generation Learning Curve (ROUND={TC['HIDDEN_R']} Neurons, GRU={TC['HIDDEN_G']} Neurons)\nTarget: 'HELLO WORLD' (32 Steps)", fontsize=14, color='white')
     ax.set_xlabel('Epochs', fontsize=12, color='gray')
     ax.set_ylabel('Accuracy (Next Char)', fontsize=12, color='gray')
     ax.grid(True, alpha=0.1)
@@ -219,29 +219,6 @@ def train():
     plt.savefig(os.path.join(output_dir, f'benchmark_ascii_{UID}.png'), dpi=300)
     P(f"Plot saved to benchmark_ascii_{UID}.png")
     
-    # Correlation Plot
-    ft = target_tensor.cpu().numpy().flatten()
-    ds = np.vstack([np.stack(round_preds), ft])
-    corr = np.corrcoef(ds)
-    labels = [f'R{i+1}' for i in range(RUNS)] + ['GT']
-    
-    plt.figure(figsize=(8, 6))
-    plt.imshow(corr, interpolation='nearest', cmap='coolwarm', vmin=0, vmax=1)
-    plt.title(f'ROUND Consistency: ASCII\nBatch {UID}')
-    plt.colorbar()
-    tick_marks = np.arange(len(labels))
-    plt.xticks(tick_marks, labels, rotation=45)
-    plt.yticks(tick_marks, labels)
-    for i in range(len(labels)):
-        for j in range(len(labels)):
-            val = corr[i, j]
-            # Handle potential NaNs if variance is 0 (constant prediction)
-            if np.isnan(val): val = 0 
-            text = plt.text(j, i, f"{val:.2f}", ha="center", va="center", color="black" if 0.3 < val < 0.7 else "white")
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, f'correlation_ascii_{UID}.png'), dpi=300)
-    P(f"Correlation plot saved to correlation_ascii_{UID}.png")
-
     L_FILE.close()
 
 if __name__ == "__main__":

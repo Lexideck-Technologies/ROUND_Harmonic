@@ -1,5 +1,5 @@
 --- Creative Benchmark: ASCII Generator (ROUND vs GRU) ---
-Batch UID: 608309c9
+Batch UID: 67bcce15
 Run Config: {'HIDDEN_R': 32, 'HIDDEN_G': 128, 'PEAK_LOCKING_STRENGTH': 0.0625, 'HARMONICS': [1], 'EPOCHS': 300, 'LR': 0.001953125, 'TERMINAL_ONLY': False}
 Task: Learn 'HELLO WORLD' + 21 Spaces sequence.
 Training ROUND (5 Runs)...
@@ -74,5 +74,4 @@ GRU_5 E 100 | Acc: 0.84 | Loss: 0.5381 | Out: 'ELLOOWOO                        '
 GRU_5 E 200 | Acc: 0.97 | Loss: 0.1059 | Out: 'ELLO WORLD                      '
 GRU_5 E 299 | Acc: 0.97 | Loss: 0.0424 | Out: 'ELLO WORLD                      '
 GRU_5 Final Acc: 0.9688
-Plot saved to benchmark_ascii_608309c9.png
-Correlation plot saved to correlation_ascii_608309c9.png
+Plot saved to benchmark_ascii_67bcce15.png

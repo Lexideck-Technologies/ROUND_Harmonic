@@ -106,7 +106,7 @@ if __name__=="__main__":
     gm, gs = np.mean(gr, 0), np.std(gr, 0)
     ep = np.arange(C['epochs'])
 
-    ax.set_title(f"Harmonic ROUND vs GRU: 16-bit Parity (Harmonic Monism)\nstrength={TC['PEAK_LOCKING_STRENGTH']}, harmonics={TC['HARMONICS']}", fontsize=14, color='white')
+    ax.set_title(f"Harmonic ROUND vs GRU: 16-bit Parity [ROUND={TC['HIDDEN_R']} Neuron, GRU={TC['HIDDEN_G']} Neurons]\nstrength={TC['PEAK_LOCKING_STRENGTH']}, harmonics={TC['HARMONICS']}", fontsize=14, color='white')
     ax.set_xlabel('Epochs', fontsize=12, color='gray')
     ax.set_ylabel('Accuracy', fontsize=12, color='gray')
     
@@ -131,22 +131,5 @@ if __name__=="__main__":
     plt.tight_layout()
     plt.savefig(os.path.join(output_dir, f'benchmark_parity_{UID}.png'), dpi=300)
     
-    # Correlation Plot
-    ds = np.vstack([np.stack(ap), ft.flatten()])
-    corr = np.corrcoef(ds)
-    labels = [f'R{i+1}' for i in range(C['runs'])] + ['GT']
-    
-    plt.figure(figsize=(8, 6))
-    plt.imshow(corr, interpolation='nearest', cmap='coolwarm', vmin=0, vmax=1)
-    plt.title(f'ROUND Consistency: Parity\nBatch {UID}')
-    plt.colorbar()
-    tick_marks = np.arange(len(labels))
-    plt.xticks(tick_marks, labels, rotation=45)
-    plt.yticks(tick_marks, labels)
-    for i in range(len(labels)):
-        for j in range(len(labels)):
-            text = plt.text(j, i, f"{corr[i, j]:.2f}", ha="center", va="center", color="black" if 0.3 < corr[i, j] < 0.7 else "white")
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, f'correlation_parity_{UID}.png'), dpi=300)
     P("Done.")
     L_FILE.close()

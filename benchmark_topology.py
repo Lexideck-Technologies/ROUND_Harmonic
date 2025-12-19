@@ -142,7 +142,7 @@ if __name__=="__main__":
     gm, gs = np.mean(gr, 0), np.std(gr, 0)
     ep = np.arange(C['epochs'])
 
-    ax.set_title(f"Harmonic ROUND vs GRU: Graph Cycle (Topology) - Harmonics Test\nstrength={TC['PEAK_LOCKING_STRENGTH']}, harmonics={TC['HARMONICS']}", fontsize=14, color='white')
+    ax.set_title(f"Harmonic ROUND vs GRU: Graph Cycle [ROUND={TC['HIDDEN_R']} Neurons, GRU={TC['HIDDEN_G']} Neurons]\nstrength={TC['PEAK_LOCKING_STRENGTH']}, harmonics={TC['HARMONICS']}", fontsize=14, color='white')
     ax.set_xlabel('Epochs', fontsize=12, color='gray')
     ax.set_ylabel('Accuracy', fontsize=12, color='gray')
     
@@ -160,15 +160,5 @@ if __name__=="__main__":
     plt.tight_layout()
     plt.savefig(os.path.join(output_dir, f'benchmark_topology_{UID}.png'), dpi=300)
     
-    # Correlation Plot
-    ds = np.vstack([np.stack(ap), ft.flatten()])
-    corr = np.corrcoef(ds)
-    labels = [f'R{i+1}' for i in range(C['runs'])] + ['GT']
-    plt.figure(figsize=(8, 6))
-    plt.imshow(corr, interpolation='nearest', cmap='coolwarm', vmin=0, vmax=1)
-    plt.title(f'ROUND Consistency: Topology\nBatch {UID}')
-    plt.colorbar()
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, f'correlation_topology_{UID}.png'), dpi=300)
     P("Done.")
     L_FILE.close()

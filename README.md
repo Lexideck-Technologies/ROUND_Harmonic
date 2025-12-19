@@ -138,54 +138,54 @@ python run_battery.py
 
 ## Benchmark Results: v0.6.3 "The Density Duel"
 
-We performed a Head-to-Head comparison between **ROUND (Spinor Monism)** and a standard **GRU** across the "Decathlon" suite. Results are from the `608309c9` regression battery.
+We performed a Head-to-Head comparison between **ROUND (Spinor Monism)** and a standard **GRU** across the "Decathlon" suite. Results are from the `67bcce15` regression battery.
 
 ### 7.1 The "Impossible" Logic Test (Parity)
 *   **ROUND:** **100% Accuracy** ($HIDDEN=1$). Snaps to the global optimum within 100 epochs using the theoretical minimum capacity.
 *   **GRU:** **50.6% Accuracy** ($HIDDEN=128$). Fails completely on 16-bit XOR chains despite 128x more capacity.
-*   ![Parity Benchmark](data/608309c9/benchmark_parity_608309c9.png)
+*   ![Parity Benchmark](data/67bcce15/benchmark_parity_67bcce15.png)
 
 ### 7.2 Topological Invariants (Graph Cycles)
 *   **ROUND:** **100% Accuracy.** Stable, monotonic convergence on flattened graph adjacency matrices.
 *   **GRU:** **Matches Performance.** Stable with the 128-neuron provision, though slightly slower to stabilize.
-*   ![Topology Benchmark](data/608309c9/benchmark_topology_608309c9.png)
+*   ![Topology Benchmark](data/67bcce15/benchmark_topology_67bcce15.png)
 
 ### 7.3 Streaming Recursion (Brackets Masked)
-*   **ROUND:** **~99% Accuracy.** Successfully handles Dyck-2 nesting in sequential mode.
+*   **ROUND:** **~100% Accuracy.** Successfully handles Dyck-2 nesting in sequential mode.
 *   **GRU:** **100% Accuracy.** 
-*   ![Brackets Benchmark](data/608309c9/benchmark_brackets_masked_608309c9.png)
+*   ![Brackets Benchmark](data/67bcce15/benchmark_brackets_masked_67bcce15.png)
 
 ### 7.4 The Oracle (QA Consistency)
 *   **ROUND:** **100% Accuracy.** Perfect consistency across binary classification tasks.
 *   **GRU:** **100% Accuracy.**
-*   ![Oracle Benchmark](data/608309c9/benchmark_oracle_608309c9.png)
+*   ![Oracle Benchmark](data/67bcce15/benchmark_oracle_67bcce15.png)
 
 ### 7.5 Order Extraction (Permutations)
 *   **ROUND:** **100% Accuracy.** Successfully extracts sequence order from shuffled prompts.
 *   **GRU:** **Matches Performance.** Can learn fixed small-set permutations.
-*   ![Permutations Benchmark](data/608309c9/benchmark_perms_vs_gru_608309c9.png)
+*   ![Permutations Benchmark](data/67bcce15/benchmark_perms_vs_gru_67bcce15.png)
 
 ### 7.6 Generative Creativity (ASCII)
 *   **ROUND:** **100% Accuracy.** Perfect cyclic timing and zero drift.
 *   **GRU:** **~97% Accuracy.** Occasional character drift even with 4x hidden state size.
-*   ![ASCII Benchmark](data/608309c9/benchmark_ascii_608309c9.png)
+*   ![ASCII Benchmark](data/67bcce15/benchmark_ascii_67bcce15.png)
 
 ### 7.7 Semantic Algebra (Colors)
 *   **ROUND:** **~95% Accuracy.** Successfully learns vector-like relationships in symbolic space.
 *   **GRU:** **~95% Accuracy.** Matches performance with 4x parameters.
-*   ![Colors Benchmark](data/608309c9/benchmark_colors_608309c9.png)
+*   ![Colors Benchmark](data/67bcce15/benchmark_colors_67bcce15.png)
 
 ### 7.8 The CAM Gauntlet (Long-Term Memory)
 The definitive proof of ROUND's non-volatile nature. In this test, a model must learn 6 high-ASCII words in a random curriculum and remember the first word after 10,000 epochs of training on subsequent data.
 *   **ROUND:** **100% Accuracy.** Perfect recall of all words regardless of training order.
 *   **GRU:** **Catastrophic Forgetting (~88.9%).** Recalls later words but loses earlier ones (specifically `UNIVERSAL`).
-*   ![CAM Benchmark](data/608309c9/benchmark_long_term_b8f542b1.png)
+*   ![CAM Benchmark](data/67bcce15/benchmark_long_term_2a776bcc.png)
 
 ### 7.9 Order Independence Brutality Test
 Performing 3 complete dual-model training batches (10k epochs each) with randomized keyword orders.
 *   **ROUND:** **100.0% Mean Accuracy.** 0.0% Standard Deviation. Zero Forgetfulness.
-*   **GRU:** **~95.8% Mean Aggregate Accuracy.** Significant variance depending on the sequence (~88% recall on complex shuffles).
-*   ![Gauntlet Results](data/608309c9/benchmark_long_term_ee0a1531.png)
+*   **GRU:** **~96% Mean Aggregate Accuracy.** Significant variance depending on the sequence (~88% recall on complex shuffles).
+*   ![Gauntlet Results](data/67bcce15/benchmark_long_term_d6da6ea7.png)
 
 ---
 

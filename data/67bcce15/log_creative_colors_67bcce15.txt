@@ -1,0 +1,83 @@
+--- Creative Benchmark: Semantic Algebra (Colors) ---
+Batch UID: 67bcce15
+Run Config: {'HIDDEN_R': 32, 'HIDDEN_G': 128, 'PEAK_LOCKING_STRENGTH': 0.0625, 'HARMONICS': [1], 'EPOCHS': 300, 'LR': 0.001953125, 'TERMINAL_ONLY': False}
+Task: Learn Symbolic Logic (A+B=C) from 12 examples.
+Training ROUND (5 Runs)...
+
+--- Training ROUND_1 ---
+Epoch    0 | Acc: 0.0000 | Loss: 68.2153
+Epoch  100 | Acc: 0.4686 | Loss: 18.4345
+Epoch  200 | Acc: 0.8571 | Loss: 7.8086
+Epoch  299 | Acc: 0.9543 | Loss: 2.5930
+ROUND_1 Final Acc: 0.9543
+
+--- Training ROUND_2 ---
+Epoch    0 | Acc: 0.0000 | Loss: 64.4506
+Epoch  100 | Acc: 0.4743 | Loss: 17.3485
+Epoch  200 | Acc: 0.8686 | Loss: 7.6093
+Epoch  299 | Acc: 0.8914 | Loss: 4.9443
+ROUND_2 Final Acc: 0.8914
+
+--- Training ROUND_3 ---
+Epoch    0 | Acc: 0.0000 | Loss: 70.4200
+Epoch  100 | Acc: 0.5371 | Loss: 16.1023
+Epoch  200 | Acc: 0.9314 | Loss: 6.2386
+Epoch  299 | Acc: 0.9600 | Loss: 2.2649
+ROUND_3 Final Acc: 0.9600
+
+--- Training ROUND_4 ---
+Epoch    0 | Acc: 0.0000 | Loss: 65.3071
+Epoch  100 | Acc: 0.5771 | Loss: 16.4115
+Epoch  200 | Acc: 0.9314 | Loss: 5.3019
+Epoch  299 | Acc: 0.9600 | Loss: 1.8789
+ROUND_4 Final Acc: 0.9600
+
+--- Training ROUND_5 ---
+Epoch    0 | Acc: 0.0000 | Loss: 64.3346
+Epoch  100 | Acc: 0.5829 | Loss: 15.8854
+Epoch  200 | Acc: 0.9200 | Loss: 5.5089
+Epoch  299 | Acc: 0.9600 | Loss: 2.0406
+ROUND_5 Final Acc: 0.9600
+Training GRU (5 Runs)...
+
+--- Training GRU_1 ---
+Epoch    0 | Acc: 0.0000 | Loss: 60.7651
+Epoch  100 | Acc: 0.2743 | Loss: 26.4453
+Epoch  200 | Acc: 0.6971 | Loss: 10.3208
+Epoch  299 | Acc: 0.9429 | Loss: 3.0150
+GRU_1 Final Acc: 0.9429
+
+--- Training GRU_2 ---
+Epoch    0 | Acc: 0.0000 | Loss: 61.5857
+Epoch  100 | Acc: 0.3714 | Loss: 23.8445
+Epoch  200 | Acc: 0.8229 | Loss: 7.1441
+Epoch  299 | Acc: 0.9600 | Loss: 1.8958
+GRU_2 Final Acc: 0.9600
+
+--- Training GRU_3 ---
+Epoch    0 | Acc: 0.0000 | Loss: 61.1154
+Epoch  100 | Acc: 0.2971 | Loss: 24.5660
+Epoch  200 | Acc: 0.8000 | Loss: 8.0118
+Epoch  299 | Acc: 0.9486 | Loss: 2.2826
+GRU_3 Final Acc: 0.9486
+
+--- Training GRU_4 ---
+Epoch    0 | Acc: 0.0000 | Loss: 61.0609
+Epoch  100 | Acc: 0.4114 | Loss: 22.4626
+Epoch  200 | Acc: 0.7886 | Loss: 7.4929
+Epoch  299 | Acc: 0.9429 | Loss: 2.6663
+GRU_4 Final Acc: 0.9429
+
+--- Training GRU_5 ---
+Epoch    0 | Acc: 0.0000 | Loss: 60.9426
+Epoch  100 | Acc: 0.2286 | Loss: 26.0589
+Epoch  200 | Acc: 0.6914 | Loss: 10.7109
+Epoch  299 | Acc: 0.9429 | Loss: 2.8151
+GRU_5 Final Acc: 0.9429
+Plot saved to benchmark_colors_67bcce15.png
+
+--- Testing Color Algebra (Vector Addition) [ROUND] ---
+Prompt: RED+BLUE=  -> Predicted: PURPLE.
+Prompt: YELLOW+BLUE= -> Predicted: GREEN.
+Prompt: RED+RED=   -> Predicted: RED.
+Prompt: BLACK+WHITE= -> Predicted: GRAY.
