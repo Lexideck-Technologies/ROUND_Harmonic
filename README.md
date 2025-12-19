@@ -1,7 +1,22 @@
-# Spinor Monism (Harmonic ROUND) v0.6.2
+# Spinor Monism (Harmonic ROUND) v0.6.3
+### "The Density Duel" (Harmonic Monism + Spinor Features)
 
-[![The U-Neuron](media/round_video_thumbnail.png)](https://www.lexidecktechnologies.com/UIT_IEG/The_U-Neuron.mp4)
-<div align="center"><em>Click the thumbnail above to watch the 2-minute explainer.</em></div>
+**ROUND** (Recurrent Output-oriented Unified Neuron) is a non-volatile recurrent architecture based on the principles of **Unified Informatic Topology (UIT)**. Unlike standard neurons (GRU/LSTM) that store state in Euclidean space (where it drifts and decays), ROUND stores state on a topological manifold—a phase circle.
+
+---
+
+## 1. The Density Duel (Benchmark Standard v0.6.3)
+
+To prove that ROUND's efficiency isn't just a quirk, but a fundamental property of topological memory, we have implemented the **"Density Duel"** standard across our entire regression battery.
+
+### The 4x Capacity Advantage
+In all head-to-head tests, we grant the **GRU** a significant raw capacity advantage to account for its less efficient memory mapping.
+*   **ROUND (32 neurons)** vs. **GRU (128 neurons)**
+*   **ROUND (64 neurons)** vs. **GRU (256 neurons)**
+
+Standard industry performance usually relies on **Scale** (more neurons). ROUND optimizes for **Density** (better information embedding). Even with **4x more neurons**, standard gated architectures struggle to match ROUND's stability in long-term mnemonic tasks and logical invariants.
+
+---
 
 ## Table of Contents
 1. [The Story of ROUND: An Arc of Discovery](#the-story-of-round-an-arc-of-discovery)
@@ -118,56 +133,56 @@ python run_battery.py
 
 ---
 
-## Benchmark Results: v0.6.2 Order-Independent Mastery
+## Benchmark Results: v0.6.3 "The Density Duel"
 
-We performed a Head-to-Head comparison between **ROUND (Spinor Monism)** and a standard **GRU** across the "Decathlon" suite. Results are from the `a09a99d1` regression battery.
+We performed a Head-to-Head comparison between **ROUND (Spinor Monism)** and a standard **GRU** across the "Decathlon" suite. Results are from the `608309c9` regression battery.
 
 ### 7.1 The "Impossible" Logic Test (Parity)
-*   **ROUND:** **100% Accuracy.** Snaps to the global optimum within 100 epochs.
-*   **GRU:** **50% Accuracy.** Fails completely on 16-bit XOR chains.
-*   ![Parity Benchmark](data/a09a99d1/benchmark_parity_a09a99d1.png)
+*   **ROUND:** **100% Accuracy** ($HIDDEN=1$). Snaps to the global optimum within 100 epochs using the theoretical minimum capacity.
+*   **GRU:** **50.6% Accuracy** ($HIDDEN=128$). Fails completely on 16-bit XOR chains despite 128x more capacity.
+*   ![Parity Benchmark](data/608309c9/benchmark_parity_608309c9.png)
 
 ### 7.2 Topological Invariants (Graph Cycles)
-*   **ROUND:** **100% Accuracy.** Stable convergence on flattened graph adjacency matrices.
-*   **GRU:** **Unstable.** Wide variance across seeds; prone to mode collapse.
-*   ![Topology Benchmark](data/a09a99d1/benchmark_topology_a09a99d1.png)
+*   **ROUND:** **100% Accuracy.** Stable, monotonic convergence on flattened graph adjacency matrices.
+*   **GRU:** **Matches Performance.** Stable with the 128-neuron provision, though slightly slower to stabilize.
+*   ![Topology Benchmark](data/608309c9/benchmark_topology_608309c9.png)
 
 ### 7.3 Streaming Recursion (Brackets Masked)
-*   **ROUND:** **100% Accuracy.** Handles Dyck-2 nesting in sequential mode.
+*   **ROUND:** **~99% Accuracy.** Successfully handles Dyck-2 nesting in sequential mode.
 *   **GRU:** **100% Accuracy.** 
-*   ![Brackets Benchmark](data/a09a99d1/benchmark_brackets_masked_a09a99d1.png)
+*   ![Brackets Benchmark](data/608309c9/benchmark_brackets_masked_608309c9.png)
 
 ### 7.4 The Oracle (QA Consistency)
 *   **ROUND:** **100% Accuracy.** Perfect consistency across binary classification tasks.
 *   **GRU:** **100% Accuracy.**
-*   ![Oracle Benchmark](data/a09a99d1/benchmark_oracle_a09a99d1.png)
+*   ![Oracle Benchmark](data/608309c9/benchmark_oracle_608309c9.png)
 
 ### 7.5 Order Extraction (Permutations)
 *   **ROUND:** **100% Accuracy.** Successfully extracts sequence order from shuffled prompts.
 *   **GRU:** **Matches Performance.** Can learn fixed small-set permutations.
-*   ![Permutations Benchmark](data/a09a99d1/benchmark_perms_vs_gru_a09a99d1.png)
+*   ![Permutations Benchmark](data/608309c9/benchmark_perms_vs_gru_608309c9.png)
 
 ### 7.6 Generative Creativity (ASCII)
 *   **ROUND:** **100% Accuracy.** Perfect cyclic timing and zero drift.
-*   **GRU:** **Sub-perfect.** Drifts on long sequences, losing periodicity.
-*   ![ASCII Benchmark](data/a09a99d1/benchmark_ascii_a09a99d1.png)
+*   **GRU:** **~97% Accuracy.** Occasional character drift even with 4x hidden state size.
+*   ![ASCII Benchmark](data/608309c9/benchmark_ascii_608309c9.png)
 
 ### 7.7 Semantic Algebra (Colors)
-*   **ROUND:** **~96% Accuracy.** Successfully learns vector-like relationships in symbolic space.
-*   **GRU:** **~50% Accuracy.** Fails to map semantic sums.
-*   ![Colors Benchmark](data/a09a99d1/benchmark_colors_a09a99d1.png)
+*   **ROUND:** **~95% Accuracy.** Successfully learns vector-like relationships in symbolic space.
+*   **GRU:** **~95% Accuracy.** Matches performance with 4x parameters.
+*   ![Colors Benchmark](data/608309c9/benchmark_colors_608309c9.png)
 
 ### 7.8 The CAM Gauntlet (Long-Term Memory)
 The definitive proof of ROUND's non-volatile nature. In this test, a model must learn 6 high-ASCII words in a random curriculum and remember the first word after 10,000 epochs of training on subsequent data.
 *   **ROUND:** **100% Accuracy.** Perfect recall of all words regardless of training order.
-*   **GRU:** **Catastrophic Forgetting (~88%).** Recalls later words but loses earlier ones.
-*   ![CAM Benchmark](data/a09a99d1/benchmark_long_term_345d69b0.png)
+*   **GRU:** **Catastrophic Forgetting (~88.9%).** Recalls later words but loses earlier ones (specifically `UNIVERSAL`).
+*   ![CAM Benchmark](data/608309c9/benchmark_long_term_b8f542b1.png)
 
 ### 7.9 Order Independence Brutality Test
 Performing 3 complete dual-model training batches (10k epochs each) with randomized keyword orders.
 *   **ROUND:** **100.0% Mean Accuracy.** 0.0% Standard Deviation. Zero Forgetfulness.
-*   **GRU:** **~94.5% Mean Aggregate Accuracy.** Significant variance depending on the sequence (~83% recall on complex shuffles).
-*   ![Gauntlet Results](data/a09a99d1/benchmark_long_term_9b8ab51c.png)
+*   **GRU:** **~95.8% Mean Aggregate Accuracy.** Significant variance depending on the sequence (~88% recall on complex shuffles).
+*   ![Gauntlet Results](data/608309c9/benchmark_long_term_ee0a1531.png)
 
 ---
 
@@ -196,14 +211,14 @@ The core hypothesis of UIT is that **discrete logic is a special case of continu
 
 **License:** MIT License.
 
-**Citation:** Please cite **v0.6.1 Spinor Monism (The Grand Slam)**.
+**Citation:** Please cite **v0.6.3 "The Density Duel"**.
 
 ---
 
 ## Glossary of Terms
 
 ### Spinor Monism
-The finalized v0.6.1 configuration using **Fundamental Harmonic (`[1]`)** locking and **Spinor ($1/2$)** Input Features. It represents the most efficient mapping of phase-space to logical state.
+The finalized v0.6.3 configuration using **Fundamental Harmonic (`[1]`)** locking and **Spinor ($1/2$)** Input Features. It represents the most efficient mapping of phase-space to logical state.
 
 ### Phase Accumulation
 The core mechanic of the `PhaseAccumulator`. Unlike standard neurons that use multiplicative gates, ROUND updates its state via simple addition: $\phi_{t+1} = \phi_t + \Delta\phi_t$. This preserves information indefinitely unless explicitly modified.

@@ -1,4 +1,4 @@
-# version 0.6.1 - Harmonic Monism (Permutation Memory Test vs GRU)
+# version 0.6.3 - "The Density Duel" (Permutations)
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -87,11 +87,11 @@ def generate_permutation_data(perms):
 
 # --- Training ---
 
-def train_model(model_name, model_class, perm_data, device, epochs, L_FILE):
+def train_model(model_name, model_class, hidden_size, perm_data, device, epochs, L_FILE):
     def P(s): print(s); L_FILE.write(str(s) + '\n'); L_FILE.flush()
     P(f"\n--- Training {model_name} ---")
     
-    model = model_class(HIDDEN_SIZE).to(device)
+    model = model_class(hidden_size).to(device)
     lr = LR if "ROUND" in model_name else GRU_LR
     optimizer = optim.Adam(model.parameters(), lr=lr)
     
@@ -161,19 +161,19 @@ def run_benchmark():
     ground_truth = np.concatenate([tg.cpu().numpy().flatten() for _, _, tg in perm_data])
 
     P(f"--- [PERMUTATION BENCHMARK: ROUND vs GRU] ---")
-    P(f"UID: {UID} | Hidden: {HIDDEN_SIZE} | EPOCHS: {EPOCHS} | RUNS: {RUNS}")
+    P(f"UID: {UID} | R_Hidden: {TC['HIDDEN_R']} | G_Hidden: {TC['HIDDEN_G']} | EPOCHS: {EPOCHS} | RUNS: {RUNS}")
 
     round_all_acc = []
     gru_all_acc = []
     round_all_preds = []
 
     for i in range(RUNS):
-        _, rac, rpr = train_model(f"ROUND_{i+1}", PermutationROUNDModel, perm_data, DEVICE, EPOCHS, L_FILE)
+        _, rac, rpr = train_model(f"ROUND_{i+1}", PermutationROUNDModel, TC['HIDDEN_R'], perm_data, DEVICE, EPOCHS, L_FILE)
         round_all_acc.append(rac)
         round_all_preds.append(rpr)
 
     for i in range(RUNS):
-        _, gac, _ = train_model(f"GRU_{i+1}", PermutationGRUModel, perm_data, DEVICE, EPOCHS, L_FILE)
+        _, gac, _ = train_model(f"GRU_{i+1}", PermutationGRUModel, TC['HIDDEN_G'], perm_data, DEVICE, EPOCHS, L_FILE)
         gru_all_acc.append(gac)
 
     # --- Plotting ---

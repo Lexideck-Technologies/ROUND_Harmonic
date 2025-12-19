@@ -1,5 +1,4 @@
-
-# version 0.6.2 - Harmonic Monism (Masked Brackets)
+# version 0.6.3 - "The Density Duel" (Masked Brackets)
 import torch,torch.nn as nn,torch.optim as optim,numpy as np,matplotlib.pyplot as plt,os,uuid
 from ROUND import SequentialROUNDModel,HarmonicROUNDLoss
 from config import BRACKETS_CONFIG, get_lock_strength
@@ -15,7 +14,7 @@ P(f"Batch UID: {UID}")
 # Load Config
 TC = BRACKETS_CONFIG
 P(f"Run Config: {TC}")
-C={'task':'dyck_2','seq_len':20,'hidden_size':TC['HIDDEN_SIZE'],'steps':20,'epochs':TC['EPOCHS'],
+C={'task':'dyck_2','seq_len':20,'hidden_r':TC['HIDDEN_R'],'hidden_g':TC['HIDDEN_G'],'steps':20,'epochs':TC['EPOCHS'],
    'batch_size':64,'dataset_size':2000,'runs':5,'lr':TC['LR'],'device':'cuda' if torch.cuda.is_available() else 'cpu'}
 
 def generate_dyck_data(n, l):
@@ -58,7 +57,7 @@ class GRUModel(nn.Module):
 
 def train_round_seq(rid,X,Y,Xt,Yt,d):
     # Streaming Input: Input Dim = 1
-    m=SequentialROUNDModel(hidden_size=TC['HIDDEN_SIZE'],input_dim=1).to(d)
+    m=SequentialROUNDModel(hidden_size=TC['HIDDEN_R'],input_dim=1).to(d)
     c=HarmonicROUNDLoss(locking_strength=TC['PEAK_LOCKING_STRENGTH'],
                         harmonics=TC['HARMONICS'],
                         weights=[1.0]*len(TC['HARMONICS']),
@@ -90,7 +89,7 @@ def train_round_seq(rid,X,Y,Xt,Yt,d):
     return ah,pt,Yt
 
 def train_gru(rid,X,Y,Xt,Yt,d):
-    m=GRUModel(1,C['hidden_size']).to(d);c=nn.BCEWithLogitsLoss();o=optim.Adam(m.parameters(),lr=C['lr']);ah=[];locked=False
+    m=GRUModel(1,C['hidden_g']).to(d);c=nn.BCEWithLogitsLoss();o=optim.Adam(m.parameters(),lr=C['lr']);ah=[];locked=False
     for e in range(C['epochs']):
         o.zero_grad();out=m(X);l=c(out,Y);l.backward();o.step()
         with torch.no_grad():

@@ -1,5 +1,4 @@
-
-# version 0.6.2 - Harmonic Monism (Oracle)
+# version 0.6.3 - "The Density Duel" (Oracle)
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -98,12 +97,12 @@ CHALLENGES = [
     "IS THE UNIVERSE INFINITE?"
 ]
 
-def train_model_run(run_id, model_class, device, output_dir, L_FILE):
+def train_model_run(run_id, model_class, hidden_size, device, output_dir, L_FILE):
     model_name = "ROUND" if model_class == OracleROUND else "GRU"
     def P(s): print(s); L_FILE.write(str(s) + '\n'); L_FILE.flush()
     
     P(f"\n--- {model_name} Run {run_id} ---")
-    model = model_class(TC['HIDDEN_SIZE']).to(device)
+    model = model_class(hidden_size).to(device)
     optimizer = optim.Adam(model.parameters(), lr=TC['LR'])
     
     if model_name == "ROUND":
@@ -195,7 +194,7 @@ def train():
     
     P(f"Training ROUND ({RUNS} Runs)...")
     for i in range(RUNS):
-        model, stats, preds = train_model_run(i+1, OracleROUND, device, output_dir, L_FILE)
+        model, stats, preds = train_model_run(i+1, OracleROUND, TC['HIDDEN_R'], device, output_dir, L_FILE)
         round_stats.append(stats)
         round_preds.append(preds)
         last_r_model = model
@@ -205,7 +204,7 @@ def train():
     
     P(f"Training GRU ({RUNS} Runs)...")
     for i in range(RUNS):
-        model, stats, preds = train_model_run(i+1, OracleGRU, device, output_dir, L_FILE)
+        model, stats, preds = train_model_run(i+1, OracleGRU, TC['HIDDEN_G'], device, output_dir, L_FILE)
         gru_stats.append(stats)
         gru_preds.append(preds)
         

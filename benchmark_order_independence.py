@@ -1,10 +1,10 @@
-# version 0.6.2 - Order Independence Gauntlet (Head-to-Head)
+# version 0.6.3 - "The Density Duel" (Order Independence Gauntlet)
 import torch
 import numpy as np
 import os
 import uuid
 import random
-from benchmark_long_term import run_long_term_comparison, WORDS, HIDDEN_SIZE, EPOCHS
+from benchmark_long_term import run_long_term_comparison, WORDS, LONG_TERM_CONFIG
 
 # --- Configuration ---
 RUNS = 3 # Deep Gauntlet: 3 full dual-model batches
@@ -30,8 +30,9 @@ def main():
         # Call the modular long-term engine
         run_res = run_long_term_comparison(
             shuffled_words=shuffled,
-            epochs=EPOCHS,
-            hidden_size=HIDDEN_SIZE,
+            epochs=LONG_TERM_CONFIG['EPOCHS'],
+            hidden_size_r=LONG_TERM_CONFIG['HIDDEN_R'],
+            hidden_size_g=LONG_TERM_CONFIG['HIDDEN_G'],
             p_func=P,
             output_dir=OUTPUT_DIR
         )

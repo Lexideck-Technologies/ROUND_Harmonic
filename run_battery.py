@@ -1,5 +1,4 @@
-
-# version 0.6.2 - Harmonic Monism
+# version 0.6.3 - "The Density Duel"
 import subprocess
 import os
 import sys

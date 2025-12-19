@@ -1,4 +1,4 @@
-# version 0.6.2 - Harmonic Monism (Topology)
+# version 0.6.3 - "The Density Duel" (Topology)
 import torch,torch.nn as nn,torch.optim as optim,numpy as np,matplotlib.pyplot as plt,os,uuid
 from ROUND import SequentialROUNDModel,HarmonicROUNDLoss
 from config import TOPOLOGY_CONFIG, get_lock_strength
@@ -16,7 +16,8 @@ TC = TOPOLOGY_CONFIG
 P(f"Run Config: {TC}")
 C={'task':'euler_char',
    'seq_len':100, # Matches generated flatten size
-   'hidden_size':TC['HIDDEN_SIZE'],
+   'hidden_r':TC['HIDDEN_R'],
+   'hidden_g':TC['HIDDEN_G'],
    'epochs':TC['EPOCHS'],
    'runs':5, # Standard
    'lr':TC['LR'],
@@ -61,7 +62,7 @@ class GRUModel(nn.Module):
     def forward(self,x):_,h=self.gru(x);return self.fc(h[-1])
 
 def train_round(rid,X,Y,Xt,Yt,d):
-    m=SequentialROUNDModel(hidden_size=TC['HIDDEN_SIZE'],input_dim=1,output_classes=1,wobble=TC['WOBBLE']).to(d)
+    m=SequentialROUNDModel(hidden_size=TC['HIDDEN_R'],input_dim=1,output_classes=1,wobble=TC['WOBBLE']).to(d)
     
     # HARMONICS TEST CONFIGURATION
     c=HarmonicROUNDLoss(locking_strength=TC['PEAK_LOCKING_STRENGTH'],
@@ -101,7 +102,7 @@ def train_round(rid,X,Y,Xt,Yt,d):
     return ah,pt,Yt
 
 def train_gru(rid,X,Y,Xt,Yt,d):
-    m=GRUModel(1,C['hidden_size']).to(d);c=nn.BCEWithLogitsLoss();o=optim.Adam(m.parameters(),lr=C['lr']);ah=[];locked=False
+    m=GRUModel(1,C['hidden_g']).to(d);c=nn.BCEWithLogitsLoss();o=optim.Adam(m.parameters(),lr=C['lr']);ah=[];locked=False
     for e in range(C['epochs']):
         o.zero_grad();out=m(X.unsqueeze(-1));l=c(out,Y);l.backward();o.step()
         with torch.no_grad():

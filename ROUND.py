@@ -1,4 +1,4 @@
-# version 0.6.2 - Order-Independent Mnemonic Memory
+# version 0.6.3 - "The Density Duel" (Core)
 import torch
 import torch.nn as nn
 

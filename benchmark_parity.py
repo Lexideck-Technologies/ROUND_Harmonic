@@ -1,4 +1,4 @@
-# version 0.6.2 - Harmonic Monism (Parity)
+# version 0.6.3 - "The Density Duel" (Parity)
 import torch,torch.nn as nn,torch.optim as optim,numpy as np,matplotlib.pyplot as plt,os,uuid
 from ROUND import SequentialROUNDModel,HarmonicROUNDLoss
 from config import PARITY_CONFIG, get_lock_strength
@@ -14,7 +14,7 @@ P(f"Batch UID: {UID}")
 # Load Config
 TC = PARITY_CONFIG
 P(f"Run Config: {TC}")
-C={'task':'parity_16','input_dim':16,'hidden_size':1,'steps':20,'epochs':TC['EPOCHS'],'batch_size':64,'dataset_size':2000,'runs':5,'lr':TC['LR'],'device':'cuda' if torch.cuda.is_available() else 'cpu'}
+C={'task':'parity_16','input_dim':16,'hidden_r':TC['HIDDEN_R'],'hidden_g':TC['HIDDEN_G'],'steps':20,'epochs':TC['EPOCHS'],'batch_size':64,'dataset_size':2000,'runs':5,'lr':TC['LR'],'device':'cuda' if torch.cuda.is_available() else 'cpu'}
 
 def generate_parity_data(n,b):X=torch.randint(0,2,(n,b)).float();return X,(X.sum(1)%2).unsqueeze(1).float()
 
@@ -24,7 +24,8 @@ class GRUModel(nn.Module):
 
 def train_round(rid,X,Y,Xt,Yt,d):
     # Sequential Parity: Input Dim = 1 (Bit stream), Seq Len = 16
-    m=SequentialROUNDModel(hidden_size=C['hidden_size'],input_dim=1,output_classes=1,spinor=True,use_raw_phase=False).to(d)
+    # Note: We use the config hidden_r for standard comparison density.
+    m=SequentialROUNDModel(hidden_size=C['hidden_r'],input_dim=1,output_classes=1,spinor=True,use_raw_phase=False).to(d)
     
     # Initialize to break symmetry
     with torch.no_grad():
@@ -74,7 +75,7 @@ def train_round(rid,X,Y,Xt,Yt,d):
     return ah,pt,Yt
 
 def train_gru(rid,X,Y,Xt,Yt,d):
-    m=GRUModel(1,C['hidden_size']).to(d);c=nn.BCEWithLogitsLoss();o=optim.Adam(m.parameters(),lr=C['lr']);ah=[];locked=False
+    m=GRUModel(1,C['hidden_g']).to(d);c=nn.BCEWithLogitsLoss();o=optim.Adam(m.parameters(),lr=C['lr']);ah=[];locked=False
     for e in range(C['epochs']):
         o.zero_grad();out=m(X);l=c(out,Y);l.backward();o.step()
         

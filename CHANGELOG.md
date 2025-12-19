@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.3] - "The Density Duel" - 2025-12-18
+### Added
+*   **The Density Duel Standard:** Formalized a new benchmarking protocol where the **GRU** is granted **4x the raw capacity** (hidden neurons) compared to **ROUND** (e.g., ROUND 64 vs GRU 256). 
+*   **Efficiency Proof:** Validated that the U-Neuron with 64 neurons outperforms or matches a 256-neuron GRU in long-term curriculum learning and symbolic logic.
+*   **Minimalist Parity:** Re-confirmed that ROUND can solve 16-bit XOR with a single topological neuron ($HIDDEN=1$), highlighting the "Density" advantage over Euclidean networks.
+*   **Centralized Sizing:** Added `HIDDEN_SIZE_R` and `HIDDEN_SIZE_G` to `config.py` to enforce the asymmetric benchmark standard across the entire decathlon suite.
+
 ## [0.6.2] - "Mnemonic Crystallization" - 2025-12-18
 ### Added
 *   **Content-Addressable Memory (CAM):** Refactored `benchmark_long_term.py` to be a modular, side-by-side comparative engine. Proved that Phase Accumulation is a permanent mnemonic anchor where Matrix Multiplication (GRU) suffers from bulldoze decay.

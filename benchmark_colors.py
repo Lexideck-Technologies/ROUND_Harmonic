@@ -1,4 +1,4 @@
-# version 0.6.2 - Harmonic Monism (Colors)
+# version 0.6.3 - "The Density Duel" (Colors)
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -86,12 +86,12 @@ def str_to_bits(s):
         bits.append([int(c) for c in bin_str])
     return torch.tensor(bits, dtype=torch.float32)
 
-def train_model(model_name, model_class, device, training_sequences, epochs, uid, output_dir, stats_list, L_FILE):
+def train_model(model_name, model_class, hidden_size, device, training_sequences, epochs, uid, output_dir, stats_list, L_FILE):
     def P(s): print(s); L_FILE.write(str(s) + '\n'); L_FILE.flush()
     
     P(f"\n--- Training {model_name} ---")
     
-    model = model_class(TC['HIDDEN_SIZE']).to(device)
+    model = model_class(hidden_size).to(device)
     optimizer = optim.Adam(model.parameters(), lr=TC['LR'])
     
     if model_name == "ROUND":
@@ -211,14 +211,14 @@ def train():
     P(f"Training ROUND ({RUNS} Runs)...")
     last_r_model = None
     for i in range(RUNS):
-        r_model, p = train_model(f"ROUND_{i+1}", ColorROUND, device, TRAINING_SEQUENCES, EPOCHS, UID, output_dir, round_stats, L_FILE)
+        r_model, p = train_model(f"ROUND_{i+1}", ColorROUND, TC['HIDDEN_R'], device, TRAINING_SEQUENCES, EPOCHS, UID, output_dir, round_stats, L_FILE)
         round_preds.append(p)
         last_r_model = r_model
     
     # Train GRU
     P(f"Training GRU ({RUNS} Runs)...")
     for i in range(RUNS):
-        g_model, p = train_model(f"GRU_{i+1}", ColorGRU, device, TRAINING_SEQUENCES, EPOCHS, UID, output_dir, gru_stats, L_FILE)
+        g_model, p = train_model(f"GRU_{i+1}", ColorGRU, TC['HIDDEN_G'], device, TRAINING_SEQUENCES, EPOCHS, UID, output_dir, gru_stats, L_FILE)
     
     # Plotting
     plt.style.use('dark_background')

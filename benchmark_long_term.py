@@ -1,4 +1,4 @@
-# version 0.6.2 - Harmonic Monism (Long-Term Memory Curriculum)
+# version 0.6.3 - "The Density Duel" (Long-Term Memory)
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -9,7 +9,7 @@ import uuid
 import time
 import random
 from ROUND import PhaseAccumulator, WobblePhaseAccumulator, HarmonicROUNDLoss
-from config import get_lock_strength
+from config import get_lock_strength, LONG_TERM_CONFIG
 
 # --- Configuration ---
 HIDDEN_SIZE = 64
@@ -127,17 +127,18 @@ def get_stochastic_payload(bits):
     
     return (bits + noise) * mask
 
-def run_long_term_comparison(shuffled_words, epochs=10000, hidden_size=64, p_func=print, output_dir='data'):
+def run_long_term_comparison(shuffled_words, epochs=10000, hidden_size_r=64, hidden_size_g=None, p_func=print, output_dir='data'):
+    if hidden_size_g is None: hidden_size_g = hidden_size_r
     UID = str(uuid.uuid4())[:8]
     if not os.path.exists(output_dir): os.makedirs(output_dir)
     
     p_func(f"--- [ROUND vs GRU: LONG-TERM COMPARISON] ---")
     p_func(f"Order: {shuffled_words}")
-    p_func(f"Epochs: {epochs} | Hidden: {hidden_size}")
+    p_func(f"Epochs: {epochs} | ROUND Hidden: {hidden_size_r} | GRU Hidden: {hidden_size_g}")
 
     # 1. Models & Optimizers
-    model_r = LongTermROUNDModel(hidden_size, wobble=True).to(DEVICE)
-    model_g = GRULongTermModel(hidden_size).to(DEVICE)
+    model_r = LongTermROUNDModel(hidden_size_r, wobble=True).to(DEVICE)
+    model_g = GRULongTermModel(hidden_size_g).to(DEVICE)
     
     opt_r = optim.Adam(model_r.parameters(), lr=LR)
     opt_g = optim.Adam(model_g.parameters(), lr=LR)
@@ -236,7 +237,7 @@ def train_long_term():
 
     shuffled_words = list(WORDS)
     random.shuffle(shuffled_words)
-    results = run_long_term_comparison(shuffled_words, EPOCHS, HIDDEN_SIZE, L_P, output_dir)
+    results = run_long_term_comparison(shuffled_words, LONG_TERM_CONFIG['EPOCHS'], LONG_TERM_CONFIG['HIDDEN_R'], LONG_TERM_CONFIG['HIDDEN_G'], L_P, output_dir)
     
     P = L_P
     P("\n--- Final Comparative Audit ---")
