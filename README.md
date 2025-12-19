@@ -3,6 +3,9 @@
 
 **ROUND** (Recurrent Output-oriented Unified Neuron) is a non-volatile recurrent architecture based on the principles of **Unified Informatic Topology (UIT)**. Unlike standard neurons (GRU/LSTM) that store state in Euclidean space (where it drifts and decays), ROUND stores state on a topological manifold—a phase circle.
 
+[![The U-Neuron](media/round_video_thumbnail.png)](media/The_U-Neuron.mp4)
+<div align="center"><em>Click the thumbnail above to watch the 2-minute explainer video.</em></div>
+
 ---
 
 ## 1. The Density Duel (Benchmark Standard v0.6.3)
@@ -50,8 +53,8 @@ The breakthrough came from physics. We realized that the "topological twist" of 
 ### Chapter 4: The Great Simplification (v0.6.0)
 With the power of Spinors, the complexity of the "Rugged Landscape" became unnecessary. In v0.6.0, we discovered that a **single, smooth fundamental harmonic (`[1]`)** combined with Spinor features solves every benchmark—Logic, Topology, and Structure—with perfect stability. 
 
-### Chapter 5: Memory Crystallization (v0.6.2)
-In the final step toward AGI-level mnemonic structures, we solved the "Long-Term Persistence" problem. By introducing a **Precessing Mnemonic Clock (Wobble Drift)** and **Gemination Deflectors**, we enabled a single 64-neuron cell to store an arbitrary sequence of high-entropy patterns (ASCII) with zero decay. This is **Content-Addressable Memory (CAM)**: a neural memory that is order-independent and stable over potentially infinite horizons.
+### Chapter 5: The Density Duel (v0.6.3)
+To prove that ROUND's efficiency isn't just a quirk, but a fundamental property of topological memory, we established the **"Density Duel"** standard. By granting standard architectures (GRU) a **4x raw capacity advantage**, we proved that ROUND's topological embedding integrates information more efficiently than Euclidean gating, achieving perfect reliability where scaled models drift.
 
 **This is Spinor Monism: the realization that one perfect potential well, properly oriented in 3D phase-space, is a permanent mnemonic anchor.**
 
@@ -61,15 +64,15 @@ In the final step toward AGI-level mnemonic structures, we solved the "Long-Term
 
 The contemporary landscape of computational theory has long been fractured by a dichotomy between the continuous and the discrete. The **Unified Informatic Topology (UIT)** framework offers a resolution to this divide by positing that information is a physical substrate with thermodynamic weight.
 
-The **Spinor Monism** configuration (v0.6.1) establishes that a **single 32-neuron configuration** can span multiple computational regimes—Logic (XOR), Arithmetic (Counting), Structure (Recursion), and Topology (connectivity)—that typically require vastly different inductive biases.
+The **Spinor Monism** configuration (v0.6.3) establishes that a **single 32-neuron configuration** can span multiple computational regimes—Logic (XOR), Arithmetic (Counting), Structure (Recursion), and Topology (connectivity)—that typically require vastly different inductive biases.
 
 ### Deep Research Artifacts (Google Gemini)
 
 Independent validation and explanation of the ROUND architecture:
 
-- 🎬 **Video Explainer** (2 min): [The_U-Neuron.mp4](https://www.lexidecktechnologies.com/UIT_IEG/The_U-Neuron.mp4)
-- 🎙️ **Podcast Episode** (32 min): [Phase_Memory_Solves_AI_Long-Term_Failure.m4a](media/Phase_Memory_Solves_AI_Long-Term_Failure.m4a)
-- 📑 **Research Slide Deck**: [Unifying_Wave_and_Particle_Computation.pdf](media/Unifying_Wave_and_Particle_Computation.pdf)
+- 🎬 **Video Explainer** (2 min): [The U-Neuron](media/The_U-Neuron.mp4)
+- 🎙️ **Podcast Episode** (32 min): [Phase Memory Solves AI Long-Term Failure](media/Phase_Memory_Solves_AI_Long-Term_Failure.m4a)
+- 📑 **Short Research Explainer**: [Unifying Wave and Particle Computation](media/Unifying_Wave_and_Particle_Computation.pdf)
 
 ---
 
@@ -230,7 +233,7 @@ The mathematical technique of projecting inputs onto the $4\pi$ range. This reso
 Defined by `PEAK_LOCKING_STRENGTH` in `config.py`. It represents the "gravitational pull" of the harmonic potential wells. At $0.0625$ (The Golden Setting), it provides enough force to discretize the state without trapping it in local minima.
 
 ### Harmonic Spectrum
-The set of frequencies (`HARMONICS`) used to define the potential landscape. While earlier versions used a complex spectrum like `[1, 2, 4, 8]`, v0.6.1 established that the fundamental harmonic `[1]` is universal when combined with Spinor features.
+The set of frequencies (`HARMONICS`) used to define the potential landscape. While earlier versions used a complex spectrum like `[1, 2, 4, 8]`, v0.6.3 established that the fundamental harmonic `[1]` is universal when combined with Spinor features.
 
 ### Intrinsic Annealing (Wobble)
 Implemented in the `WobblePhaseAccumulator`. When the phase is stuck at a potential barrier, the energy is converted into a rotation around the $Z$-axis (Latitude), allowing the state to slide around obstacles on the Bloch Sphere.
