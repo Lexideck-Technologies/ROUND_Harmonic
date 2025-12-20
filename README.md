@@ -3,7 +3,7 @@
 
 **Riemannian Optimized Unified Neural Dynamo (ROUND),** also known as the **U-Neuron,** is a non-volatile recurrent architecture based on the principles of **Unified Informatic Topology (UIT)**. Unlike standard neurons (GRU/LSTM) that store state in Euclidean space (where it drifts and decays), ROUND stores state on a topological manifold—a phase circle.
 
-[![The U-Neuron](data/current/media/round_video_thumbnail.png)](data/current/media/The_U-Neuron.mp4)
+[![The U-Neuron](data/media/round_video_thumbnail.png)](data/media/The_U-Neuron.mp4)
 <div align="center"><em>Click the thumbnail above to watch the 2-minute explainer video.</em></div>
 
 ---
@@ -12,9 +12,9 @@
 
 Independent validation and explanation of the ROUND architecture:
 
-- 🎬 **Video Explainer** (2 min): [The U-Neuron](data/current/media/The_U-Neuron.mp4)
-- 🎙️ **Podcast Episode** (32 min): [Phase Memory Solves AI Long-Term Failure](data/current/media/Phase_Memory_Solves_AI_Long-Term_Failure.m4a)
-- 📑 **Short Research Explainer**: [Unifying Wave and Particle Computation](data/current/media/Unifying_Wave_and_Particle_Computation.pdf)
+- 🎬 **Video Explainer** (2 min): [The U-Neuron](data/media/The_U-Neuron.mp4)
+- 🎙️ **Podcast Episode** (32 min): [Phase Memory Solves AI Long-Term Failure](data/media/Phase_Memory_Solves_AI_Long-Term_Failure.m4a)
+- 📑 **Short Research Explainer**: [Unifying Wave and Particle Computation](data/media/Unifying_Wave_and_Particle_Computation.pdf)
     
 ---
 
@@ -138,49 +138,49 @@ We performed a Head-to-Head comparison between **ROUND (Spinor Monism)** and a s
 ### 7.1 The "Impossible" Logic Test (Parity)
 *   **ROUND:** **100% Accuracy** ($HIDDEN=1$). Snaps to the global optimum within 100 epochs using the theoretical minimum capacity.
 *   **GRU:** **50.6% Accuracy** ($HIDDEN=128$). Fails completely on 16-bit XOR chains despite 128x more capacity.
-*   ![Parity Benchmark](data/907bd6ab/benchmark_parity_907bd6ab.png)
+*   ![Parity Benchmark](data/current/benchmark_parity_907bd6ab.png)
 
 ### 7.2 Topological Invariants (Graph Cycles)
 *   **ROUND:** **100% Accuracy.** Stable, monotonic convergence on flattened graph adjacency matrices.
 *   **GRU:** **Matches Performance.** Stable with the 128-neuron provision, though slightly slower to stabilize.
-*   ![Topology Benchmark](data/907bd6ab/benchmark_topology_907bd6ab.png)
+*   ![Topology Benchmark](data/current/benchmark_topology_907bd6ab.png)
 
 ### 7.3 Streaming Recursion (Brackets Masked)
 *   **ROUND:** **~100% Accuracy.** Successfully handles Dyck-2 nesting in sequential mode.
 *   **GRU:** **100% Accuracy.** 
-*   ![Brackets Benchmark](data/907bd6ab/benchmark_brackets_masked_907bd6ab.png)
+*   ![Brackets Benchmark](data/current/benchmark_brackets_masked_907bd6ab.png)
 
 ### 7.4 The Oracle (QA Consistency)
 *   **ROUND:** **100% Accuracy.** Perfect consistency across binary classification tasks.
 *   **GRU:** **100% Accuracy.**
-*   ![Oracle Benchmark](data/907bd6ab/benchmark_oracle_907bd6ab.png)
+*   ![Oracle Benchmark](data/current/benchmark_oracle_907bd6ab.png)
 
 ### 7.5 Order Extraction (Permutations)
 *   **ROUND:** **100% Accuracy.** Successfully extracts sequence order from shuffled prompts.
 *   **GRU:** **Matches Performance.** Can learn fixed small-set permutations.
-*   ![Permutations Benchmark](data/907bd6ab/benchmark_perms_vs_gru_907bd6ab.png)
+*   ![Permutations Benchmark](data/current/benchmark_perms_vs_gru_907bd6ab.png)
 
 ### 7.6 Generative Creativity (ASCII)
 *   **ROUND:** **100% Accuracy.** Perfect cyclic timing and zero drift.
 *   **GRU:** **~97% Accuracy.** Occasional character drift even with 4x hidden state size.
-*   ![ASCII Benchmark](data/907bd6ab/benchmark_ascii_907bd6ab.png)
+*   ![ASCII Benchmark](data/current/benchmark_ascii_907bd6ab.png)
 
 ### 7.7 Semantic Algebra (Colors)
 *   **ROUND:** **100% Accuracy.** Successfully learns vector-like relationships in symbolic space using the "Logic Crystal" Ticker Array format (v0.7.3).
 *   **GRU:** **100% Accuracy.** Matches performance with 4x parameters.
-*   ![Colors Benchmark](data/907bd6ab/benchmark_colors_907bd6ab.png)
+*   ![Colors Benchmark](data/current/benchmark_colors_907bd6ab.png)
 
 ### 7.8 The CAM Gauntlet (Noisy Curriculum Prediction)
 The definitive proof of ROUND's non-volatile nature. In this test, a model must learn 6 high-entropy words in a random, stochastic curriculum (where bits are blurred by Gaussian noise). The model must remember the entire archive after 10,000 epochs of training on subsequent data with a **constant, high learning rate.**
 *   **ROUND:** **100% Accuracy.** Geometric quantization allows the model to "lock" words into topological slots that are immune to high-LR drift.
 *   **GRU:** **Catastrophic Forgetting (~88%).** Recalls later words but loses earlier ones as high plasticity "overwrites" old Euclidean vectors.
-*   ![CAM Benchmark](data/907bd6ab/log_long_term_907bd6ab.txt)
+*   ![CAM Benchmark](data/current/log_long_term_907bd6ab.txt)
 
 ### 7.9 Order Independence Brutality Test
 Performing 3 complete dual-model training batches (10k epochs each) with randomized keyword orders.
 *   **ROUND:** **100.0% Mean Accuracy.** 0.0% Standard Deviation. Zero Forgetfulness.
 *   **GRU:** **~96% Mean Aggregate Accuracy.** Significant variance depending on the sequence (~88% recall on complex shuffles).
-*   ![Gauntlet Results](data/907bd6ab/log_order_independence_907bd6ab.txt)
+*   ![Gauntlet Results](data/current/log_order_independence_907bd6ab.txt)
 
 ---
 
