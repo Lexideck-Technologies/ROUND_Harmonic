@@ -123,7 +123,7 @@ def get_stochastic_payload(bits):
     
     return (bits + noise) * mask
 
-def run_long_term_comparison(shuffled_words, epochs=10000, hidden_size_r=64, hidden_size_g=None, p_func=print, output_dir='data'):
+def run_long_term_comparison(shuffled_words, epochs=10000, hidden_size_r=64, hidden_size_g=None, p_func=print, output_dir='data', plot_name=None):
     if hidden_size_g is None: hidden_size_g = hidden_size_r
     UID = str(uuid.uuid4())[:8]
     if not os.path.exists(output_dir): os.makedirs(output_dir)
@@ -219,7 +219,10 @@ def run_long_term_comparison(shuffled_words, epochs=10000, hidden_size_r=64, hid
     ax_r.legend(loc='lower left', fontsize=8, ncol=3); ax_g.legend(loc='lower left', fontsize=8, ncol=3)
     
     plt.tight_layout()
-    plot_path = os.path.join(output_dir, f'benchmark_long_term_{UID}.png')
+    if plot_name:
+        plot_path = os.path.join(output_dir, plot_name)
+    else:
+        plot_path = os.path.join(output_dir, f'benchmark_long_term_{UID}.png')
     plt.savefig(plot_path, dpi=300)
     p_func(f"Results saved to {plot_path}")
     

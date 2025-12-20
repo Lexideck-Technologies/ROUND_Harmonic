@@ -34,7 +34,8 @@ def main():
             hidden_size_r=LONG_TERM_CONFIG['HIDDEN_R'],
             hidden_size_g=LONG_TERM_CONFIG['HIDDEN_G'],
             p_func=P,
-            output_dir=OUTPUT_DIR
+            output_dir=OUTPUT_DIR,
+            plot_name=f"benchmark_order_independence_{UID}_{i}.png"
         )
         master_results.append(run_res)
         
