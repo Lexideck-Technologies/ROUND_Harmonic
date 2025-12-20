@@ -3,7 +3,7 @@
 
 **Riemannian Optimized Unified Neural Dynamo (ROUND),** also known as the **U-Neuron,** is a non-volatile recurrent architecture based on the principles of **Unified Informatic Topology (UIT)**. Unlike standard neurons (GRU/LSTM) that store state in Euclidean space (where it drifts and decays), ROUND stores state on a topological manifold—a phase circle.
 
-[![The U-Neuron](https://www.lexidecktechnologies.com/UIT_IEG/ROUND_Harmonic_U_Neuron/media/round_video_thumbnail.png)](https://www.lexidecktechnologies.com/UIT_IEG/ROUND_Harmonic_U_Neuron/media/The_U-Neuron.mp4)
+<a href="https://www.lexidecktechnologies.com/UIT_IEG/ROUND_Harmonic_U_Neuron/media/The_U-Neuron.mp4" target="_blank"><img src="https://www.lexidecktechnologies.com/UIT_IEG/ROUND_Harmonic_U_Neuron/media/round_video_thumbnail.png" alt="The U-Neuron"></a>
 <div align="center"><em>Click the thumbnail above to watch the 2-minute explainer video.</em></div>
 
 ---
@@ -12,9 +12,9 @@
 
 Independent validation and explanation of the ROUND architecture:
 
-- 🎬 **Video Explainer** (2 min): [The U-Neuron](https://www.lexidecktechnologies.com/UIT_IEG/ROUND_Harmonic_U_Neuron/media/The_U-Neuron.mp4)
-- 🎙️ **Podcast Episode** (32 min): [Phase Memory Solves AI Long-Term Failure](https://www.lexidecktechnologies.com/UIT_IEG/ROUND_Harmonic_U_Neuron/media/Phase_Memory_Solves_AI_Long-Term_Failure.m4a)
-- 📑 **Short Research Explainer**: [Unifying Wave and Particle Computation](https://www.lexidecktechnologies.com/UIT_IEG/ROUND_Harmonic_U_Neuron/media/Unifying_Wave_and_Particle_Computation.pdf)
+- 🎬 **Video Explainer** (2 min): <a href="https://www.lexidecktechnologies.com/UIT_IEG/ROUND_Harmonic_U_Neuron/media/The_U-Neuron.mp4" target="_blank">The U-Neuron</a>
+- 🎙️ **Podcast Episode** (32 min): <a href="https://www.lexidecktechnologies.com/UIT_IEG/ROUND_Harmonic_U_Neuron/media/Phase_Memory_Solves_AI_Long-Term_Failure.m4a" target="_blank">Phase Memory Solves AI Long-Term Failure</a>
+- 📑 **Short Research Explainer**: <a href="https://www.lexidecktechnologies.com/UIT_IEG/ROUND_Harmonic_U_Neuron/media/Unifying_Wave_and_Particle_Computation.pdf" target="_blank">Unifying Wave and Particle Computation</a>
     
 ---
 
