@@ -1,4 +1,4 @@
-# version 0.6.3 - "The Density Duel" (Topology)
+# version 0.7.3 - "The Hyper-Resolution Basin" (Topology)
 import torch,torch.nn as nn,torch.optim as optim,numpy as np,matplotlib.pyplot as plt,os,uuid
 from ROUND import SequentialROUNDModel,HarmonicROUNDLoss
 from config import TOPOLOGY_CONFIG, get_lock_strength
@@ -74,12 +74,8 @@ def train_round(rid,X,Y,Xt,Yt,d):
     o=optim.Adam(m.parameters(),lr=TC['LR'])
     ah=[];locked=False
     for e in range(TC['EPOCHS']):
-        # LR Decay from Parity
-        if e == (TC['EPOCHS'] // 2):
-            for g in o.param_groups: g['lr'] *= 0.1
-
-        # Delayed Locking from Parity
-        delay_threshold = TC.get('DELAYED_LOCKING', 0.4) * TC['EPOCHS']
+        # Delayed Locking: Open up learning curve to 50%
+        delay_threshold = 0.5 * TC['EPOCHS']
         if e < delay_threshold:
              c.locking_strength = 0.0
         else:

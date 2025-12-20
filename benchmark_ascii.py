@@ -1,4 +1,4 @@
-# version 0.6.3 - "The Density Duel" (ASCII)
+# version 0.7.3 - "The Hyper-Resolution Basin" (ASCII)
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -14,20 +14,33 @@ TC = ASCII_CONFIG
 from ROUND import PhaseAccumulator, HarmonicROUNDLoss
 
 class GenerativeROUNDModel(nn.Module):
-    def __init__(self, hidden_size=64, input_dim=8, output_dim=256):
+    def __init__(self, hidden_size=64, input_dim=8, output_dim=256, spinor=True, wobble=True):
         super().__init__()
         self.h = hidden_size
+        self.wobble = wobble
+        self.spinor = spinor
         # Input: 8 bits of the ASCII char
         self.e = nn.Linear(input_dim, hidden_size) 
-        self.c = PhaseAccumulator(hidden_size)
+        
+        if wobble:
+            from ROUND import WobblePhaseAccumulator
+            self.c = WobblePhaseAccumulator(hidden_size, spinor=spinor)
+            self.c.coupling = TC.get('WOBBLE_COUPLING', 1.0)
+        else:
+            self.c = PhaseAccumulator(hidden_size, spinor=spinor)
+            
         # Output: Probability of next ASCII char (256 classes)
-        self.r = nn.Linear(hidden_size * 3, output_dim)
+        # Readout: [Cos, Sin] + [CosS, SinS if spinor] + [CosW, SinW if wobble] + [Ph]
+        num_features = 2 + (2 if spinor else 0) + (2 if wobble else 0) + 1
+        self.r = nn.Linear(hidden_size * num_features, output_dim)
 
     def forward(self, x):
         # x: [Batch, Seq, 8] (Bits)
         B, S, D = x.shape
         ph = torch.zeros(B, self.h, device=x.device)
+        wb = torch.zeros(B, self.h, device=x.device) if self.wobble else None
         
+        prev_xt = None
         # Store outputs for every step
         logits_seq = []
         hist_seq = []
@@ -40,22 +53,51 @@ class GenerativeROUNDModel(nn.Module):
             # 2. Resonate (Recurrence)
             # Create phasors from the drive
             xpt = torch.stack([torch.cos(pt), torch.sin(pt)], 2)
-            # Update Phase State
-            ph = self.c(ph, xpt)
             
-            # 3. Store History
-            hist_seq.append(ph)
+            # Update State with Long-Term Engine logic
+            if self.wobble:
+                # A. Constant Mnemonic Drift (The Clock)
+                # Helps differentiate identical sequences (like 21 spaces)
+                wb = wb + 0.03125 # 2^-5
+                
+                # B. Triggered Gemination Deflection
+                is_repeat = False
+                if prev_xt is not None:
+                    is_repeat = torch.all(torch.eq(xt, prev_xt)).item()
+                
+                if is_repeat:
+                    # Accelerate wobble into the Z-axis to break the parity loop
+                    ph, wb = self.c(ph, xpt, wb)
+                else:
+                    # Pure linear drift for non-repeats (clean counting)
+                    ph, _ = self.c(ph, xpt, wb)
+                
+                prev_xt = xt
+                hist_seq.append((ph, wb))
+                
+                # C. SU(2) Readout Features (7 Features)
+                ph_s = 0.5 * ph
+                readout_features = torch.cat([
+                    torch.cos(ph), torch.sin(ph), 
+                    torch.cos(ph_s), torch.sin(ph_s), 
+                    torch.cos(wb), torch.sin(wb),
+                    ph
+                ], 1)
+            else:
+                ph = self.c(ph, xpt)
+                hist_seq.append(ph)
+                ph_s = 0.5 * ph
+                readout_features = torch.cat([
+                    torch.cos(ph), torch.sin(ph), 
+                    torch.cos(ph_s), torch.sin(ph_s), 
+                    ph
+                ], 1)
             
-            # 4. Readout (Generate Next Char Prediction)
-            # We use Cos, Sin, and raw Phase (Neuro-Symbolic)
-            readout_features = torch.cat([torch.cos(ph), torch.sin(ph), ph], 1)
-            logits = self.r(readout_features) # [B, 256]
+            logits = self.r(readout_features)
             logits_seq.append(logits)
 
         # Stack sequences
-        # logits_seq: [Batch, Seq, 256]
         logits_out = torch.stack(logits_seq, dim=1)
-        
         return logits_out, hist_seq
 
 # --- 2. GRU Baseline Model ---
@@ -93,22 +135,34 @@ def train_model(model_name, model_class, hidden_size, device, input_bits, target
         
     P(f"\n--- Training {model_name} ---")
     
-    model = model_class(hidden_size=hidden_size).to(device)
+    if model_name == "ROUND":
+        model = model_class(hidden_size=hidden_size, spinor=True, wobble=True).to(device)
+    else:
+        model = model_class(hidden_size=hidden_size).to(device)
     optimizer = optim.Adam(model.parameters(), lr=TC['LR'])
     
     if model_name == "ROUND":
+        harmonics = [1, 2, 4, 8]
+        weights = [1.0, 0.25, 0.0625, 0.015625]
         criterion = HarmonicROUNDLoss(locking_strength=TC['PEAK_LOCKING_STRENGTH'],
-                                      harmonics=TC['HARMONICS'],
+                                      harmonics=harmonics,
+                                      weights=weights,
                                       mode='multiclass',
-                                      terminal_only=TC.get('TERMINAL_ONLY', False))
+                                      terminal_only=TC.get('TERMINAL_ONLY', False),
+                                      wobble_gravity=TC.get('WOBBLE_GRAVITY', 0.1))
     else:
         criterion = nn.CrossEntropyLoss()
         
     acc_history = []
     
     for epoch in range(epochs):
-        if model_name == "ROUND":
-            criterion.locking_strength = get_lock_strength(epoch, epochs, TC['PEAK_LOCKING_STRENGTH'])
+        # Delayed Locking: Open up learning curve to 50%
+        delay_threshold = 0.5 * epochs
+        if "ROUND" in model_name: 
+            if epoch < delay_threshold:
+                criterion.locking_strength = 0.0
+            else:
+                criterion.locking_strength = get_lock_strength(epoch, epochs, TC['PEAK_LOCKING_STRENGTH'], TC.get('FLOOR', 0.015625))
             
         optimizer.zero_grad()
         

@@ -1,4 +1,4 @@
-# version 0.6.3 - "The Density Duel" (Permutations)
+# version 0.7.3 - "The Hyper-Resolution Basin" (Permutations)
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -12,7 +12,8 @@ from config import PERMS_CONFIG, get_lock_strength
 
 # --- Configuration ---
 TC = PERMS_CONFIG
-HIDDEN_SIZE = TC['HIDDEN_SIZE']
+HIDDEN_R = TC['HIDDEN_R']
+HIDDEN_G = TC['HIDDEN_G']
 LR = TC['LR']
 # Scaling LR for GRU to give it a fighting chance
 GRU_LR = TC['LR']
@@ -96,7 +97,9 @@ def train_model(model_name, model_class, hidden_size, perm_data, device, epochs,
     optimizer = optim.Adam(model.parameters(), lr=lr)
     
     if "ROUND" in model_name:
-        criterion = HarmonicROUNDLoss(locking_strength=PEAK_LOCKING_STRENGTH, harmonics=[1], mode='multiclass')
+        criterion = HarmonicROUNDLoss(locking_strength=TC['PEAK_LOCKING_STRENGTH'], 
+                                      harmonics=TC['HARMONICS'], 
+                                      mode='multiclass')
     else:
         criterion = nn.CrossEntropyLoss()
         
@@ -110,7 +113,13 @@ def train_model(model_name, model_class, hidden_size, perm_data, device, epochs,
         logits, hist = model(in_bits)
         
         if "ROUND" in model_name:
-            criterion.locking_strength = get_lock_strength(epoch, epochs, PEAK_LOCKING_STRENGTH, floor_strength=TC.get('FLOOR', 0.0))
+            # Neural Shield Protocol: 50% Fluid Exploration / 50% Crystalline Locking
+            delay_threshold = 0.5 * epochs
+            if epoch < delay_threshold:
+                criterion.locking_strength = 0.0
+            else:
+                criterion.locking_strength = get_lock_strength(epoch, epochs, TC['PEAK_LOCKING_STRENGTH'], floor_strength=TC.get('FLOOR', 0.015625))
+            
             loss, tk_loss, lk_loss = criterion(logits.view(-1, 256), targets.view(-1), hist)
         else:
             loss = criterion(logits.view(-1, 256), targets.view(-1))

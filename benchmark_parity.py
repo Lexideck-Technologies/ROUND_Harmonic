@@ -1,4 +1,4 @@
-# version 0.6.3 - "The Density Duel" (Parity)
+# version 0.7.3 - "The Hyper-Resolution Basin" (Parity)
 import torch,torch.nn as nn,torch.optim as optim,numpy as np,matplotlib.pyplot as plt,os,uuid
 from ROUND import SequentialROUNDModel,HarmonicROUNDLoss
 from config import PARITY_CONFIG, get_lock_strength
@@ -44,15 +44,12 @@ def train_round(rid,X,Y,Xt,Yt,d):
     o=optim.Adam(m.parameters(),lr=0.01) # Increased LR for Parity
     ah=[];locked=False
     for e in range(C['epochs']):
-        if e == (C['epochs'] // 2):
-            for g in o.param_groups: g['lr'] *= 0.1
-
-        # Delayed Locking: Allow free exploration first
-        delay_threshold = TC.get('DELAYED_LOCKING', 0.4) * C['epochs']
+        # Delayed Locking: Open up learning curve to 50%
+        delay_threshold = 0.5 * C['epochs']
         if e < delay_threshold:
              c.locking_strength = 0.0
         else:
-             c.locking_strength = get_lock_strength(e, C['epochs'], TC['PEAK_LOCKING_STRENGTH'])
+             c.locking_strength = get_lock_strength(e, C['epochs'], TC['PEAK_LOCKING_STRENGTH'], TC['FLOOR'])
         o.zero_grad()
         # X: [Batch, 16] -> [Batch, 16, 1]
         out,h=m(X.unsqueeze(-1))

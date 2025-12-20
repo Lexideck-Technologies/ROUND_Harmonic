@@ -1,4 +1,4 @@
-# version 0.6.3 - "The Density Duel" (Masked Brackets)
+# version 0.7.3 - "The Hyper-Resolution Basin" (Masked Brackets)
 import torch,torch.nn as nn,torch.optim as optim,numpy as np,matplotlib.pyplot as plt,os,uuid
 from ROUND import SequentialROUNDModel,HarmonicROUNDLoss
 from config import BRACKETS_CONFIG, get_lock_strength
@@ -66,11 +66,12 @@ def train_round_seq(rid,X,Y,Xt,Yt,d):
     o=optim.Adam(m.parameters(),lr=TC['LR'])
     ah=[];locked=False
     for e in range(TC['EPOCHS']):
-        # Maintenance: Decay LR in second half
-        if e == (TC['EPOCHS'] // 2):
-            for g in o.param_groups: g['lr'] *= 0.1
-            
-        c.locking_strength = get_lock_strength(e, TC['EPOCHS'], TC['PEAK_LOCKING_STRENGTH'])
+        # Delayed Locking: Open up learning curve to 50%
+        delay_threshold = 0.5 * TC['EPOCHS']
+        if e < delay_threshold:
+            c.locking_strength = 0.0
+        else:
+            c.locking_strength = get_lock_strength(e, TC['EPOCHS'], TC['PEAK_LOCKING_STRENGTH'], TC.get('FLOOR', 0.015625))
         o.zero_grad()
         out,h=m(X.unsqueeze(-1))
         l,tk,lk=c(out,Y,h)

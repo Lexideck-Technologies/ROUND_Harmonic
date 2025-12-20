@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.7.3] - "Hyper-Resolution Basin" - 2025-12-20
+### Added
+*   **Hyper-Resolution Clock:** Increased the Drift Clock constant to $2^{-5}$ (`0.03125`) and expanded the standard Hidden Size to 128 neurons.
+*   **Logic Crystal (Ticker Array):** Overhauled the `benchmark_colors.py` test to use Batched Ticker Arrays with Context Indexing.
+*   **Perfect Symbolic Algebra:** Achieved **100.0% Accuracy** on the Colors benchmark, eliminating the "Deterministic Collision" plateau.
+
+### Changed
+*   **Wobble Mechanics:** Enforced "Clock Purity" (Linear Drift) for non-repeating tokens.
+*   **Colors Config:** Increased `HIDDEN_R` to 128 and `EPOCHS` to 800.
+
+## [0.6.4] - "The Neural Shield" - 2025-12-19
+### Added
+*   **Infinite Plasticity Standard:** Purged all learning rate decay from the benchmark suite. All models now maintain a constant, optimized learning rate ($2^{-12} \approx 0.00024$) for the entire duration of the run.
+*   **Mnemonic Shielding:** Implemented a context-aware harness policy that protects established memories during continuous learning. 
+    *   **Fluid Exploration:** New tasks begin with zero locking gravity for the first 50% of their curriculum slot.
+    *   **Neural Shield:** The maintenance floor ($2^{-6}$) is automatically engaged whenever the model revisits "Old" tasks, preventing high-LR plasticity from erasing the archive.
+*   **Unified Battery Sync:** Synchronized all 8 benchmarks (Topology, Parity, Brackets, Colors, Oracle, ASCII, Long-Term, Permutations) to the v0.6.4 "Neural Shield" protocol.
+*   **Heavy Harmonic Floor:** Standardized a $2^{-6}$ (0.015625) maintenance floor across all tasks to ensure irreversible quantization.
+
 ## [0.6.3] - "The Density Duel" - 2025-12-18
 ### Added
 *   **The Density Duel Standard:** Formalized a new benchmarking protocol where the **GRU** is granted **4x the raw capacity** (hidden neurons) compared to **ROUND** (e.g., ROUND 64 vs GRU 256). 

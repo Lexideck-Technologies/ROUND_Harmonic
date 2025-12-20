@@ -1,4 +1,4 @@
-# version 0.6.3 - "The Density Duel"
+# version 0.7.3 - "The Hyper-Resolution Basin"
 import subprocess
 import os
 import sys

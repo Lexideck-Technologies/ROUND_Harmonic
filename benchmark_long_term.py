@@ -1,4 +1,4 @@
-# version 0.6.3 - "The Density Duel" (Long-Term Memory)
+# version 0.7.3 - "The Hyper-Resolution Basin" (Long-Term Memory)
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -12,11 +12,7 @@ from ROUND import PhaseAccumulator, WobblePhaseAccumulator, HarmonicROUNDLoss
 from config import get_lock_strength, LONG_TERM_CONFIG
 
 # --- Configuration ---
-HIDDEN_SIZE = 64
-LR = 0.00048828125 # 2^-11 (The 'Sweet Spot' for 32-Neuron Retention)
-PEAK_LOCKING_STRENGTH = 0.0625
-FLOOR = 0.03125   # 2^-5 (Steady Maintenance Floor for 32 Neurons)
-EPOCHS = 10000 
+TC = LONG_TERM_CONFIG
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Keywords for the Curriculum (6-Word Deep Bake Suite)
@@ -53,7 +49,7 @@ class LongTermROUNDModel(nn.Module):
             
             if self.wobble:
                 # 1. Constant Mnemonic Drift (The Clock)
-                wb = wb + 0.00390625 # 2^-8 drift
+                wb = wb + 0.015625 # 2^-6 drift
                 
                 # 2. Triggered Gemination Deflection
                 is_repeat = False
@@ -140,12 +136,12 @@ def run_long_term_comparison(shuffled_words, epochs=10000, hidden_size_r=64, hid
     model_r = LongTermROUNDModel(hidden_size_r, wobble=True).to(DEVICE)
     model_g = GRULongTermModel(hidden_size_g).to(DEVICE)
     
-    opt_r = optim.Adam(model_r.parameters(), lr=LR)
-    opt_g = optim.Adam(model_g.parameters(), lr=LR)
+    opt_r = optim.Adam(model_r.parameters(), lr=TC['LR'])
+    opt_g = optim.Adam(model_g.parameters(), lr=TC['LR'])
     
     harmonics = [1, 2, 4, 8]
     weights = [1.0, 0.25, 0.0625, 0.015625]
-    crit_r = HarmonicROUNDLoss(locking_strength=PEAK_LOCKING_STRENGTH, harmonics=harmonics, weights=weights, mode='multiclass', wobble_gravity=0.1)
+    crit_r = HarmonicROUNDLoss(locking_strength=TC['PEAK_LOCKING_STRENGTH'], harmonics=harmonics, weights=weights, mode='multiclass', wobble_gravity=0.1)
     crit_g = nn.CrossEntropyLoss()
     
     word_data = {word: get_word_data(word) for word in shuffled_words}
@@ -155,11 +151,6 @@ def run_long_term_comparison(shuffled_words, epochs=10000, hidden_size_r=64, hid
     
     for epoch in range(epochs):
         model_r.train(); model_g.train()
-        lr_factor = (0.25 ** (epoch / epochs))
-        current_lr = LR * lr_factor
-        for opt in [opt_r, opt_g]:
-            for pg in opt.param_groups: pg['lr'] = current_lr
-        
         num_words = len(shuffled_words)
         phase = (epoch / epochs) * num_words
         current_idx = int(phase) if phase < num_words else num_words - 1
@@ -173,7 +164,15 @@ def run_long_term_comparison(shuffled_words, epochs=10000, hidden_size_r=64, hid
             
         raw_bits, targets = word_data[train_word]
         input_bits = get_stochastic_payload(raw_bits)
-        crit_r.locking_strength = get_lock_strength(epoch % (epochs // num_words), epochs // num_words, PEAK_LOCKING_STRENGTH, floor_strength=FLOOR)
+        
+        # Continuous Learning Protocol:
+        # If training the CURRENT word: Use the 50% Fluid/50% Crystalline curve.
+        # If training an OLD word (Revision): Use the FLOOR strength immediately.
+        cycle_len = epochs // num_words
+        if train_word == current_word:
+            crit_r.locking_strength = get_lock_strength(epoch % cycle_len, cycle_len, TC['PEAK_LOCKING_STRENGTH'], floor_strength=TC['FLOOR'])
+        else:
+            crit_r.locking_strength = TC['FLOOR']
         
         # ROUND
         opt_r.zero_grad()

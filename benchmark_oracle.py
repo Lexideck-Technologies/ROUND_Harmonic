@@ -1,4 +1,4 @@
-# version 0.6.3 - "The Density Duel" (Oracle)
+# version 0.7.3 - "The Hyper-Resolution Basin" (Oracle)
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -16,17 +16,30 @@ TC = ORACLE_CONFIG
 # --- 1. Model: The Oracle ---
 # --- 1. Model: The Oracle ---
 class OracleROUND(nn.Module):
-    def __init__(self, hidden_size=64):
+    def __init__(self, hidden_size=64, wobble=True):
         super().__init__()
         self.h = hidden_size
+        self.wobble = wobble
         self.e = nn.Linear(8, hidden_size) # 8-bit ASCII input
-        self.c = PhaseAccumulator(hidden_size)
-        self.r = nn.Linear(hidden_size * 3, 3) # Output: [NULL, YES, NO]
+        
+        if wobble:
+            from ROUND import WobblePhaseAccumulator
+            self.c = WobblePhaseAccumulator(hidden_size, spinor=True)
+            self.c.coupling = TC.get('WOBBLE_COUPLING', -1.0)
+        else:
+            self.c = PhaseAccumulator(hidden_size)
+            
+        # Readout: [Cos, Sin, CosS, SinS, CosW, SinW, Ph]
+        num_features = 3 + (4 if wobble else 0)
+        self.r = nn.Linear(hidden_size * 7 if wobble else hidden_size * 3, 3) # Output: [NULL, YES, NO]
 
     def forward(self, x):
         # x: [Batch, Seq, 8]
         B, S, D = x.shape
         ph = torch.zeros(B, self.h, device=x.device)
+        wb = torch.zeros(B, self.h, device=x.device) if self.wobble else None
+        
+        prev_xt = None
         H = []
         
         # Process entire sequence
@@ -34,11 +47,36 @@ class OracleROUND(nn.Module):
             xt = x[:, t, :]
             pt = self.e(xt)
             xpt = torch.stack([torch.cos(pt), torch.sin(pt)], 2)
-            ph = self.c(ph, xpt)
-            H.append(ph)
+            
+            if self.wobble:
+                wb = wb + 0.03125 # Drift Clock (2^-5)
+                
+                is_repeat = False
+                if prev_xt is not None:
+                    is_repeat = torch.all(torch.eq(xt, prev_xt)).item()
+                
+                if is_repeat:
+                    ph, wb = self.c(ph, xpt, wb)
+                else:
+                    # Pure linear drift
+                    ph, _ = self.c(ph, xpt, wb)
+                
+                prev_xt = xt
+                H.append((ph, wb))
+                
+                ph_s = 0.5 * ph
+                readout = torch.cat([
+                    torch.cos(ph), torch.sin(ph), 
+                    torch.cos(ph_s), torch.sin(ph_s), 
+                    torch.cos(wb), torch.sin(wb),
+                    ph
+                ], 1)
+            else:
+                ph = self.c(ph, xpt)
+                H.append(ph)
+                readout = torch.cat([torch.cos(ph), torch.sin(ph), ph], 1)
             
         # Terminal Readout Only
-        readout = torch.cat([torch.cos(ph), torch.sin(ph), ph], 1)
         logits = self.r(readout) # [Batch, 3]
         return logits, H
 
@@ -106,18 +144,27 @@ def train_model_run(run_id, model_class, hidden_size, device, output_dir, L_FILE
     optimizer = optim.Adam(model.parameters(), lr=TC['LR'])
     
     if model_name == "ROUND":
+        harmonics = [1, 2, 4, 8]
+        weights = [1.0, 0.25, 0.0625, 0.015625]
         criterion = HarmonicROUNDLoss(locking_strength=TC['PEAK_LOCKING_STRENGTH'],
-                                      harmonics=TC['HARMONICS'],
+                                      harmonics=harmonics,
+                                      weights=weights,
                                       mode='multiclass',
-                                      terminal_only=TC.get('TERMINAL_ONLY', True))
+                                      terminal_only=TC.get('TERMINAL_ONLY', True),
+                                      wobble_gravity=TC.get('WOBBLE_GRAVITY', 0.1))
     else:
         criterion = nn.CrossEntropyLoss()
         
     acc_history = []
     
     for epoch in range(TC['EPOCHS']):
+        # Delayed Locking: Open up learning curve to 50%
+        delay_threshold = 0.5 * TC['EPOCHS']
         if model_name == "ROUND":
-            criterion.locking_strength = get_lock_strength(epoch, TC['EPOCHS'], TC['PEAK_LOCKING_STRENGTH'])
+            if epoch < delay_threshold:
+                criterion.locking_strength = 0.0
+            else:
+                criterion.locking_strength = get_lock_strength(epoch, TC['EPOCHS'], TC['PEAK_LOCKING_STRENGTH'], TC.get('FLOOR', 0.015625))
             
         total_loss = 0
         correct = 0

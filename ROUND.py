@@ -151,7 +151,7 @@ class SequentialROUNDModel(nn.Module):
         self.spinor = spinor
         # Readout: [Cos, Sin] + [CosS, SinS if spinor] + [CosW, SinW if wobble] + [Ph if use_raw_phase]
         num_features = 2 + (2 if spinor else 0) + (2 if wobble else 0) + (1 if use_raw_phase else 0)
-        readout_dim = hidden_size * num_features
+        readout_dim = hidden_size * 7 if wobble else hidden_size * num_features
         self.r = nn.Linear(readout_dim, output_classes)
         
     def forward(self, x):
@@ -160,6 +160,7 @@ class SequentialROUNDModel(nn.Module):
         ph = torch.zeros(B, self.h, device=x.device)
         wb = torch.zeros(B, self.h, device=x.device) if self.wobble else None
         
+        prev_xt = None
         H = []
         for t in range(S):
             xt = x[:, t, :]
@@ -167,24 +168,46 @@ class SequentialROUNDModel(nn.Module):
             xpt = torch.stack([torch.cos(pt), torch.sin(pt)], 2)
             
             if self.wobble:
-                ph, wb = self.c(ph, xpt, wb)
+                # 1. Constant Mnemonic Drift (The Clock)
+                # Helps differentiate identical sequences
+                wb = wb + 0.03125 # 2^-5 (Hyper-Resolution Clock)
+                
+                # 2. Triggered Gemination Deflection
+                is_repeat = False
+                if prev_xt is not None:
+                    is_repeat = torch.all(torch.eq(xt, prev_xt)).item()
+                
+                if is_repeat:
+                    # Accelerate wobble into the Z-axis to break the parity loop
+                    ph, wb = self.c(ph, xpt, wb)
+                else:
+                    # Planar discovery, but still tracking the drift/wobble update
+                    ph, wb = self.c(ph, xpt, wb)
+                
+                prev_xt = xt
                 H.append((ph, wb))
+                
+                # 3. SU(2) Readout Features (7 Features)
+                ph_s = self.spin_factor * ph
+                readout_features = torch.cat([
+                    torch.cos(ph), torch.sin(ph), 
+                    torch.cos(ph_s), torch.sin(ph_s), 
+                    torch.cos(wb), torch.sin(wb),
+                    ph
+                ], 1)
             else:
                 ph = self.c(ph, xpt)
                 H.append(ph)
+                ph_s = self.spin_factor * ph
+                readout_features_list = [
+                    torch.cos(ph), torch.sin(ph), 
+                    torch.cos(ph_s), torch.sin(ph_s)
+                ]
+                if self.use_raw_phase:
+                    readout_features_list.append(ph)
+                readout_features = torch.cat(readout_features_list, 1)
             
-        readout_features = [torch.cos(ph), torch.sin(ph)]
-        if self.spinor:
-             ph_s = self.spin_factor * ph
-             readout_features.extend([torch.cos(ph_s), torch.sin(ph_s)])
-             
-        if self.wobble:
-             readout_features.extend([torch.cos(wb), torch.sin(wb)])
-             
-        if self.use_raw_phase:
-            readout_features.append(ph)
-            
-        return self.r(torch.cat(readout_features, 1)), H
+        return self.r(readout_features), H
 
 class ROUNDLoss(nn.Module):
     def __init__(self, locking_strength=0.1, terminal_only=False):

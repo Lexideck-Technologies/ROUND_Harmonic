@@ -1,0 +1,87 @@
+--- Creative Benchmark: ASCII Generator (ROUND vs GRU) ---
+Batch UID: 907bd6ab
+Run Config: {'HIDDEN_R': 32, 'HIDDEN_G': 128, 'PEAK_LOCKING_STRENGTH': 0.5, 'HARMONICS': [1, 2, 4, 8], 'EPOCHS': 400, 'FLOOR': 0.125, 'LR': 0.001953125, 'WOBBLE_GRAVITY': 0.1, 'WOBBLE_COUPLING': -1.0, 'TERMINAL_ONLY': False}
+Task: Learn 'HELLO WORLD' + 21 Spaces sequence.
+Training ROUND (5 Runs)...
+
+--- Training ROUND_1 ---
+ROUND_1 E   0 | Acc: 0.00 | Loss: 5.2526 | Out: '????????????????????????????????'
+ROUND_1 E 100 | Acc: 0.94 | Loss: 0.3149 | Out: 'ELLO WORDD                      '
+ROUND_1 E 200 | Acc: 0.97 | Loss: 0.1630 | Out: 'ELLO WORLD                      '
+ROUND_1 E 300 | Acc: 1.00 | Loss: 0.0119 | Out: 'ELLO WORLD                     H'
+ROUND_1 E 399 | Acc: 1.00 | Loss: 0.0063 | Out: 'ELLO WORLD                     H'
+ROUND_1 Final Acc: 1.0000
+
+--- Training ROUND_2 ---
+ROUND_2 E   0 | Acc: 0.00 | Loss: 6.8396 | Out: '????PPP?????????????hhhhhhhhhh??'
+ROUND_2 E 100 | Acc: 0.94 | Loss: 0.2897 | Out: 'ELLO WORL                       '
+ROUND_2 E 200 | Acc: 0.97 | Loss: 0.1512 | Out: 'ELLO WORLD                      '
+ROUND_2 E 300 | Acc: 0.97 | Loss: 0.0529 | Out: 'ELLO WORLD                      '
+ROUND_2 E 399 | Acc: 1.00 | Loss: 0.0070 | Out: 'ELLO WORLD                     H'
+ROUND_2 Final Acc: 1.0000
+
+--- Training ROUND_3 ---
+ROUND_3 E   0 | Acc: 0.00 | Loss: 6.8585 | Out: 'Z???????????????????????????????'
+ROUND_3 E 100 | Acc: 0.91 | Loss: 0.3225 | Out: 'ELLO WORR                       '
+ROUND_3 E 200 | Acc: 0.97 | Loss: 0.1494 | Out: 'ELLO WORLD                      '
+ROUND_3 E 300 | Acc: 1.00 | Loss: 0.0136 | Out: 'ELLO WORLD                     H'
+ROUND_3 E 399 | Acc: 1.00 | Loss: 0.0077 | Out: 'ELLO WORLD                     H'
+ROUND_3 Final Acc: 1.0000
+
+--- Training ROUND_4 ---
+ROUND_4 E   0 | Acc: 0.00 | Loss: 5.1348 | Out: '```DDD******????***********?****'
+ROUND_4 E 100 | Acc: 0.97 | Loss: 0.2014 | Out: 'ELLO WORLD                      '
+ROUND_4 E 200 | Acc: 0.91 | Loss: 0.3469 | Out: 'ELLO WOLL                       '
+ROUND_4 E 300 | Acc: 1.00 | Loss: 0.0147 | Out: 'ELLO WORLD                     H'
+ROUND_4 E 399 | Acc: 1.00 | Loss: 0.0067 | Out: 'ELLO WORLD                     H'
+ROUND_4 Final Acc: 1.0000
+
+--- Training ROUND_5 ---
+ROUND_5 E   0 | Acc: 0.00 | Loss: 6.4329 | Out: 'ss??????????????????????????????'
+ROUND_5 E 100 | Acc: 0.97 | Loss: 0.2679 | Out: 'ELLO WORLD                      '
+ROUND_5 E 200 | Acc: 0.97 | Loss: 0.1648 | Out: 'ELLO WORLD                      '
+ROUND_5 E 300 | Acc: 0.97 | Loss: 0.1235 | Out: 'ELLO WORLD                      '
+ROUND_5 E 399 | Acc: 1.00 | Loss: 0.0071 | Out: 'ELLO WORLD                     H'
+ROUND_5 Final Acc: 1.0000
+Training GRU (5 Runs)...
+
+--- Training GRU_1 ---
+GRU_1 E   0 | Acc: 0.00 | Loss: 5.6022 | Out: '*??JJ???????????????????????????'
+GRU_1 E 100 | Acc: 0.81 | Loss: 0.5963 | Out: 'ELLOOOOO                        '
+GRU_1 E 200 | Acc: 0.97 | Loss: 0.1924 | Out: 'ELLO WORLD                      '
+GRU_1 E 300 | Acc: 0.97 | Loss: 0.0609 | Out: 'ELLO WORLD                      '
+GRU_1 E 399 | Acc: 1.00 | Loss: 0.0293 | Out: 'ELLO WORLD                     H'
+GRU_1 Final Acc: 1.0000
+
+--- Training GRU_2 ---
+GRU_2 E   0 | Acc: 0.00 | Loss: 5.5453 | Out: '?]?????5?(((????????????????????'
+GRU_2 E 100 | Acc: 0.84 | Loss: 0.5879 | Out: 'ELLOOWOO                        '
+GRU_2 E 200 | Acc: 0.97 | Loss: 0.2122 | Out: 'ELLO WORLD                      '
+GRU_2 E 300 | Acc: 1.00 | Loss: 0.0653 | Out: 'ELLO WORLD                     H'
+GRU_2 E 399 | Acc: 1.00 | Loss: 0.0371 | Out: 'ELLO WORLD                     H'
+GRU_2 Final Acc: 1.0000
+
+--- Training GRU_3 ---
+GRU_3 E   0 | Acc: 0.00 | Loss: 5.5766 | Out: 'c???1?111?????KKKKKKKKKKKKKKKKKK'
+GRU_3 E 100 | Acc: 0.81 | Loss: 0.5689 | Out: 'ELLLOWOO                        '
+GRU_3 E 200 | Acc: 0.97 | Loss: 0.1680 | Out: 'ELLO WORLD                      '
+GRU_3 E 300 | Acc: 1.00 | Loss: 0.0496 | Out: 'ELLO WORLD                     H'
+GRU_3 E 399 | Acc: 1.00 | Loss: 0.0289 | Out: 'ELLO WORLD                     H'
+GRU_3 Final Acc: 1.0000
+
+--- Training GRU_4 ---
+GRU_4 E   0 | Acc: 0.00 | Loss: 5.4955 | Out: '??U?UUUUUUUU?==================='
+GRU_4 E 100 | Acc: 0.84 | Loss: 0.5780 | Out: 'ELLOOWOO                        '
+GRU_4 E 200 | Acc: 0.97 | Loss: 0.1795 | Out: 'ELLO WORLD                      '
+GRU_4 E 300 | Acc: 0.97 | Loss: 0.0576 | Out: 'ELLO WORLD                      '
+GRU_4 E 399 | Acc: 1.00 | Loss: 0.0306 | Out: 'ELLO WORLD                     H'
+GRU_4 Final Acc: 1.0000
+
+--- Training GRU_5 ---
+GRU_5 E   0 | Acc: 0.00 | Loss: 5.4738 | Out: '?~~~~~~~~~~~~rrrrrrrrrrrrrrrrrrr'
+GRU_5 E 100 | Acc: 0.84 | Loss: 0.6133 | Out: 'ELLOOWOO                        '
+GRU_5 E 200 | Acc: 0.97 | Loss: 0.2005 | Out: 'ELLO WORLD                      '
+GRU_5 E 300 | Acc: 0.97 | Loss: 0.0781 | Out: 'ELLO WORLD                      '
+GRU_5 E 399 | Acc: 0.97 | Loss: 0.0411 | Out: 'ELLO WORLD                      '
+GRU_5 Final Acc: 0.9688
+Plot saved to benchmark_ascii_907bd6ab.png

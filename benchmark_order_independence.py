@@ -1,4 +1,4 @@
-# version 0.6.3 - "The Density Duel" (Order Independence Gauntlet)
+# version 0.7.3 - "The Hyper-Resolution Basin" (Order Independence Gauntlet)
 import torch
 import numpy as np
 import os
