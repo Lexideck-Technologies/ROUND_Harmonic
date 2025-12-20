@@ -174,13 +174,13 @@ We performed a Head-to-Head comparison between **ROUND (Spinor Monism)** and a s
 The definitive proof of ROUND's non-volatile nature. In this test, a model must learn 6 high-entropy words in a random, stochastic curriculum (where bits are blurred by Gaussian noise). The model must remember the entire archive after 10,000 epochs of training on subsequent data with a **constant, high learning rate.**
 *   **ROUND:** **100% Accuracy.** Geometric quantization allows the model to "lock" words into topological slots that are immune to high-LR drift.
 *   **GRU:** **Catastrophic Forgetting (~88%).** Recalls later words but loses earlier ones as high plasticity "overwrites" old Euclidean vectors.
-*   ![CAM Benchmark](data/current/log_long_term_907bd6ab.txt)
+*   [View Content-Addressed Memory (CAM) Benchmark Log](data/current/log_long_term_907bd6ab.txt)
 
 ### 7.9 Order Independence Brutality Test
 Performing 3 complete dual-model training batches (10k epochs each) with randomized keyword orders.
 *   **ROUND:** **100.0% Mean Accuracy.** 0.0% Standard Deviation. Zero Forgetfulness.
 *   **GRU:** **~96% Mean Aggregate Accuracy.** Significant variance depending on the sequence (~88% recall on complex shuffles).
-*   ![Gauntlet Results](data/current/log_order_independence_907bd6ab.txt)
+*   [View Gauntlet Results Log](data/current/log_order_independence_907bd6ab.txt)
 
 ---
 
