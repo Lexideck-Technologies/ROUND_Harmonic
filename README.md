@@ -237,7 +237,7 @@ The core hypothesis of UIT is that **discrete logic is a special case of continu
 
 **License:** MIT License.
 
-**Citation:** Please cite **v0.6.3 "The Density Duel"**.
+**Citation:** Please cite **Lexideck ROUND Harmonic U-Neuron**.
 
 ---
 
