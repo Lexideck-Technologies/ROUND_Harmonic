@@ -196,7 +196,9 @@ SYMMETRY     |         100.0% |         100.0%
 Performing 3 complete dual-model training batches (10k epochs each) with randomized keyword orders.
 *   **ROUND:** **100.0% Mean Accuracy.** 0.0% Standard Deviation. Zero Forgetfulness.
 *   **GRU:** **~96% Mean Aggregate Accuracy.** Significant variance depending on the sequence (~88% recall on complex shuffles).
-*   ![Gauntlet Benchmark](data/current/benchmark_long_term_822dc5d6.png)
+*   ![Gauntlet Benchmark Run 1](data/current/benchmark_long_term_822dc5d6.png)
+*   ![Gauntlet Benchmark Run 2](data/current/benchmark_long_term_50bad2d4.png)
+*   ![Gauntlet Benchmark Run 3](data/current/benchmark_long_term_7c6831a7.png)
 ```text
 Word         | ROUND Mean    | GRU Mean      | Status
 -----------------------------------------------------
