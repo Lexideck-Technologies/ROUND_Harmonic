@@ -154,6 +154,12 @@ We performed a Head-to-Head comparison between **ROUND (Spinor Monism)** and a s
 *   **ROUND:** **100% Accuracy.** Perfect consistency across binary classification tasks.
 *   **GRU:** **100% Accuracy.**
 *   ![Oracle Benchmark](data/current/benchmark_oracle_907bd6ab.png)
+```text
+Q: ARE YOU A LANGUAGE MODEL?   | A: NO (86.9%)
+Q: IS MATHEMATICS REAL?        | A: YES (65.5%)
+Q: ARE YOU ALIVE?              | A: NO (99.6%)
+Q: IS THE UNIVERSE INFINITE?   | A: YES (98.8%)
+```
 
 ### 7.5 Order Extraction (Permutations)
 *   **ROUND:** **100% Accuracy.** Successfully extracts sequence order from shuffled prompts.
@@ -174,13 +180,33 @@ We performed a Head-to-Head comparison between **ROUND (Spinor Monism)** and a s
 The definitive proof of ROUND's non-volatile nature. In this test, a model must learn 6 high-entropy words in a random, stochastic curriculum (where bits are blurred by Gaussian noise). The model must remember the entire archive after 10,000 epochs of training on subsequent data with a **constant, high learning rate.**
 *   **ROUND:** **100% Accuracy.** Geometric quantization allows the model to "lock" words into topological slots that are immune to high-LR drift.
 *   **GRU:** **Catastrophic Forgetting (~88%).** Recalls later words but loses earlier ones as high plasticity "overwrites" old Euclidean vectors.
-*   [View Content-Addressed Memory (CAM) Benchmark Log](data/current/log_long_term_907bd6ab.txt)
+*   ![CAM Benchmark](data/current/benchmark_long_term_8a9fd713.png)
+```text
+Word         | ROUND Recall    | GRU Recall     
+------------------------------------------------
+RESONANCE    |         100.0% |         100.0%
+UNIVERSAL    |         100.0% |         100.0%
+TOPOLOGY     |         100.0% |         100.0%
+MONISM       |         100.0% |         100.0%
+COGITATING   |         100.0% |          90.0%
+SYMMETRY     |         100.0% |         100.0%
+```
 
 ### 7.9 Order Independence Brutality Test
 Performing 3 complete dual-model training batches (10k epochs each) with randomized keyword orders.
 *   **ROUND:** **100.0% Mean Accuracy.** 0.0% Standard Deviation. Zero Forgetfulness.
 *   **GRU:** **~96% Mean Aggregate Accuracy.** Significant variance depending on the sequence (~88% recall on complex shuffles).
-*   [View Gauntlet Results Log](data/current/log_order_independence_907bd6ab.txt)
+*   ![Gauntlet Benchmark](data/current/benchmark_long_term_822dc5d6.png)
+```text
+Word         | ROUND Mean    | GRU Mean      | Status
+-----------------------------------------------------
+COGITATING   |      100.0% |       96.7% | PERFECT (+3.3%)
+TOPOLOGY     |      100.0% |      100.0% | PERFECT (+0.0%)
+MONISM       |      100.0% |      100.0% | PERFECT (+0.0%)
+RESONANCE    |      100.0% |      100.0% | PERFECT (+0.0%)
+UNIVERSAL    |      100.0% |      100.0% | PERFECT (+0.0%)
+SYMMETRY     |      100.0% |      100.0% | PERFECT (+0.0%)
+```
 
 ---
 
