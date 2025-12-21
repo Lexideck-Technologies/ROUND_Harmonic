@@ -1,4 +1,4 @@
-# version 0.7.3 - "The Hyper-Resolution Basin" (Config)
+# version 0.8.0 - "The Frozen Basin" (Config)
 import math
 
 # ROUND Configuration
@@ -138,6 +138,6 @@ LONG_TERM_CONFIG = {
     'HIDDEN_G': 256,
     'PEAK_LOCKING_STRENGTH': 0.5,
     'FLOOR': 0.125,
-    'EPOCHS': 10000,
+    'EPOCHS': 12500,
     'LR': 0.000244140625
 }

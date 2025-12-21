@@ -1,4 +1,4 @@
-# version 0.7.3 - "The Hyper-Resolution Basin" (ASCII)
+# version 0.8.0 - "The Frozen Basin" (ASCII)
 import torch
 import torch.nn as nn
 import torch.optim as optim

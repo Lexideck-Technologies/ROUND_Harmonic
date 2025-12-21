@@ -1,4 +1,4 @@
-# version 0.7.3 - "The Hyper-Resolution Basin" (Long-Term Memory)
+# version 0.8.0 - "The Frozen Basin" (Freezing Mechanism Development)
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -18,6 +18,56 @@ DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # Keywords for the Curriculum (6-Word Deep Bake Suite)
 WORDS = ["COGITATING", "TOPOLOGY", "MONISM", "RESONANCE", "UNIVERSAL", "SYMMETRY"]
 
+# --- Custom Freezing Mask Generator ---
+class FreezingGradientMask(nn.Module):
+    """
+    Implements the 'Gradient Vault':
+    Instead of penalizing movement (stiff spring), we identify solved neurons
+    and return a MASK. The optimizer loop will then ZERO the gradients for these
+    neurons, physically preventing them from moving regardless of the loss.
+    """
+    def __init__(self, harmonics=[1], weights=None, solved_threshold=0.001953125, hidden_size=64):
+        super().__init__()
+        self.h = harmonics
+        self.w = weights if weights else [1.0]*len(harmonics)
+        self.solved_threshold = solved_threshold
+        # Permanent Graduation Registry
+        self.register_buffer('permanent_mask', torch.zeros(hidden_size, dtype=torch.bool))
+
+    def forward(self, hist):
+        # Unpack History
+        if isinstance(hist[0], tuple):
+            # Phase is the first element
+            st_ph = torch.stack([h[0] for h in hist])
+        else:
+            st_ph = torch.stack(hist)
+            
+        # Calculate Per-Neuron Locking Error (Braking Requirement)
+        # Shape of st_ph: [Seq, Batch, Hidden]
+        
+        # Accumulate error across harmonics
+        locking_error = torch.zeros_like(st_ph)
+        for i, s in enumerate(self.h):
+            locking_error += self.w[i] * (torch.sin(s/2.0 * st_ph)**2)
+        
+        # Normalize by number of harmonics
+        locking_error /= len(self.h)
+        
+        # Collapse time dimension (Seq)
+        avg_error = torch.mean(locking_error, dim=0) # [Batch, Hidden]
+        
+        # Identify CURRENTLY Solved Neurons
+        current_solved = avg_error < self.solved_threshold # [Batch, Hidden]
+        
+        # Since Batch=1 in this test, squeeze to [Hidden]
+        current_solved = current_solved.squeeze(0)
+        
+        # Update Permanent Registry (Logical OR)
+        self.permanent_mask = self.permanent_mask | current_solved
+        
+        return self.permanent_mask # Return the cumulative mask
+
+# --- Models ---
 class LongTermROUNDModel(nn.Module):
     def __init__(self, hidden_size=32, input_dim=8, output_dim=256, wobble=True):
         super().__init__()
@@ -34,7 +84,7 @@ class LongTermROUNDModel(nn.Module):
         num_features = 5 + (2 if wobble else 0)
         self.r = nn.Linear(hidden_size * num_features, output_dim)
 
-    def forward(self, x):
+    def forward(self, x, pruning_mask=None):
         B, S, D = x.shape
         ph = torch.zeros(B, self.h, device=x.device)
         wb = torch.zeros(B, self.h, device=x.device) if self.wobble else None
@@ -66,21 +116,44 @@ class LongTermROUNDModel(nn.Module):
                 prev_xt = xt
                 hist_seq.append((ph, wb))
                 ph_s = 0.5 * ph
-                readout_features = torch.cat([
+                
+                # Stack features: [Batch, NumFeatures, Hidden]
+                # Order matters to match existing weights?
+                # Original was cat([Cos(ph), Sin(ph)...], 1) which is [B, H*F] where H is inner?
+                # No, cat([B,H], [B,H]) makes [B, 2H].
+                # So indices 0..63 are Cos. 64..127 are Sin.
+                # So it IS Feature-Major.
+                # Stack [B, H] -> [B, F, H]. Flatten -> [B, F*H].
+                # Correct.
+                
+                features_list = [
                     torch.cos(ph), torch.sin(ph), 
                     torch.cos(ph_s), torch.sin(ph_s), 
                     torch.cos(wb), torch.sin(wb),
                     ph
-                ], 1)
+                ]
             else:
                 ph = self.c(ph, xpt)
                 hist_seq.append(ph)
                 ph_s = 0.5 * ph
-                readout_features = torch.cat([
+                features_list = [
                     torch.cos(ph), torch.sin(ph), 
                     torch.cos(ph_s), torch.sin(ph_s), 
                     ph
-                ], 1)
+                ]
+            
+            # Form Readout Input
+            stacked = torch.stack(features_list, dim=1) # [B, F, H]
+            
+            # STORM PRUNING
+            if pruning_mask is not None:
+                # pruning_mask is [Hidden] (True for Keep/Frozen, False for Prune)
+                # We want to KEEP True.
+                # Ensure mask is float
+                mask_tensor = pruning_mask.float().view(1, 1, -1) # [1, 1, H]
+                stacked = stacked * mask_tensor
+                
+            readout_features = stacked.reshape(B, -1) # Flatten to [B, F*H]
                 
             logits = self.r(readout_features)
             logits_seq.append(logits)
@@ -123,12 +196,12 @@ def get_stochastic_payload(bits):
     
     return (bits + noise) * mask
 
-def run_long_term_comparison(shuffled_words, epochs=10000, hidden_size_r=64, hidden_size_g=None, p_func=print, output_dir='data', plot_name=None):
+def run_long_term_comparison(shuffled_words, epochs=10500, hidden_size_r=64, hidden_size_g=None, p_func=print, output_dir='data', plot_name=None):
     if hidden_size_g is None: hidden_size_g = hidden_size_r
     UID = str(uuid.uuid4())[:8]
     if not os.path.exists(output_dir): os.makedirs(output_dir)
     
-    p_func(f"--- [ROUND vs GRU: LONG-TERM COMPARISON] ---")
+    p_func(f"--- [ROUND vs GRU: PHASE ANGLE LOCK TEST] ---")
     p_func(f"Order: {shuffled_words}")
     p_func(f"Epochs: {epochs} | ROUND Hidden: {hidden_size_r} | GRU Hidden: {hidden_size_g}")
 
@@ -141,14 +214,27 @@ def run_long_term_comparison(shuffled_words, epochs=10000, hidden_size_r=64, hid
     
     harmonics = [1, 2, 4, 8]
     weights = [1.0, 0.25, 0.0625, 0.015625]
+    
+    # Use standard harmonic loss for now, we will add the mask logic in the loop
     crit_r = HarmonicROUNDLoss(locking_strength=TC['PEAK_LOCKING_STRENGTH'], harmonics=harmonics, weights=weights, mode='multiclass', wobble_gravity=0.1)
     crit_g = nn.CrossEntropyLoss()
+    
+    # Freezing Mask Generator
+    mask_gen = FreezingGradientMask(harmonics=harmonics, weights=weights, solved_threshold=0.001953125, hidden_size=hidden_size_r).to(DEVICE)
     
     word_data = {word: get_word_data(word) for word in shuffled_words}
     hist_r = {word: [] for word in shuffled_words}
     hist_g = {word: [] for word in shuffled_words}
     loss_r, loss_g = [], []
     
+    NOISE_START = epochs - 1500
+
+    # Define layers to freeze (Vertical Crystal)
+    # We do this once to avoid logic overhead in the loop
+    frozen_layers = [model_r.e, model_r.c.d]
+    if hasattr(model_r.c, 'd_w'):
+        frozen_layers.append(model_r.c.d_w)
+        
     for epoch in range(epochs):
         model_r.train(); model_g.train()
         num_words = len(shuffled_words)
@@ -163,7 +249,20 @@ def run_long_term_comparison(shuffled_words, epochs=10000, hidden_size_r=64, hid
             train_word = current_word
             
         raw_bits, targets = word_data[train_word]
-        input_bits = get_stochastic_payload(raw_bits)
+        
+        # --- NOISE STORM INJECTION ---
+        if epoch >= NOISE_START:
+            if epoch == NOISE_START:
+                p_func(f"\n!!! [NOISE STORM INITIATED] Epoch {epoch}: Interference Level 0.5 (Max 50% Corruption) !!!")
+            input_bits = get_stochastic_payload(raw_bits) # Apply standard noise first
+            # Manually apply storm noise here
+            storm_noise = torch.randn_like(input_bits) * 0.5
+            storm_mask = (torch.rand_like(input_bits) > 0.4).float() # Keeps 60% approx
+            input_bits = (input_bits + storm_noise) * storm_mask
+        else:
+            # STANDARD TRAINING
+            input_bits = get_stochastic_payload(raw_bits)
+
         
         # Continuous Learning Protocol:
         # If training the CURRENT word: Use the 50% Fluid/50% Crystalline curve.
@@ -172,16 +271,43 @@ def run_long_term_comparison(shuffled_words, epochs=10000, hidden_size_r=64, hid
         if train_word == current_word:
             crit_r.locking_strength = get_lock_strength(epoch % cycle_len, cycle_len, TC['PEAK_LOCKING_STRENGTH'], floor_strength=TC['FLOOR'])
         else:
-            crit_r.locking_strength = TC['FLOOR']
+            # Strengthen the lock for revisited words!
+            crit_r.locking_strength = TC['FLOOR'] * 2.0
         
         # ROUND
-        opt_r.zero_grad()
-        l_r, h_r = model_r(input_bits)
-        ls_r, tk_r, _ = crit_r(l_r.view(-1, 256), targets.view(-1), h_r)
-        ls_r.backward(); opt_r.step()
-        loss_r.append(tk_r)
+        if epoch < NOISE_START:
+            model_r.train()
+            opt_r.zero_grad()
+            l_r, h_r = model_r(input_bits)
+            
+            # Determine if we freeze based on global locked status or local mask?
+            # We stick to the Gradient Vault Mask (local neuron state)
+            ls_r, tk_r, _ = crit_r(l_r.view(-1, 256), targets.view(-1), h_r)
+            
+            # --- GRADIENT VAULT: APPLY FREEZING ---
+            ls_r.backward()
+            
+            frozen_mask = mask_gen(h_r) # [Hidden]
+            if frozen_mask.any():
+                # Apply to all registered frozen layers (Vertical Crystal)
+                for layer in frozen_layers:
+                    if layer.weight.grad is not None:
+                        layer.weight.grad[frozen_mask] = 0.0
+                    if layer.bias is not None and layer.bias.grad is not None:
+                        layer.bias.grad[frozen_mask] = 0.0
+                
+            opt_r.step()
+            loss_r.append(tk_r)
+        else:
+            # ROUND CRYOSTASIS (Storm Mode)
+            # The model is frozen. It faces the storm with fixed weights.
+            model_r.eval()
+            with torch.no_grad():
+                l_r, h_r = model_r(input_bits)
+                ls_r, tk_r, _ = crit_r(l_r.view(-1, 256), targets.view(-1), h_r)
+            loss_r.append(tk_r)
         
-        # GRU
+        # GRU (Continues to struggle/learn/overfit)
         opt_g.zero_grad()
         l_g, _ = model_g(input_bits)
         ls_g = crit_g(l_g.view(-1, 256), targets.view(-1))
@@ -214,7 +340,7 @@ def run_long_term_comparison(shuffled_words, epochs=10000, hidden_size_r=64, hid
         ax_r.plot(ep_axis, hist_r[word], label=f"R: {word}", color=colors[i % len(colors)], linewidth=2)
         ax_g.plot(ep_axis, hist_g[word], label=f"G: {word}", color=colors[i % len(colors)], linewidth=2, linestyle='--')
     
-    ax_r.set_title(f"ROUND - Spinor Monism ({hidden_size_r} Neurons)", color='#FF5555', fontsize=16)
+    ax_r.set_title(f"ROUND - Phase Angle Lock ({hidden_size_r} Neurons)", color='#FF5555', fontsize=16)
     ax_g.set_title(f"GRU - Standard Gating ({hidden_size_g} Neurons)", color='#5555FF', fontsize=16)
     ax_r.legend(loc='lower left', fontsize=8, ncol=3); ax_g.legend(loc='lower left', fontsize=8, ncol=3)
     
@@ -222,7 +348,7 @@ def run_long_term_comparison(shuffled_words, epochs=10000, hidden_size_r=64, hid
     if plot_name:
         plot_path = os.path.join(output_dir, plot_name)
     else:
-        plot_path = os.path.join(output_dir, f'benchmark_long_term_{UID}.png')
+        plot_path = os.path.join(output_dir, f'benchmark_phase_lock_{UID}.png')
     plt.savefig(plot_path, dpi=300)
     p_func(f"Results saved to {plot_path}")
     
@@ -233,7 +359,7 @@ def train_long_term():
     UID = os.environ.get('ROUND_BATCH_UID', str(uuid.uuid4())[:8])
     output_dir = os.environ.get('ROUND_OUTPUT_DIR', 'data')
     if not os.path.exists(output_dir): os.makedirs(output_dir)
-    log_path = os.path.join(output_dir, f'log_long_term_{UID}.txt')
+    log_path = os.path.join(output_dir, f'log_phase_lock_{UID}.txt')
     L_FILE = open(log_path, 'w')
     def L_P(s): print(s); L_FILE.write(str(s) + '\n'); L_FILE.flush()
 

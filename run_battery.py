@@ -1,4 +1,4 @@
-# version 0.7.3 - "The Hyper-Resolution Basin"
+# version 0.8.0 - "The Frozen Basin"
 import subprocess
 import os
 import sys
@@ -12,7 +12,7 @@ scripts = [
     "benchmark_colors.py",
     "benchmark_oracle.py",
     "benchmark_permutations.py",
-    "benchmark_long_term.py",
+    "benchmark_phase_lock.py",
     "benchmark_order_independence.py"
 ]
 

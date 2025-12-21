@@ -1,4 +1,4 @@
-# version 0.6.3 - "The Density Duel" (Core)
+# version 0.8.0 - "The Frozen Basin"
 import torch
 import torch.nn as nn
 

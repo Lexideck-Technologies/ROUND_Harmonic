@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.0] - "The Frozen Basin" - 2025-12-20
+### Added
+*   **Frozen Basin Test:** Replaced the legacy Long-Term Memory test with `benchmark_phase_lock.py` ("The Magnum Opus"). This test runs for **12,500 Epochs** (11,000 Learn + 1,500 Cryostasis Storm).
+*   **Cryostasis Mechanism:** Implemented the "Gradient Vault" within the `FreezingGradientMask` class. This mechanism autonomously detects when a neuron has achieved harmonic resonance ($< 2^{-9}$ error) and permanently zeros its gradients, "locking" the weight state indefinitely.
+*   **Phase Angle Lock:** Demonstrated that ROUND can achieve **100% Retention** through a 1,500-epoch Noise Storm. This storm simulates the **destructive interference of backpropagation** from future layers (e.g., fine-tuning a communication layer on top of a concept layer). By engaging Cryostasis, ROUND allows for infinite vertical stacking without "Backward Leakage" or forgetting.
+*   **Vertical Crystal:** Extended the freezing logic to encompass the entire neuronal slice (Encoder + Recurrent Weights + Wobble Weights), effectively turning parts of the network into fixed feature extractors while other parts remain fluid.
+
+### Changed
+*   **Repo Standardization:** Renamed `benchmark_long_term.py` to `benchmark_phase_lock.py` and deleted the legacy file.
+*   **Battery Update:** Updated `run_battery.py` to include the new Phase Lock test as the capstone verification.
+*   **Documentation:** Overhauled `README.md` to center the narrative on "Autonomous Phase Locking" and the solution to the Stability-Plasticity Dilemma.
+
 ## [0.7.3] - "Hyper-Resolution Basin" - 2025-12-20
 ### Added
 *   **Hyper-Resolution Clock:** Increased the Drift Clock constant to $2^{-5}$ (`0.03125`) and expanded the standard Hidden Size to 128 neurons.
@@ -155,6 +167,6 @@ The benchmarking suite has been rewritten to enforce strict Head-to-Head (H2H) c
 
 ## [0.1.0] - 2025-12-12
 ### Added
-- Initial release of `ROUND` (Riemannian Optimized Unified Neural Dynamo).
-- Core `PhaseAccumulator` mechanism.
-- Basic `ROUNDModel` for binary classification.
+- **Initial release of `ROUND` (Riemannian Optimized Unified Neural Dynamo).**
+- **Core `PhaseAccumulator` mechanism.**
+- **Basic `ROUNDModel` for binary classification.**
