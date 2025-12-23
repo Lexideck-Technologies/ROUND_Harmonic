@@ -1,0 +1,135 @@
+--- Creative Benchmark: Semantic Algebra (Colors) ---
+Batch UID: 08b6464b
+Run Config: {'HIDDEN_R': 128, 'HIDDEN_G': 512, 'PEAK_LOCKING_STRENGTH': 0.125, 'HARMONICS': [1, 2, 4, 8], 'EPOCHS': 800, 'FLOOR': 0.015625, 'LR': 0.0009765625, 'WOBBLE': True, 'WOBBLE_GRAVITY': 0.0, 'WOBBLE_COUPLING': -1.0, 'TERMINAL_ONLY': False}
+Run Config: {'HIDDEN_R': 128, 'HIDDEN_G': 512, 'PEAK_LOCKING_STRENGTH': 0.125, 'HARMONICS': [1, 2, 4, 8], 'EPOCHS': 800, 'FLOOR': 0.015625, 'LR': 0.0009765625, 'WOBBLE': True, 'WOBBLE_GRAVITY': 0.0, 'WOBBLE_COUPLING': -1.0, 'TERMINAL_ONLY': False}
+Task: Learn Logic Tickers (Key+A+B->C).
+Format: Key + 4-char codes (e.g. aCRIMAZURPLUM).
+Max Len: 13 (Context Indexed)
+Training ROUND (5 Runs)...
+
+--- Training ROUND_1 (Batched Array) ---
+Epoch    0 | Acc: 0.0000 | Loss: 5.5376
+Epoch  100 | Acc: 0.9545 | Loss: 0.2229
+Epoch  200 | Acc: 0.9924 | Loss: 0.0574
+Epoch  300 | Acc: 1.0000 | Loss: 0.0244
+Epoch  400 | Acc: 1.0000 | Loss: 0.0097
+Epoch  500 | Acc: 1.0000 | Loss: 0.0051
+Epoch  600 | Acc: 1.0000 | Loss: 0.0034
+Epoch  700 | Acc: 1.0000 | Loss: 0.0025
+Epoch  799 | Acc: 1.0000 | Loss: 0.0019
+ROUND_1 Final Acc: 1.0000
+
+--- Training ROUND_2 (Batched Array) ---
+Epoch    0 | Acc: 0.0000 | Loss: 5.7097
+Epoch  100 | Acc: 0.9394 | Loss: 0.2547
+Epoch  200 | Acc: 0.9848 | Loss: 0.0634
+Epoch  300 | Acc: 1.0000 | Loss: 0.0295
+Epoch  400 | Acc: 1.0000 | Loss: 0.0127
+Epoch  500 | Acc: 1.0000 | Loss: 0.0064
+Epoch  600 | Acc: 1.0000 | Loss: 0.0040
+Epoch  700 | Acc: 1.0000 | Loss: 0.0028
+Epoch  799 | Acc: 1.0000 | Loss: 0.0022
+ROUND_2 Final Acc: 1.0000
+
+--- Training ROUND_3 (Batched Array) ---
+Epoch    0 | Acc: 0.0152 | Loss: 5.7102
+Epoch  100 | Acc: 0.9470 | Loss: 0.2651
+Epoch  200 | Acc: 0.9848 | Loss: 0.0714
+Epoch  300 | Acc: 1.0000 | Loss: 0.0341
+Epoch  400 | Acc: 1.0000 | Loss: 0.0158
+Epoch  500 | Acc: 1.0000 | Loss: 0.0076
+Epoch  600 | Acc: 1.0000 | Loss: 0.0046
+Epoch  700 | Acc: 1.0000 | Loss: 0.0032
+Epoch  799 | Acc: 1.0000 | Loss: 0.0024
+ROUND_3 Final Acc: 1.0000
+
+--- Training ROUND_4 (Batched Array) ---
+Epoch    0 | Acc: 0.0076 | Loss: 6.0068
+Epoch  100 | Acc: 0.9621 | Loss: 0.2268
+Epoch  200 | Acc: 0.9848 | Loss: 0.0565
+Epoch  300 | Acc: 1.0000 | Loss: 0.0239
+Epoch  400 | Acc: 1.0000 | Loss: 0.0099
+Epoch  500 | Acc: 1.0000 | Loss: 0.0054
+Epoch  600 | Acc: 1.0000 | Loss: 0.0036
+Epoch  700 | Acc: 1.0000 | Loss: 0.0026
+Epoch  799 | Acc: 1.0000 | Loss: 0.0021
+ROUND_4 Final Acc: 1.0000
+
+--- Training ROUND_5 (Batched Array) ---
+Epoch    0 | Acc: 0.0000 | Loss: 5.5988
+Epoch  100 | Acc: 0.9621 | Loss: 0.2319
+Epoch  200 | Acc: 0.9848 | Loss: 0.0594
+Epoch  300 | Acc: 1.0000 | Loss: 0.0262
+Epoch  400 | Acc: 1.0000 | Loss: 0.0104
+Epoch  500 | Acc: 1.0000 | Loss: 0.0054
+Epoch  600 | Acc: 1.0000 | Loss: 0.0035
+Epoch  700 | Acc: 1.0000 | Loss: 0.0026
+Epoch  799 | Acc: 1.0000 | Loss: 0.0020
+ROUND_5 Final Acc: 1.0000
+Training GRU (5 Runs)...
+
+--- Training GRU_1 (Batched Array) ---
+Epoch    0 | Acc: 0.0000 | Loss: 5.5328
+Epoch  100 | Acc: 0.4318 | Loss: 1.6678
+Epoch  200 | Acc: 0.9318 | Loss: 0.3743
+Epoch  300 | Acc: 0.9773 | Loss: 0.1069
+Epoch  400 | Acc: 0.9848 | Loss: 0.0683
+Epoch  500 | Acc: 0.9848 | Loss: 0.0506
+Epoch  600 | Acc: 0.9848 | Loss: 0.0397
+Epoch  700 | Acc: 0.9924 | Loss: 0.0320
+Epoch  799 | Acc: 1.0000 | Loss: 0.0255
+GRU_1 Final Acc: 1.0000
+
+--- Training GRU_2 (Batched Array) ---
+Epoch    0 | Acc: 0.0076 | Loss: 5.5412
+Epoch  100 | Acc: 0.4848 | Loss: 1.6599
+Epoch  200 | Acc: 0.9470 | Loss: 0.3810
+Epoch  300 | Acc: 0.9773 | Loss: 0.1098
+Epoch  400 | Acc: 0.9848 | Loss: 0.0707
+Epoch  500 | Acc: 0.9848 | Loss: 0.0525
+Epoch  600 | Acc: 0.9848 | Loss: 0.0414
+Epoch  700 | Acc: 0.9848 | Loss: 0.0335
+Epoch  799 | Acc: 1.0000 | Loss: 0.0268
+GRU_2 Final Acc: 1.0000
+
+--- Training GRU_3 (Batched Array) ---
+Epoch    0 | Acc: 0.0000 | Loss: 5.5387
+Epoch  100 | Acc: 0.5000 | Loss: 1.6370
+Epoch  200 | Acc: 0.9470 | Loss: 0.3337
+Epoch  300 | Acc: 0.9773 | Loss: 0.1011
+Epoch  400 | Acc: 0.9848 | Loss: 0.0667
+Epoch  500 | Acc: 0.9848 | Loss: 0.0493
+Epoch  600 | Acc: 0.9924 | Loss: 0.0378
+Epoch  700 | Acc: 1.0000 | Loss: 0.0290
+Epoch  799 | Acc: 1.0000 | Loss: 0.0215
+GRU_3 Final Acc: 1.0000
+
+--- Training GRU_4 (Batched Array) ---
+Epoch    0 | Acc: 0.0000 | Loss: 5.5575
+Epoch  100 | Acc: 0.4621 | Loss: 1.6456
+Epoch  200 | Acc: 0.9318 | Loss: 0.3703
+Epoch  300 | Acc: 0.9773 | Loss: 0.1064
+Epoch  400 | Acc: 0.9848 | Loss: 0.0693
+Epoch  500 | Acc: 0.9848 | Loss: 0.0519
+Epoch  600 | Acc: 0.9848 | Loss: 0.0413
+Epoch  700 | Acc: 0.9848 | Loss: 0.0341
+Epoch  799 | Acc: 1.0000 | Loss: 0.0282
+GRU_4 Final Acc: 1.0000
+
+--- Training GRU_5 (Batched Array) ---
+Epoch    0 | Acc: 0.0000 | Loss: 5.5431
+Epoch  100 | Acc: 0.5000 | Loss: 1.6643
+Epoch  200 | Acc: 0.9318 | Loss: 0.3492
+Epoch  300 | Acc: 0.9697 | Loss: 0.1119
+Epoch  400 | Acc: 0.9848 | Loss: 0.0736
+Epoch  500 | Acc: 0.9848 | Loss: 0.0550
+Epoch  600 | Acc: 0.9848 | Loss: 0.0434
+Epoch  700 | Acc: 0.9848 | Loss: 0.0352
+Epoch  799 | Acc: 1.0000 | Loss: 0.0287
+GRU_5 Final Acc: 1.0000
+Plot saved to benchmark_colors_08b6464b.png
+
+--- Testing Ticker Logic (Indexed) [ROUND] ---
+Prompt: aCRIMAZUR       -> Predicted: PLUMMTTRRTT
+Prompt: cCRIMGOLD       -> Predicted: RUSTTTTTTTT
+Prompt: jVOIDSNOW       -> Predicted: IRONNNNNNDO
