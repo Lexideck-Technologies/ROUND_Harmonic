@@ -129,13 +129,16 @@ def run_experiment(config):
     frozen_harmonic = config.get('frozen_harmonic', False)
     phase_well_strength = config.get('phase_well', 0.0)
     teacher_forcing_ratio = config.get('teacher_forcing', 0.0)
-    clip_grad = config.get('clip_grad', 1.0)
     
     # Gen 2 Configs
     teacher_decay = config.get('teacher_decay', False)
     jitter_min_ratio = config.get('jitter_min_ratio', 0.0)
-    learning_rate = config.get('lr', 0.002) # Allow override
-    curr_step_size = config.get('step_size', 5) # Allow override
+    learning_rate = config.get('lr', 0.001) # Gen 3: Default 0.001
+    curr_step_size = config.get('step_size', 5) 
+    
+    # Gen 3 Configs
+    acc_threshold = config.get('threshold', 0.95) # Gen 3: Default 0.95
+    clip_grad = config.get('clip_grad', 0.5) # Gen 3: Default 0.5
     
     # Constants
     MODULUS = 17
@@ -144,11 +147,10 @@ def run_experiment(config):
     START_SEQ_LEN = 10 if use_curriculum else MAX_SEQ_LEN
     BATCH_SIZE = 64
     EPOCHS = 3000
-    ACCURACY_THRESHOLD = 0.99
     DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     print(f"\n--- Starting Experiment: {name} ---")
-    print(f"Conf: OH={use_one_hot} | TF={teacher_forcing_ratio} (Decay={teacher_decay}) | JitRatio={jitter_min_ratio} | LR={learning_rate}")
+    print(f"Conf: OH={use_one_hot} | TF={teacher_forcing_ratio} (Decay={teacher_decay}) | JitRatio={jitter_min_ratio} | LR={learning_rate} | Thr={acc_threshold} | Clip={clip_grad}")
     
     # Model Setup
     input_dim = MODULUS if use_one_hot else 1
@@ -212,7 +214,7 @@ def run_experiment(config):
         seq_len_history.append(actual_len) 
         
         if use_curriculum:
-            if accuracy > ACCURACY_THRESHOLD:
+            if accuracy > acc_threshold:
                 if current_seq_len < MAX_SEQ_LEN:
                     current_seq_len += curr_step_size
                 
@@ -235,19 +237,17 @@ def train_mod17():
     os.makedirs(save_dir, exist_ok=True)
     
     strategies = [
-        # --- Survivors (Gen 1) ---
+        # --- Survivors (Gen 2) ---
         {"name": "Curriculum (Scalar)", "one_hot": False, "curriculum": True},
-        {"name": "Combined (Fast)", "one_hot": True, "curriculum": True}, # Original Combined
-        {"name": "Jitter (Random)", "one_hot": True, "curriculum": True, "jitter": True},
         {"name": "Teacher Forcing (Fixed)", "one_hot": True, "curriculum": True, "teacher_forcing": 0.1},
-        {"name": "Frozen Harmonic", "one_hot": True, "curriculum": True, "frozen_harmonic": True},
-        {"name": "Robust Harmonic", "one_hot": True, "curriculum": True, "harmonic_init": True, "jitter": True, "clip_grad": 0.1},
-        
-        # --- Generation 2 Hybrids ---
         {"name": "Annealed Forcing", "one_hot": True, "curriculum": True, "teacher_forcing": 0.5, "teacher_decay": True},
-        {"name": "Guided Jitter (Frontier)", "one_hot": True, "curriculum": True, "jitter": True, "jitter_min_ratio": 0.5},
-        {"name": "Slow-Burn Combined", "one_hot": True, "curriculum": True, "lr": 0.001, "step_size": 2},
-        {"name": "Resonant Teacher", "one_hot": True, "curriculum": True, "teacher_forcing": 0.1, "resonance_loss": True}
+        {"name": "Resonant Teacher", "one_hot": True, "curriculum": True, "teacher_forcing": 0.1, "resonance_loss": True},
+        
+        # --- Generation 3 Tuned Hybrids ---
+        {"name": "Stability First", "one_hot": True, "curriculum": True, "lr": 0.0005, "clip_grad": 0.1, "threshold": 0.90},
+        {"name": "Handheld Harmonic", "one_hot": True, "curriculum": True, "harmonic_init": True, "teacher_forcing": 0.2, "resonance_loss": True},
+        {"name": "Scalar Resonance", "one_hot": False, "curriculum": True, "resonance_loss": True},
+        {"name": "Oscillator Lock", "one_hot": True, "curriculum": True, "frozen_harmonic": True, "teacher_forcing": 0.1, "resonance_loss": True}
     ]
     
     results = {}
