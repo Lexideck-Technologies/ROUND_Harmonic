@@ -13,7 +13,8 @@ scripts = [
     "benchmark_oracle.py",
     "benchmark_permutations.py",
     "benchmark_phase_lock.py",
-    "benchmark_order_independence.py"
+    "benchmark_order_independence.py",
+    "benchmark_mod17.py"
 ]
 
 print("Starting Full Test Battery...")

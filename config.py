@@ -141,3 +141,15 @@ LONG_TERM_CONFIG = {
     'EPOCHS': 12500,
     'LR': 0.000244140625
 }
+
+# 9. MOD17 (Cyclic Counting Benchmark)
+MOD17_CONFIG = {
+    'MODULUS': 17,
+    'HIDDEN_SIZE': 128,
+    'LR': 0.001,
+    'THRESHOLD': 0.95,
+    'CLIP_GRAD': 0.5,
+    'EPOCHS': 3000,
+    'BATCH_SIZE': 64,
+    'MAX_SEQ_LEN': 200
+}

@@ -6,6 +6,7 @@ import numpy as np
 import os
 import time
 from ROUND import PhaseAccumulator  # Component import
+from config import MOD17_CONFIG
 
 # --- STRATEGY: Curriculum Learning & One-Hot Encoding ---
 # Mod 17 is difficult because the state space is discrete and cyclic.
@@ -85,6 +86,18 @@ class GenerativeROUND(nn.Module):
             
         return torch.stack(logits_seq, dim=1), H
 
+class GRUBaseline(nn.Module):
+    def __init__(self, input_dim, hidden_size, output_classes, **kwargs):
+        super().__init__()
+        self.gru = nn.GRU(input_dim, hidden_size, batch_first=True)
+        self.fc = nn.Linear(hidden_size, output_classes)
+        
+    def forward(self, x, **kwargs):
+        # x: [Batch, S, D]
+        out, _ = self.gru(x) # [Batch, S, Hidden]
+        logits = self.fc(out) # [Batch, S, Out]
+        return logits, [] # No phase history
+
 class Mod17Generator:
     def __init__(self, batch_size, modulus=17):
         self.batch_size = batch_size
@@ -130,31 +143,36 @@ def run_experiment(config):
     phase_well_strength = config.get('phase_well', 0.0)
     teacher_forcing_ratio = config.get('teacher_forcing', 0.0)
     
-    # Gen 2 Configs
+    # Config from config.py + Overrides
+    learning_rate = config.get('lr', MOD17_CONFIG['LR'])
+    acc_threshold = config.get('threshold', MOD17_CONFIG['THRESHOLD'])
+    clip_grad = config.get('clip_grad', MOD17_CONFIG['CLIP_GRAD'])
+    curr_step_size = config.get('step_size', 5)
+    
+    # Specifics
     teacher_decay = config.get('teacher_decay', False)
     jitter_min_ratio = config.get('jitter_min_ratio', 0.0)
-    learning_rate = config.get('lr', 0.001) # Gen 3: Default 0.001
-    curr_step_size = config.get('step_size', 5) 
-    
-    # Gen 3 Configs
-    acc_threshold = config.get('threshold', 0.95) # Gen 3: Default 0.95
-    clip_grad = config.get('clip_grad', 0.5) # Gen 3: Default 0.5
-    
+    model_type = config.get('model_type', 'ROUND')
+
     # Constants
-    MODULUS = 17
-    HIDDEN_SIZE = 128
-    MAX_SEQ_LEN = 200
+    MODULUS = MOD17_CONFIG['MODULUS']
+    HIDDEN_SIZE = MOD17_CONFIG['HIDDEN_SIZE']
+    MAX_SEQ_LEN = MOD17_CONFIG['MAX_SEQ_LEN']
     START_SEQ_LEN = 10 if use_curriculum else MAX_SEQ_LEN
-    BATCH_SIZE = 64
-    EPOCHS = 3000
+    BATCH_SIZE = MOD17_CONFIG['BATCH_SIZE']
+    EPOCHS = MOD17_CONFIG['EPOCHS']
     DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     print(f"\n--- Starting Experiment: {name} ---")
-    print(f"Conf: OH={use_one_hot} | TF={teacher_forcing_ratio} (Decay={teacher_decay}) | JitRatio={jitter_min_ratio} | LR={learning_rate} | Thr={acc_threshold} | Clip={clip_grad}")
+    print(f"Conf: Type={model_type} | OH={use_one_hot} | TF={teacher_forcing_ratio} | LR={learning_rate} | Thr={acc_threshold} | Clip={clip_grad}")
     
     # Model Setup
     input_dim = MODULUS if use_one_hot else 1
-    model = GenerativeROUND(input_dim=input_dim, hidden_size=HIDDEN_SIZE, output_classes=MODULUS, spinor=use_spinor, harmonic_init=(harmonic_init or frozen_harmonic), phase_well_strength=phase_well_strength).to(DEVICE)
+    
+    if model_type == 'GRU':
+        model = GRUBaseline(input_dim=input_dim, hidden_size=HIDDEN_SIZE, output_classes=MODULUS).to(DEVICE)
+    else:
+        model = GenerativeROUND(input_dim=input_dim, hidden_size=HIDDEN_SIZE, output_classes=MODULUS, spinor=use_spinor, harmonic_init=(harmonic_init or frozen_harmonic), phase_well_strength=phase_well_strength).to(DEVICE)
     
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     criterion = nn.CrossEntropyLoss()
@@ -247,7 +265,11 @@ def train_mod17():
         {"name": "Stability First", "one_hot": True, "curriculum": True, "lr": 0.0005, "clip_grad": 0.1, "threshold": 0.90},
         {"name": "Handheld Harmonic", "one_hot": True, "curriculum": True, "harmonic_init": True, "teacher_forcing": 0.2, "resonance_loss": True},
         {"name": "Scalar Resonance", "one_hot": False, "curriculum": True, "resonance_loss": True},
-        {"name": "Oscillator Lock", "one_hot": True, "curriculum": True, "frozen_harmonic": True, "teacher_forcing": 0.1, "resonance_loss": True}
+        {"name": "Oscillator Lock", "one_hot": True, "curriculum": True, "frozen_harmonic": True, "teacher_forcing": 0.1, "resonance_loss": True},
+        
+        # --- Baselines ---
+        {"name": "GRU (Scalar)", "model_type": "GRU", "one_hot": False, "curriculum": True},
+        {"name": "GRU (One-Hot)", "model_type": "GRU", "one_hot": True, "curriculum": True}
     ]
     
     results = {}
