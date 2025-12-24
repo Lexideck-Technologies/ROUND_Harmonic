@@ -330,26 +330,28 @@ def run_long_term_comparison(shuffled_words, epochs=10500, hidden_size_r=64, hid
             if epoch % 100 == 0:
                 p_func(f"E {epoch:4d} | R: {np.mean([hist_r[w][-1] for w in shuffled_words]):.2f} | G: {np.mean([hist_g[w][-1] for w in shuffled_words]):.2f}")
 
-    # Plotting
-    plt.style.use('dark_background')
-    fig, (ax_r, ax_g) = plt.subplots(2, 1, figsize=(14, 12))
+    # Plotting with Seaborn
+    from visualization_utils import setup_seaborn_theme, plot_multi_word_comparison
+
+    palette = setup_seaborn_theme(style='darkgrid', palette='classic')
     ep_axis = np.linspace(0, epochs, len(hist_r[shuffled_words[0]]))
     colors = ['#FF4B4B', '#4B4BFF', '#FFFF4B', '#FF4BFF', '#4BFFFF', '#FFA500']
-    
-    for i, word in enumerate(shuffled_words):
-        ax_r.plot(ep_axis, hist_r[word], label=f"R: {word}", color=colors[i % len(colors)], linewidth=2)
-        ax_g.plot(ep_axis, hist_g[word], label=f"G: {word}", color=colors[i % len(colors)], linewidth=2, linestyle='--')
-    
-    ax_r.set_title(f"ROUND - Phase Angle Lock ({hidden_size_r} Neurons)", color='#FF5555', fontsize=16)
-    ax_g.set_title(f"GRU - Standard Gating ({hidden_size_g} Neurons)", color='#5555FF', fontsize=16)
-    ax_r.legend(loc='lower left', fontsize=8, ncol=3); ax_g.legend(loc='lower left', fontsize=8, ncol=3)
-    
-    plt.tight_layout()
+
     if plot_name:
         plot_path = os.path.join(output_dir, plot_name)
     else:
         plot_path = os.path.join(output_dir, f'benchmark_phase_lock_{UID}.png')
-    plt.savefig(plot_path, dpi=300)
+
+    plot_multi_word_comparison(
+        hist_r=hist_r,
+        hist_g=hist_g,
+        words=shuffled_words,
+        ep_axis=ep_axis,
+        hidden_size_r=hidden_size_r,
+        hidden_size_g=hidden_size_g,
+        output_path=plot_path,
+        word_colors=colors
+    )
     p_func(f"Results saved to {plot_path}")
     
     final_res = {word: (hist_r[word][-1], hist_g[word][-1]) for word in shuffled_words}
@@ -357,7 +359,8 @@ def run_long_term_comparison(shuffled_words, epochs=10500, hidden_size_r=64, hid
 
 def train_long_term():
     UID = os.environ.get('ROUND_BATCH_UID', str(uuid.uuid4())[:8])
-    output_dir = os.environ.get('ROUND_OUTPUT_DIR', 'data')
+    base_dir = os.environ.get('ROUND_OUTPUT_DIR', 'data')
+    output_dir = os.path.join(base_dir, UID)
     if not os.path.exists(output_dir): os.makedirs(output_dir)
     log_path = os.path.join(output_dir, f'log_phase_lock_{UID}.txt')
     L_FILE = open(log_path, 'w')

@@ -153,7 +153,8 @@ def train_model(model_name, model_class, hidden_size, perm_data, device, epochs,
 
 def run_benchmark():
     UID = os.environ.get('ROUND_BATCH_UID', str(uuid.uuid4())[:8])
-    output_dir = os.environ.get('ROUND_OUTPUT_DIR', 'data')
+    base_dir = os.environ.get('ROUND_OUTPUT_DIR', 'data')
+    output_dir = os.path.join(base_dir, UID)
     if not os.path.exists(output_dir): os.makedirs(output_dir)
     log_path = os.path.join(output_dir, f'log_perms_vs_gru_{UID}.txt')
     L_FILE = open(log_path, 'w')
@@ -185,26 +186,21 @@ def run_benchmark():
         _, gac, _ = train_model(f"GRU_{i+1}", PermutationGRUModel, TC['HIDDEN_G'], perm_data, DEVICE, EPOCHS, L_FILE)
         gru_all_acc.append(gac)
 
-    # --- Plotting ---
-    plt.style.use('dark_background')
-    fig, ax = plt.subplots(figsize=(10, 6))
-    
-    rm, rs = np.mean(round_all_acc, 0), np.std(round_all_acc, 0)
-    gm, gs = np.mean(gru_all_acc, 0), np.std(gru_all_acc, 0)
-    ep_axis = np.linspace(0, EPOCHS, len(rm))
+    # --- Plotting with Seaborn ---
+    from visualization_utils import setup_seaborn_theme, prepare_comparison_data, plot_benchmark_comparison
 
-    ax.fill_between(ep_axis, rm-rs, rm+rs, color='#FF4B4B', alpha=0.1)
-    ax.fill_between(ep_axis, gm-gs, gm+gs, color='#4B4BFF', alpha=0.1)
-    ax.plot(ep_axis, rm, color='#FF4B4B', linewidth=2.5, label='ROUND (Harmonic)')
-    ax.plot(ep_axis, gm, color='#4B4BFF', linewidth=2.5, label='GRU (Standard)')
-    
-    ax.set_title(f"Permutation Recall: ROUND vs GRU [ROUND={TC['HIDDEN_R']} Neurons, GRU={TC['HIDDEN_G']} Neurons]\n4 Target Shuffles", fontsize=14)
-    ax.set_xlabel('Epochs', color='gray')
-    ax.set_ylabel('Avg Accuracy (All Perms)', color='gray')
-    ax.grid(True, alpha=0.1)
-    ax.legend(loc='lower right')
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, f'benchmark_perms_vs_gru_{UID}.png'), dpi=300)
+    palette = setup_seaborn_theme(style='darkgrid', palette='classic')
+    ep_axis = np.linspace(0, EPOCHS, len(round_all_acc[0]))
+    df = prepare_comparison_data(round_all_acc, gru_all_acc, epochs=ep_axis)
+
+    title = f"Permutation Recall: ROUND vs GRU [ROUND={TC['HIDDEN_R']} Neurons, GRU={TC['HIDDEN_G']} Neurons]\n4 Target Shuffles"
+    plot_benchmark_comparison(
+        df=df,
+        title=title,
+        palette=palette,
+        output_path=os.path.join(output_dir, f'benchmark_perms_vs_gru_{UID}.png'),
+        ylabel='Avg Accuracy (All Perms)'
+    )
     P(f"Learning curve saved to data/benchmark_perms_vs_gru_{UID}.png")
     
     L_FILE.close()

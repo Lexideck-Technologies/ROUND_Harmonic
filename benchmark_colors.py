@@ -285,7 +285,8 @@ def train_model(model_name, model_class, hidden_size, device, epochs, uid, outpu
 
 def train():
     UID = os.environ.get('ROUND_BATCH_UID', str(uuid.uuid4())[:8])
-    output_dir = os.environ.get('ROUND_OUTPUT_DIR', 'data')
+    base_dir = os.environ.get('ROUND_OUTPUT_DIR', 'data')
+    output_dir = os.path.join(base_dir, UID)
     if not os.path.exists(output_dir): os.makedirs(output_dir)
     
     log_path = os.path.join(output_dir, f'log_creative_colors_{UID}.txt')
@@ -321,27 +322,20 @@ def train():
     for i in range(RUNS):
         g_model = train_model(f"GRU_{i+1}", ColorGRU, TC['HIDDEN_G'], device, EPOCHS, UID, output_dir, gru_stats, L_FILE)
     
-    # Plotting
-    plt.style.use('dark_background')
-    fig, ax = plt.subplots(figsize=(10, 6))
-    
-    rm, rs = np.mean(round_stats, 0), np.std(round_stats, 0)
-    gm, gs = np.mean(gru_stats, 0), np.std(gru_stats, 0)
-    ep = np.arange(len(rm))
+    # Plotting with Seaborn
+    from visualization_utils import setup_seaborn_theme, prepare_comparison_data, plot_benchmark_comparison
 
-    ax.fill_between(ep, rm-rs, rm+rs, color='#FF4B4B', alpha=0.1)
-    ax.fill_between(ep, gm-gs, gm+gs, color='#4B4BFF', alpha=0.1)
-    
-    ax.plot(rm, color='#FF4B4B', linewidth=2, label='ROUND (Harmonic)')
-    ax.plot(gm, color='#4B4BFF', linewidth=2, label='GRU (Standard)')
-    
-    ax.set_title(f"Batched Array Learning (ROUND={TC['HIDDEN_R']}, GRU={TC['HIDDEN_G']})\nTask: Color Algebra", fontsize=14, color='white')
-    ax.set_xlabel('Epochs', fontsize=12, color='gray')
-    ax.set_ylabel('Accuracy (Next Token)', fontsize=12, color='gray')
-    ax.grid(True, alpha=0.1)
-    ax.legend()
-    
-    plt.savefig(os.path.join(output_dir, f'benchmark_colors_{UID}.png'), dpi=300)
+    palette = setup_seaborn_theme(style='darkgrid', palette='classic')
+    df = prepare_comparison_data(round_stats, gru_stats)
+
+    title = f"Batched Array Learning (ROUND={TC['HIDDEN_R']}, GRU={TC['HIDDEN_G']})\nTask: Color Algebra"
+    plot_benchmark_comparison(
+        df=df,
+        title=title,
+        palette=palette,
+        output_path=os.path.join(output_dir, f'benchmark_colors_{UID}.png'),
+        ylabel='Accuracy (Next Token)'
+    )
     P(f"Plot saved to benchmark_colors_{UID}.png")
     
     # Generate completion for logical check

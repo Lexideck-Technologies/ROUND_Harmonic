@@ -5,7 +5,8 @@ from config import BRACKETS_CONFIG, get_lock_strength
 
 if not os.path.exists('data'):os.makedirs('data')
 UID=os.environ.get('ROUND_BATCH_UID',str(uuid.uuid4())[:8])
-output_dir = os.environ.get('ROUND_OUTPUT_DIR', 'data')
+base_dir = os.environ.get('ROUND_OUTPUT_DIR', 'data')
+output_dir = os.path.join(base_dir, UID)
 if not os.path.exists(output_dir): os.makedirs(output_dir)
 L_FILE=open(f'{output_dir}/log_brackets_masked_{UID}.txt','w')
 def P(s):print(s);L_FILE.write(str(s)+'\n');L_FILE.flush()
@@ -112,17 +113,19 @@ if __name__=="__main__":
     P("Training GRU (Test Validation)")
     for i in range(C['runs']):a,p,_=train_gru(i+1,X,Y,Xt,Yt,d);gr.append(a)
     
-    plt.style.use('dark_background')
-    fig, ax = plt.subplots(figsize=(12, 6))
-    rm, rs = np.mean(rr, 0), np.std(rr, 0)
-    gm, gs = np.mean(gr, 0), np.std(gr, 0)
-    ep = np.arange(C['epochs'])
-    ax.set_title(f"Harmonic ROUND vs GRU: Masked Brackets [ROUND={TC['HIDDEN_R']} Neurons, GRU={TC['HIDDEN_G']} Neurons]\nstrength={TC['PEAK_LOCKING_STRENGTH']}, harmonics={TC['HARMONICS']}", fontsize=14, color='white')
-    ax.set_xlabel('Epochs', fontsize=12, color='gray')
-    ax.set_ylabel('Accuracy', fontsize=12, color='gray')
-    ax.plot(rm, color='#FF4B4B', linewidth=2.5, label='ROUND')
-    ax.plot(gm, color='#4B4BFF', linewidth=2.5, label='GRU')
-    ax.legend()
-    plt.savefig(os.path.join(output_dir, f'benchmark_brackets_masked_{UID}.png'), dpi=300)
+    # Plotting with Seaborn
+    from visualization_utils import setup_seaborn_theme, prepare_comparison_data, plot_benchmark_comparison
+
+    palette = setup_seaborn_theme(style='darkgrid', palette='classic')
+    df = prepare_comparison_data(rr, gr)
+
+    title = f"Harmonic ROUND vs GRU: Masked Brackets [ROUND={TC['HIDDEN_R']} Neurons, GRU={TC['HIDDEN_G']} Neurons]\nstrength={TC['PEAK_LOCKING_STRENGTH']}, harmonics={TC['HARMONICS']}"
+    plot_benchmark_comparison(
+        df=df,
+        title=title,
+        palette=palette,
+        output_path=os.path.join(output_dir, f'benchmark_brackets_masked_{UID}.png'),
+        figsize=(12, 6)
+    )
     
     L_FILE.close()

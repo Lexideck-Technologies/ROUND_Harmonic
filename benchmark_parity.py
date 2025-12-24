@@ -5,7 +5,8 @@ from config import PARITY_CONFIG, get_lock_strength
 
 if not os.path.exists('data'):os.makedirs('data')
 UID=os.environ.get('ROUND_BATCH_UID',str(uuid.uuid4())[:8])
-output_dir = os.environ.get('ROUND_OUTPUT_DIR', 'data')
+base_dir = os.environ.get('ROUND_OUTPUT_DIR', 'data')
+output_dir = os.path.join(base_dir, UID)
 if not os.path.exists(output_dir): os.makedirs(output_dir)
 L_FILE=open(f'{output_dir}/log_parity_{UID}.txt','w')
 def P(s):print(s);L_FILE.write(str(s)+'\n');L_FILE.flush()
@@ -97,36 +98,28 @@ if __name__=="__main__":
     for i in range(C['runs']):a,p,_=train_round(i+1,X,Y,Xt,Yt,d);rr.append(a);ap.append(p.detach().cpu().numpy().flatten())
     P("Training GRU (Test Validation)")
     for i in range(C['runs']):a,p,_=train_gru(i+1,X,Y,Xt,Yt,d);gr.append(a)
-    plt.style.use('dark_background')
-    fig, ax = plt.subplots(figsize=(12, 6))
-    rm, rs = np.mean(rr, 0), np.std(rr, 0)
-    gm, gs = np.mean(gr, 0), np.std(gr, 0)
-    ep = np.arange(C['epochs'])
+    # Plotting with Seaborn (with individual runs)
+    from visualization_utils import setup_seaborn_theme, prepare_comparison_data, plot_benchmark_with_runs
 
-    ax.set_title(f"Harmonic ROUND vs GRU: 16-bit Parity [ROUND={TC['HIDDEN_R']} Neuron, GRU={TC['HIDDEN_G']} Neurons]\nstrength={TC['PEAK_LOCKING_STRENGTH']}, harmonics={TC['HARMONICS']}", fontsize=14, color='white')
-    ax.set_xlabel('Epochs', fontsize=12, color='gray')
-    ax.set_ylabel('Accuracy', fontsize=12, color='gray')
-    
-    max_acc = max(np.max(rm), np.max(gm))
+    palette = setup_seaborn_theme(style='darkgrid', palette='classic')
+    df = prepare_comparison_data(rr, gr)
+
+    title = f"Harmonic ROUND vs GRU: 16-bit Parity [ROUND={TC['HIDDEN_R']} Neuron, GRU={TC['HIDDEN_G']} Neurons]\nstrength={TC['PEAK_LOCKING_STRENGTH']}, harmonics={TC['HARMONICS']}"
+
+    # Calculate ylim
+    max_acc = max(df['Accuracy'].max(), 0.5)
     if max_acc < 0.95:
-        ax.set_ylim(-0.05, min(1.05, max_acc + 0.1))
+        ylim = (-0.05, min(1.05, max_acc + 0.1))
     else:
-        ax.set_ylim(-0.05, 1.05)
+        ylim = (-0.05, 1.05)
 
-    ax.grid(True, alpha=0.1)
-
-    ax.fill_between(ep, rm-rs, rm+rs, color='#FF4B4B', alpha=0.1)
-    ax.fill_between(ep, gm-gs, gm+gs, color='#4B4BFF', alpha=0.1)
-    
-    for r in rr: ax.plot(r, color='#FF4B4B', alpha=0.15, linewidth=1)
-    for r in gr: ax.plot(r, color='#4B4BFF', alpha=0.15, linewidth=1)
-    
-    ax.plot(rm, color='#FF4B4B', linewidth=2.5, label='ROUND (Monism)')
-    ax.plot(gm, color='#4B4BFF', linewidth=2.5, label='GRU (Standard)')
-    ax.legend(loc='lower right')
-    
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, f'benchmark_parity_{UID}.png'), dpi=300)
+    plot_benchmark_with_runs(
+        df=df,
+        title=title,
+        palette=palette,
+        output_path=os.path.join(output_dir, f'benchmark_parity_{UID}.png'),
+        ylim=ylim
+    )
     
     P("Done.")
     L_FILE.close()

@@ -218,7 +218,8 @@ def train_model_run(run_id, model_class, hidden_size, device, output_dir, L_FILE
 
 def train():
     UID = os.environ.get('ROUND_BATCH_UID', str(uuid.uuid4())[:8])
-    output_dir = os.environ.get('ROUND_OUTPUT_DIR', 'data')
+    base_dir = os.environ.get('ROUND_OUTPUT_DIR', 'data')
+    output_dir = os.path.join(base_dir, UID)
     if not os.path.exists(output_dir): os.makedirs(output_dir)
     
     log_path = os.path.join(output_dir, f'log_oracle_{UID}.txt')
@@ -255,27 +256,19 @@ def train():
         gru_stats.append(stats)
         gru_preds.append(preds)
         
-    # Plotting Learning Curve
-    plt.style.use('dark_background')
-    fig, ax = plt.subplots(figsize=(10, 6))
-    
-    rm, rs = np.mean(round_stats, 0), np.std(round_stats, 0)
-    gm, gs = np.mean(gru_stats, 0), np.std(gru_stats, 0)
-    ep = np.arange(len(rm))
-    
-    ax.fill_between(ep, rm-rs, rm+rs, color='#FF4B4B', alpha=0.1)
-    ax.fill_between(ep, gm-gs, gm+gs, color='#4B4BFF', alpha=0.1)
-    
-    ax.plot(rm, color='#FF4B4B', linewidth=2.5, label='ROUND Oracle')
-    ax.plot(gm, color='#4B4BFF', linewidth=2.5, label='GRU Oracle')
-    
-    ax.set_title(f"Oracle Training Consistency (ROUND={TC['HIDDEN_R']} Neurons, GRU={TC['HIDDEN_G']} Neurons)\nQA Pairs: {len(QA_PAIRS)}", fontsize=14, color='white')
-    ax.set_xlabel('Epochs', fontsize=12, color='gray')
-    ax.set_ylabel('Accuracy', fontsize=12, color='gray')
-    ax.grid(True, alpha=0.1)
-    ax.legend()
-    
-    plt.savefig(os.path.join(output_dir, f'benchmark_oracle_{UID}.png'), dpi=300)
+    # Plotting Learning Curve with Seaborn
+    from visualization_utils import setup_seaborn_theme, prepare_comparison_data, plot_benchmark_comparison
+
+    palette = setup_seaborn_theme(style='darkgrid', palette='classic')
+    df = prepare_comparison_data(round_stats, gru_stats)
+
+    title = f"Oracle Training Consistency (ROUND={TC['HIDDEN_R']} Neurons, GRU={TC['HIDDEN_G']} Neurons)\nQA Pairs: {len(QA_PAIRS)}"
+    plot_benchmark_comparison(
+        df=df,
+        title=title,
+        palette=palette,
+        output_path=os.path.join(output_dir, f'benchmark_oracle_{UID}.png')
+    )
     P(f"Plot saved to benchmark_oracle_{UID}.png")
     
     # --- The Final Test (on last ROUND model) ---

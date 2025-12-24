@@ -9,7 +9,8 @@ from benchmark_long_term import run_long_term_comparison, WORDS, LONG_TERM_CONFI
 # --- Configuration ---
 RUNS = 3 # Deep Gauntlet: 3 full dual-model batches
 UID = os.environ.get('ROUND_BATCH_UID', str(uuid.uuid4())[:8])
-OUTPUT_DIR = os.environ.get('ROUND_OUTPUT_DIR', 'data')
+BASE_DIR = os.environ.get('ROUND_OUTPUT_DIR', 'data')
+OUTPUT_DIR = os.path.join(BASE_DIR, UID)
 
 def main():
     if not os.path.exists(OUTPUT_DIR): os.makedirs(OUTPUT_DIR)

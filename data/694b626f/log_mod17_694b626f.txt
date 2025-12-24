@@ -1,0 +1,10 @@
+Curriculum (Scalar): Final Acc=0.9641, Max Len=10
+Combined (Fast): Final Acc=0.0516, Max Len=40
+Jitter (Random): Final Acc=0.0593, Max Len=53
+Teacher Forcing (Fixed): Final Acc=0.3406, Max Len=40
+Frozen Harmonic: Final Acc=0.0641, Max Len=40
+Robust Harmonic: Final Acc=0.0595, Max Len=104
+Annealed Forcing: Final Acc=0.8516, Max Len=10
+Guided Jitter (Frontier): Final Acc=0.0585, Max Len=35
+Slow-Burn Combined: Final Acc=0.0549, Max Len=80
+Resonant Teacher: Final Acc=0.7385, Max Len=15
