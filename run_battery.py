@@ -5,16 +5,16 @@ import sys
 import uuid
 
 scripts = [
-    "benchmark_brackets_masked.py",
-    "benchmark_parity.py",
-    "benchmark_topology.py",
-    "benchmark_ascii.py",
-    "benchmark_colors.py",
-    "benchmark_oracle.py",
-    "benchmark_permutations.py",
-    "benchmark_phase_lock.py",
-    "benchmark_order_independence.py",
-    "benchmark_mod17.py"
+    "benchmarks/benchmark_brackets_masked.py",
+    "benchmarks/benchmark_parity.py",
+    "benchmarks/benchmark_topology.py",
+    "benchmarks/benchmark_ascii.py",
+    "benchmarks/benchmark_colors.py",
+    "benchmarks/benchmark_oracle.py",
+    "benchmarks/benchmark_permutations.py",
+    "benchmarks/benchmark_phase_lock.py",
+    "benchmarks/benchmark_order_independence.py",
+    "benchmarks/benchmark_mod17.py"
 ]
 
 print("Starting Full Test Battery...")

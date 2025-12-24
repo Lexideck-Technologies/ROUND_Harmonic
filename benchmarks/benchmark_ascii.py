@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 # version 0.8.0 - "The Frozen Basin" (ASCII)
 import torch
 import torch.nn as nn

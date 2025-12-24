@@ -1,0 +1,56 @@
+Batch UID: 6e15d8d5
+Run Config: {'HIDDEN_R': 32, 'HIDDEN_G': 128, 'PEAK_LOCKING_STRENGTH': 0.0625, 'HARMONICS': [1], 'EPOCHS': 400, 'FLOOR': 0.015625, 'LR': 0.001953125, 'WOBBLE': False, 'SORT_INPUTS': True, 'DELAYED_LOCKING': 0.5}
+Dev: cuda
+Training ROUND (Test Validation)
+R1 E0: TestAcc=0.52 | Lock=0.4330
+R1 E100: TestAcc=1.00 | Lock=0.4902
+R1 E200: TestAcc=1.00 | Lock=0.3074
+R1 E300: TestAcc=1.00 | Lock=0.2239
+R1 E399: TestAcc=1.00 | Lock=0.1846
+R2 E0: TestAcc=0.52 | Lock=0.4104
+R2 E100: TestAcc=0.48 | Lock=0.5426
+R2 E200: TestAcc=1.00 | Lock=0.3372
+R2 E300: TestAcc=1.00 | Lock=0.2292
+R2 E399: TestAcc=1.00 | Lock=0.1823
+R3 E0: TestAcc=0.52 | Lock=0.5863
+R3 E100: TestAcc=1.00 | Lock=0.5700
+R3 E200: TestAcc=1.00 | Lock=0.3499
+R3 E300: TestAcc=1.00 | Lock=0.2545
+R3 E399: TestAcc=1.00 | Lock=0.1924
+R4 E0: TestAcc=0.48 | Lock=0.4801
+R4 E100: TestAcc=1.00 | Lock=0.4348
+R4 E200: TestAcc=1.00 | Lock=0.3561
+R4 E300: TestAcc=1.00 | Lock=0.2682
+R4 E399: TestAcc=1.00 | Lock=0.1917
+R5 E0: TestAcc=0.48 | Lock=0.4802
+R5 E100: TestAcc=1.00 | Lock=0.5362
+R5 E200: TestAcc=1.00 | Lock=0.2997
+R5 E300: TestAcc=1.00 | Lock=0.2415
+R5 E399: TestAcc=1.00 | Lock=0.1977
+Training GRU (Test Validation)
+G1 E0: L=0.6928, TestAcc=0.52
+G1 E100: L=0.0027, TestAcc=1.00
+G1 E200: L=0.0004, TestAcc=1.00
+G1 E300: L=0.0002, TestAcc=1.00
+G1 E399: L=0.0001, TestAcc=1.00
+G2 E0: L=0.6928, TestAcc=0.52
+G2 E100: L=0.0002, TestAcc=1.00
+G2 E200: L=0.0001, TestAcc=1.00
+G2 E300: L=0.0001, TestAcc=1.00
+G2 E399: L=0.0001, TestAcc=1.00
+G3 E0: L=0.6953, TestAcc=0.48
+G3 E100: L=0.0009, TestAcc=1.00
+G3 E200: L=0.0003, TestAcc=1.00
+G3 E300: L=0.0002, TestAcc=1.00
+G3 E399: L=0.0001, TestAcc=1.00
+G4 E0: L=0.6937, TestAcc=0.52
+G4 E100: L=0.0240, TestAcc=1.00
+G4 E200: L=0.0075, TestAcc=1.00
+G4 E300: L=0.0024, TestAcc=1.00
+G4 E399: L=0.0013, TestAcc=1.00
+G5 E0: L=0.6928, TestAcc=0.52
+G5 E100: L=0.0005, TestAcc=1.00
+G5 E200: L=0.0002, TestAcc=1.00
+G5 E300: L=0.0001, TestAcc=1.00
+G5 E399: L=0.0001, TestAcc=1.00
+Done.

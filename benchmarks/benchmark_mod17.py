@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -250,9 +254,23 @@ def run_experiment(config):
     }
 
 def train_mod17():
-    timestamp = f"{int(time.time()):x}"
-    save_dir = f"data/{timestamp}"
-    os.makedirs(save_dir, exist_ok=True)
+    # Check for battery environment
+    uid = os.environ.get('ROUND_BATCH_UID', f"{int(time.time()):x}")
+    base_dir = os.environ.get('ROUND_OUTPUT_DIR')
+    
+    if base_dir:
+        # Battery Mode: Save directly to the batch folder
+        save_dir = base_dir
+        # We might want a subfolder or just distinct filenames. 
+        # run_battery logic usually implies run-specific folders or shared folder?
+        # run_battery.py sets ROUND_OUTPUT_DIR = data/BATCH_UID
+        # So we can save directly there.
+    else:
+        # Standalone Mode
+        save_dir = f"data/{uid}"
+        os.makedirs(save_dir, exist_ok=True)
+    
+    print(f"Saving Mod17 results to: {save_dir}")
     
     strategies = [
         # --- Survivors (Gen 2) ---
@@ -313,11 +331,11 @@ def train_mod17():
     ax2.grid(True, alpha=0.1)
 
     plt.tight_layout()
-    plt.savefig(f"{save_dir}/benchmark_mod17_ablation_{timestamp}.png", dpi=300, bbox_inches='tight')
+    plt.savefig(f"{save_dir}/benchmark_mod17_ablation_{uid}.png", dpi=300, bbox_inches='tight')
     plt.close()
     print(f"Results saved to {save_dir}")
     
-    with open(f"{save_dir}/log_mod17_{timestamp}.txt", "w") as f:
+    with open(f"{save_dir}/log_mod17_{uid}.txt", "w") as f:
         for name, res in results.items():
             f.write(f"{name}: Final Acc={res['acc'][-1]:.4f}, Max Len={res['seq'][-1]}\n")
 

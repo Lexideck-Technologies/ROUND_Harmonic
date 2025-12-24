@@ -1,10 +1,14 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 # version 0.7.3 - "The Hyper-Resolution Basin" (Order Independence Gauntlet)
 import torch
 import numpy as np
 import os
 import uuid
 import random
-from benchmark_long_term import run_long_term_comparison, WORDS, LONG_TERM_CONFIG
+from benchmark_phase_lock import run_long_term_comparison, WORDS, LONG_TERM_CONFIG
 
 # --- Configuration ---
 RUNS = 3 # Deep Gauntlet: 3 full dual-model batches
