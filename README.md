@@ -168,7 +168,12 @@ In this test, models must learn 6 high-entropy words. After 11,000 epochs of ann
 *   **GRU:** **100.0% Accuracy.** Matches performance with 4x capacity.
 *   ![Permutations Benchmark](data/02e966f1/02e966f1/benchmark_perms_vs_gru_02e966f1.png)
 
-### 7.9 The Sandwich Duel (Phasic Sovereignty vs. Vector Memory)
+### 7.9 The Mod-17 Challenge (Cyclic Counting)
+*   **ROUND:** **100% Accuracy.** Achieves perfect cyclic resolution on the Prime-17 manifold, demonstrating zero drift even after thousands of cycles.
+*   **GRU:** **Phase Drift Fail.** Succumbs to the "Recurrence Barrier," where cumulative floating-point errors eventually destabilize the modulo logic.
+*   ![Mod-17 Benchmark](data/694f5c14/benchmark_mod17_ablation_694f5c14.png)
+
+### 7.10 The Sandwich Duel (Phasic Sovereignty vs. Vector Memory)
 The ultimate "Show and Tell" of the Crystalline Era ($v1.0.0$). We compare **UIT-ROUND** ($512N$) against a **GRU** ($512N$) baseline across the full ASCII domain ($n=256$).
 
 ![Scientific Duel Story](data/UIT_c1d3c3c9/plots/scientific_duel_story_c1d3c3c9.png)
@@ -190,7 +195,7 @@ In **UIT-ROUND**, the hidden state is a **Sovereign Phasic Identity**. Because t
 The Crystalline Factory ($v1.0.0$) generates unique, isolated verification artifacts for every scientific run.
 
 - 📊 **Scientific Story**: [Crystalline vs Vector Duel (Alpha-Batch)](data/UIT_c1d3c3c9/plots/scientific_duel_story_c1d3c3c9.png)
-- 📝 **Execution Audit**: [Scientific Duel Log (efe843c7)](data/UIT_c1d3c3c9/logs/scientific_duel_c1d3c3c9.txt)
+- 📝 **Execution Audit**: [Scientific Duel Log (c1d3c3c9)](data/UIT_c1d3c3c9/logs/scientific_duel_c1d3c3c9.txt)
 - 📂 **Full Data Directory**: [data/UIT_c1d3c3c9](data/UIT_c1d3c3c9)
 
 ---

@@ -100,6 +100,39 @@ def get_latest_uit_run(data_root):
     valid_runs.sort(key=lambda x: x['mtime'], reverse=True)
     return valid_runs[0]
 
+def get_latest_mod17_run(data_root):
+    """
+    Finds the most recent 'Mod-17 Challenge' run in data/.
+    Criteria:
+    - Contains 'benchmark_mod17_ablation_*.png'
+    """
+    subdirs = [os.path.join(data_root, d) for d in os.listdir(data_root) if os.path.isdir(os.path.join(data_root, d))]
+    valid_runs = []
+    
+    for d in subdirs:
+        dirname = os.path.basename(d)
+        # Check both direct and nested for robustness
+        images = glob.glob(os.path.join(d, 'benchmark_mod17_ablation_*.png'))
+        if not images:
+            nested_path = os.path.join(d, dirname)
+            if os.path.isdir(nested_path):
+                images = glob.glob(os.path.join(nested_path, 'benchmark_mod17_ablation_*.png'))
+        
+        if images:
+            mtime = os.path.getmtime(d)
+            valid_runs.append({
+                'uid': dirname,
+                'root_path': d,
+                'mtime': mtime,
+                'image': images[0]
+            })
+            
+    if not valid_runs:
+        return None
+        
+    valid_runs.sort(key=lambda x: x['mtime'], reverse=True)
+    return valid_runs[0]
+
 def update_readme(readme_path, run_info):
     uid = run_info['uid']
     content_dir = run_info['content_path']
@@ -204,6 +237,30 @@ def update_readme_uit(readme_path, run_info):
     else:
         print("README.md UIT section is up to date.")
 
+def update_readme_mod17(readme_path, run_info):
+    uid = run_info['uid']
+    image_path = run_info['image']
+    project_root = os.path.dirname(os.path.abspath(readme_path))
+    rel_image = os.path.relpath(image_path, project_root).replace('\\', '/')
+    
+    with open(readme_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+    
+    original_content = content
+    
+    # Update Mod-17 Image
+    # Pattern: `![Mod-17 Benchmark](data/[^)]*?/benchmark_mod17_ablation_[^)]*?\.png)`
+    pattern = r'(!\[Mod-17 Benchmark\]\()(data/[^)]*?/benchmark_mod17_ablation_[^)]*?\.png)(\))'
+    if re.search(pattern, content):
+        content = re.sub(pattern, f'\\g<1>{rel_image}\\g<3>', content)
+        
+    if content != original_content:
+        with open(readme_path, 'w', encoding='utf-8') as f:
+            f.write(content)
+        print("README.md updated for Mod-17 Breakthrough.")
+    else:
+        print("README.md Mod-17 section is up to date.")
+
 if __name__ == "__main__":
     base_dir = os.path.dirname(os.path.abspath(__file__))
     data_dir = os.path.join(base_dir, 'data')
@@ -221,4 +278,8 @@ if __name__ == "__main__":
     latest_uit = get_latest_uit_run(data_dir)
     if latest_uit:
         update_readme_uit(readme_file, latest_uit)
+
+    latest_mod17 = get_latest_mod17_run(data_dir)
+    if latest_mod17:
+        update_readme_mod17(readme_file, latest_mod17)
 
