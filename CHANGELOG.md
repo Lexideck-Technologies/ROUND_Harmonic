@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.9.0] - "The Crystalline Bridge" - 2025-12-26
+## [1.0.0] - "The Crystalline Bridge" - 2025-12-26
 ### Added
 *   **The Structural Snap (Hard Renormalization):** Implemented a mandatory quantization step where neurons "snap" to the nearest integer phasic address. This eliminates floating-point drift and achieves the **Diamond Lock** ($256/256$ bit-perfection).
 *   **The Phasic Sandwich (End-to-End Relay):** Verified that a hidden "Phasic Identity" can be ingested by a Decoder, passed through a frozen manifold, and reconstructed by an Encoder with **Zero Erasure Cost**. This establishes the first **Zero-Loss Neural Communication Channel**.
