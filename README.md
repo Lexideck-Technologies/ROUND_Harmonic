@@ -1,5 +1,5 @@
-# The Frozen Basin (Harmonic ROUND) v0.8.0
-### "Logic, Geometry, and Time"
+# The Crystalline Bridge (UIT-ROUND) v1.0.0
+### "Sovereign Identity and Phasic Sovereignty"
 
 **Riemannian Optimized Unified Neural Dynamo (ROUND),** also known as the **U-Neuron,** is a non-volatile recurrent architecture based on the principles of **Unified Informatic Topology (UIT)**. Unlike standard neurons (GRU/LSTM) that store state in Euclidean space (where it drifts and decays), ROUND stores state on a topological manifold—a phase circle.
 
@@ -55,6 +55,9 @@ We realized that "Training" is an antiquated concept. We moved toward **Infinite
 ### Chapter 6: The Frozen Basin (v0.8.0)
 In v0.8.0, we solved the **Stability-Plasticity Dilemma**. Standard networks (like GRU) fail during long-term training because "Plasticity" implies vulnerability. If a weight can move to learn, it can move to forget. ROUND v0.8.0 introduces **Autonomous Phase Locking**. When a neuron's phase resonance exceeds a critical threshold ($2^{-9}$), it declares itself "Solved" and enters **Cryostasis** (The Gradient Vault). Its weights freeze, becoming a permanent "Crystal" of knowledge, while the rest of the network remains fluid. This allows ROUND to survive 1500 epochs of massive noise ("The Storm") with **100% Retention**, while GRUs suffer catastrophic collapse.
 
+### Chapter 7: The Crystalline Bridge (v1.0.0)
+The final ascent. In the Crystalline Era, we achieved **Phasic Sovereignty**. We discovered that once a neuron is topologically locked via the **Structural Snap** (v0.9.0), its hidden phase $\phi$ is no longer just a "state"—it is a **Sovereign Identity**. We demonstrated this by performing the **Phasic Sandwich Relay**: we took the hidden identity from a frozen Decoder and handed it directly to a frozen Encoder. The result? **100% Bit-Perfect Reconstruction** for all 256 ASCII characters. Traditional "Vector Memory" (GRU) collapsed in the same test ($0.4\%$ accuracy), proving that only Phasic Manifolds can act as universal informatic carriers.
+
 ---
 
 ## Executive Summary: Spinor Monism and Cryostasis
@@ -108,7 +111,7 @@ ROUND is a **phase-accumulating recurrent cell**:
 ### Requirements
 - Python 3.10+
 - PyTorch (tested on 2.0+)
-- NumPy, Matplotlib
+- NumPy, Matplotlib, **Seaborn**, **Pandas**
 
 ### Running The Benchmarks
 Run the full regression test to reproduce the v0.8.0 findings:
@@ -126,50 +129,73 @@ python run_battery.py
 | **ASCII** | `benchmark_ascii.py` | Cyclic sequence generation. |
 | **Phase Lock** | `benchmark_phase_lock.py` | **The Benchmark.** 12,500 Epochs. 1,500 Epoch Storm. Tests Cryostasis and Retention. |
 | **Gauntlet** | `benchmark_order_independence.py` | The Shuffled Order Independence Brutality Test. |
+| **UIT Battery** | `UIT_run_battery.py` | **Crystalline Era.** Industrial-grade verification (Sandwich Duel). |
 
 ---
 
-## Benchmark Results: v0.8.0 The Frozen Basin
+We performed a Head-to-Head comparison between **ROUND (Vertical Crystal)** and a standard **GRU** across the "Decathlon" suite. Results are from the `6e15d8d5` regression battery.
 
-We performed a Head-to-Head comparison between **ROUND (Vertical Crystal)** and a standard **GRU** across the "Decathlon" suite. Results are from the `181f675c` regression battery.
-
-### 7.1 The Phase Angle Lock Test (The Magnum Opus)
-The ultimate test of a memory system is not how well it learns, but how well it **refuses to forget**. In the v0.8.0 **"Phase Angle Lock Test"**, we simulate the **"Storm of Backpropagation"**—the noisy gradients that flow backward when a network tries to train a *new* layer on top of an *old* one.
 In this test, models must learn 6 high-entropy words. After 11,000 epochs of annealing, they are subjected to "The Storm"—**1,500 epochs** of 50% signal corruption. This simulates the chaotic feedback of a "Communication Layer" trying to fine-tune a "Concept Layer."
 *   **ROUND:** **100% Final Retention.** ROUND detects resonance, engages **Cryostasis** (Gradient Vault), and effectively "sleeps" through the storm. It allows the "New Layer" (simulated) to learn without overwriting the "Old Layer's" foundational truths.
-*   **GRU:** **Catastrophic Forgetting (<90%).** Lacking a "Done" state, the GRU tries to accommodate the training noise, destroying its own memory.
-*   ![Phase Lock Benchmark](data/181f675c/benchmark_phase_lock_cf05bd31.png)
+*   **GRU:** **Catastrophic Forgetting (<90%).** Lacking a "Done" state, the GRU tries to accommodate the training noise, destroying its own memory (notably dropping to 62.5% on complex words like 'TOPOLOGY').
+*   ![Phase Lock Benchmark](data/6e15d8d5/6e15d8d5/benchmark_phase_lock_27e7eb8d.png)
 
 ### 7.2 The "Impossible" Logic Test (Parity)
-*   **ROUND:** **100% Accuracy.** Snaps to the global optimum within 100 epochs using the theoretical minimum capacity.
-*   **GRU:** **Matches Performance.** (With 128x capacity).
-*   ![Parity Benchmark](data/181f675c/benchmark_parity_181f675c.png)
+*   **ROUND:** **100% Accuracy.** Snaps to the global optimum within 100 epochs using the theoretical minimum capacity of **1 single neuron**.
+*   **GRU:** **Failed to Converge ( ~50%).** Remained at chance level despite having 128x the hidden capacity.
+*   ![Parity Benchmark](data/6e15d8d5/6e15d8d5/benchmark_parity_6e15d8d5.png)
 
 ### 7.3 Topological Invariants (Graph Cycles)
 *   **ROUND:** **100% Accuracy.** Stable, monotonic convergence on flattened graph adjacency matrices.
-*   **GRU:** **Matches Performance.**
-*   ![Topology Benchmark](data/181f675c/benchmark_topology_181f675c.png)
+*   **GRU:** **100% Accuracy.** Matches performance with 128 neurons.
+*   ![Topology Benchmark](data/6e15d8d5/6e15d8d5/benchmark_topology_6e15d8d5.png)
 
 ### 7.4 Streaming Recursion (Brackets Masked)
-*   **ROUND:** **~100% Accuracy.** Successfully handles Dyck-2 nesting in sequential mode.
-*   ![Brackets Benchmark](data/181f675c/benchmark_brackets_masked_181f675c.png)
+*   **ROUND:** **100% Accuracy.** Successfully handles Dyck-2 nesting in sequential mode using non-volatile phase stability.
+*   ![Brackets Benchmark](data/6e15d8d5/6e15d8d5/benchmark_brackets_masked_6e15d8d5.png)
 
 ### 7.5 The Oracle (QA Consistency)
-*   **ROUND:** **100% Accuracy.** Perfect consistency across binary classification tasks.
-*   ![Oracle Benchmark](data/181f675c/benchmark_oracle_181f675c.png)
+*   **ROUND:** **100% Accuracy.** Perfect consistency across binary classification tasks with higher interpretability.
+*   ![Oracle Benchmark](data/6e15d8d5/6e15d8d5/benchmark_oracle_6e15d8d5.png)
 
 ### 7.6 Generative Creativity (ASCII)
-*   **ROUND:** **100% Accuracy.** Perfect cyclic timing and zero drift.
+*   **ROUND:** **100% Accuracy.** Perfect cyclic timing and zero byte-drift.
 *   **GRU:** **~97% Accuracy.** Occasional character drift even with 4x hidden state size.
-*   ![ASCII Benchmark](data/181f675c/benchmark_ascii_181f675c.png)
+*   ![ASCII Benchmark](data/6e15d8d5/6e15d8d5/benchmark_ascii_6e15d8d5.png)
 
-### 7.7 Semantic Algebra (Colors)
-*   **ROUND:** **100% Accuracy.** Successfully learns vector-like relationships in symbolic space.
-*   ![Colors Benchmark](data/181f675c/benchmark_colors_181f675c.png)
+### 7.8 The Shuffled Gauntlet (Permutations)
+*   **ROUND:** **100.0% Accuracy.** Stable recall across multi-shuffled datasets.
+*   **GRU:** **100.0% Accuracy.** Matches performance with 4x capacity.
+*   ![Permutations Benchmark](data/6e15d8d5/6e15d8d5/benchmark_perms_vs_gru_6e15d8d5.png)
+
+### 7.9 The Sandwich Duel (Phasic Sovereignty vs. Vector Memory)
+The ultimate "Show and Tell" of the Crystalline Era ($v1.0.0$). We compare **UIT-ROUND** ($512N$) against a **GRU** ($512N$) baseline across the full ASCII domain ($n=256$).
+
+![Scientific Duel Story](data/UIT_efe843c7/plots/scientific_duel_story_efe843c7.png)
+
+*   **UIT-ROUND:** **100.0% Success (256/256).** Bit-perfect identity relay.
+*   **GRU Baseline:** **0.39% Success (1/256).** Vector memory drift collapse.
+
+#### Why is this Remarkable?
+This result represents the achievement of **Air-Tight Neural Communication**. While both models achieved 100% accuracy on isolated tasks (Hearing and Speaking), the GRU collapsed when forced to relay its "Knowledge" to another frozen module. 
+
+In traditional Vector Memory (GRU/LSTM/Transformer), the hidden state is a "local dialect"—it only makes sense in the context of the weights that created it. When you chain two frozen GRUs, the "meaning" evaporates. 
+
+In **UIT-ROUND**, the hidden state is a **Sovereign Phasic Identity**. Because the neuron is locked to a topological grid point (**Structural Snap**), the information is universal. It passes through the manifold with **Zero-Loss Integrity**, enabling modular neural systems that can talk to each other with bit-perfection.
 
 ---
 
-## Theory: Unified Informatic Topology (UIT)
+## 8. Live Crystalline Verification (UID: efe843c7)
+
+The Crystalline Factory ($v1.0.0$) generates unique, isolated verification artifacts for every scientific run.
+
+- 📊 **Scientific Story**: [Crystalline vs Vector Duel (Alpha-Batch)](data/UIT_efe843c7/plots/scientific_duel_story_efe843c7.png)
+- 📝 **Execution Audit**: [Scientific Duel Log (efe843c7)](data/UIT_efe843c7/logs/scientific_duel_efe843c7.txt)
+- 📂 **Full Data Directory**: [g:/My Drive/Lexideck/Lexideck2025/Research/ROUND_Harmonic_0_2_0/data/UIT_efe843c7](data/UIT_efe843c7)
+
+---
+
+## 9. Theory: Unified Informatic Topology (UIT)
 
 ### "The Sphere Contains the Cube"
 
@@ -183,9 +209,13 @@ The core hypothesis of UIT is that **discrete logic is a special case of continu
 
 ## Repo Layout
 
-*   `ROUND.py`: Core engine (`PhaseAccumulator` with Spinor features).
+*   `ROUND.py`: Legacy core engine (Harmonic Era).
+*   `UIT_ROUND.py`: **The Crystalline Core.** Unified architecture with Structural Snap and Phasic Identity.
+*   `UIT_run_battery.py`: **The Crystalline Factory.** Industrial verification suite (UID-isolation).
 *   `benchmark_*.py`: Individual task harnesses (Decathlon suite).
+*   `UIT_Benchmarks/`: Consolidated Crystalline Era tests (Phasic Sandwich, Sandwich Duel).
 *   `run_battery.py`: Full regression suite for reproducing v0.8.0 logs.
+*   `visualization_utils.py`: Centralized Seaborn/Dark-Mode plotting engine for scientific-grade benchmarks.
 *   `config.py`: Centralized Golden Configuration.
 
 ---

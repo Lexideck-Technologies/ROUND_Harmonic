@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.9.0] - "The Crystalline Bridge" - 2025-12-26
+### Added
+*   **The Structural Snap (Hard Renormalization):** Implemented a mandatory quantization step where neurons "snap" to the nearest integer phasic address. This eliminates floating-point drift and achieves the **Diamond Lock** ($256/256$ bit-perfection).
+*   **The Phasic Sandwich (End-to-End Relay):** Verified that a hidden "Phasic Identity" can be ingested by a Decoder, passed through a frozen manifold, and reconstructed by an Encoder with **Zero Erasure Cost**. This establishes the first **Zero-Loss Neural Communication Channel**.
+*   **The Sandwich Duel:** Added a comparative benchmark against GRU baselines. Results: **UIT-ROUND (100%) vs GRU (0.4%)** Success Rate in end-to-end identity relay.
+*   **Phasic Inertia (Momentum):** Added a temporal anchor to the phase update logic to prevent jitter in high-frequency regimes.
+
+### Changed
+*   **Architecture Rewrite:** Unified all experimental features (Spinor, Harmonic, Wobble) into `UIT_ROUND.py` (v1.0.0 core).
+*   **Innovation: Phasic Sovereignty vs. Gated Euclidean Memory**
+    - **Legacy ROUND (`ROUND.py`):** Relies on **Continuous Potential Wells** (Harmonic Locking) to attract the phase towards stable basins. While robust against decay, it is still a "fuzzy" statistical system subject to epsilon-drift.
+    - **UIT-ROUND (`UIT_ROUND.py`):** Introduces **Informatic Exchange Geometries (IEG)**. It treates the phase manifold as a deterministic bit-address. 
+    - **The Structural Snap:** Unlike the "Soft Snap" of legacy ROUND, `UIT_ROUND` enforces a Hard Renormalization—snapping phases to their nearest topological grid point. This creates the **Diamond Lock**, enabling bit-perfect 100% reconstruction for complex discrete identities like ASCII ($n=256$).
+    - **Modular Phasic Identity:** UIT-ROUND achieves **Phasic Sovereignty**, where the hidden state of one module is mathematically identical to the input requirements of the next. This allows for zero-shot knowledge relay between a frozen Decoder and frozen Encoder—a feat impossible for Vector-based architectures.
+*   **Training Methodology:** Introduced **Phasic Coolant** (Exponential LR Descent $2^{-n}$) and **Iterative Manifold Deepening** as the standard protocol for achieving Crystalline convergence.
+*   **Benchmark Reorganization:** Relocated and standardized all decathlon benchmark scripts into specialized sub-directories for better modularity.
+*   **UIT Bridge Integration:** Consolidated core `UIT_ROUND.py` and the `UIT_Benchmarks` directory (including the Phasic Sandwich and Sandwich Duel) into the main structure.
+*   **Scientific Visualization Suite:** Introduced `visualization_utils.py` and consolidated `UIT_sandwich_duel_scientific.png` for unified storytelling.
+
 ## [0.8.0] - "The Frozen Basin" - 2025-12-20
 ### Added
 *   **Frozen Basin Test:** Replaced the legacy Long-Term Memory test with `benchmark_phase_lock.py` ("The Magnum Opus"). This test runs for **12,500 Epochs** (11,000 Learn + 1,500 Cryostasis Storm).
