@@ -47,3 +47,13 @@ for script in scripts:
         print(f"An unexpected error occurred: {e}")
 
 print("\nBattery Complete.")
+
+# Result Auto-Documentation
+print(f"\nUPDATING README With Results from {BATCH_UID}...")
+try:
+    if os.path.exists("update_readme.py"):
+        subprocess.run([sys.executable, "update_readme.py"], check=True)
+    else:
+        print("update_readme.py not found. Skipping auto-update.")
+except Exception as e:
+    print(f"Failed to update README: {e}")

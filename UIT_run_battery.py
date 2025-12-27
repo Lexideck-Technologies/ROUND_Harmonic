@@ -327,3 +327,14 @@ if __name__ == "__main__":
     r_relay, g_relay = run_relay_duel(r_dec, r_enc, g_dec, g_enc)
     visualize_story(r_hist, g_hist, r_relay, g_relay)
     W_LOG.log(f"Workshop complete. Duel Artifacts in: {BASE_DIR}")
+    
+    # Result Auto-Documentation
+    W_LOG.log(f"UPDATING README With Results from {UID}...")
+    try:
+        import subprocess
+        if os.path.exists("update_readme.py"):
+            subprocess.run([sys.executable, "update_readme.py"], check=True)
+        else:
+             W_LOG.log("update_readme.py not found. Skipping auto-update.")
+    except Exception as e:
+        W_LOG.log(f"Failed to update README: {e}")

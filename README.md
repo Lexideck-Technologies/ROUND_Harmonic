@@ -133,45 +133,45 @@ python run_battery.py
 
 ---
 
-We performed a Head-to-Head comparison between **ROUND (Vertical Crystal)** and a standard **GRU** across the "Decathlon" suite. Results are from the `6e15d8d5` regression battery.
+We performed a Head-to-Head comparison between **ROUND (Vertical Crystal)** and a standard **GRU** across the "Decathlon" suite. Results are from the `02e966f1` regression battery.
 
 In this test, models must learn 6 high-entropy words. After 11,000 epochs of annealing, they are subjected to "The Storm"—**1,500 epochs** of 50% signal corruption. This simulates the chaotic feedback of a "Communication Layer" trying to fine-tune a "Concept Layer."
 *   **ROUND:** **100% Final Retention.** ROUND detects resonance, engages **Cryostasis** (Gradient Vault), and effectively "sleeps" through the storm. It allows the "New Layer" (simulated) to learn without overwriting the "Old Layer's" foundational truths.
 *   **GRU:** **Catastrophic Forgetting (<90%).** Lacking a "Done" state, the GRU tries to accommodate the training noise, destroying its own memory (notably dropping to 62.5% on complex words like 'TOPOLOGY').
-*   ![Phase Lock Benchmark](data/6e15d8d5/6e15d8d5/benchmark_phase_lock_27e7eb8d.png)
+*   ![Phase Lock Benchmark](data/02e966f1/02e966f1/benchmark_phase_lock_352147cb.png)
 
 ### 7.2 The "Impossible" Logic Test (Parity)
 *   **ROUND:** **100% Accuracy.** Snaps to the global optimum within 100 epochs using the theoretical minimum capacity of **1 single neuron**.
 *   **GRU:** **Failed to Converge ( ~50%).** Remained at chance level despite having 128x the hidden capacity.
-*   ![Parity Benchmark](data/6e15d8d5/6e15d8d5/benchmark_parity_6e15d8d5.png)
+*   ![Parity Benchmark](data/02e966f1/02e966f1/benchmark_parity_02e966f1.png)
 
 ### 7.3 Topological Invariants (Graph Cycles)
 *   **ROUND:** **100% Accuracy.** Stable, monotonic convergence on flattened graph adjacency matrices.
 *   **GRU:** **100% Accuracy.** Matches performance with 128 neurons.
-*   ![Topology Benchmark](data/6e15d8d5/6e15d8d5/benchmark_topology_6e15d8d5.png)
+*   ![Topology Benchmark](data/02e966f1/02e966f1/benchmark_topology_02e966f1.png)
 
 ### 7.4 Streaming Recursion (Brackets Masked)
 *   **ROUND:** **100% Accuracy.** Successfully handles Dyck-2 nesting in sequential mode using non-volatile phase stability.
-*   ![Brackets Benchmark](data/6e15d8d5/6e15d8d5/benchmark_brackets_masked_6e15d8d5.png)
+*   ![Brackets Benchmark](data/02e966f1/02e966f1/benchmark_brackets_masked_02e966f1.png)
 
 ### 7.5 The Oracle (QA Consistency)
 *   **ROUND:** **100% Accuracy.** Perfect consistency across binary classification tasks with higher interpretability.
-*   ![Oracle Benchmark](data/6e15d8d5/6e15d8d5/benchmark_oracle_6e15d8d5.png)
+*   ![Oracle Benchmark](data/02e966f1/02e966f1/benchmark_oracle_02e966f1.png)
 
 ### 7.6 Generative Creativity (ASCII)
 *   **ROUND:** **100% Accuracy.** Perfect cyclic timing and zero byte-drift.
 *   **GRU:** **~97% Accuracy.** Occasional character drift even with 4x hidden state size.
-*   ![ASCII Benchmark](data/6e15d8d5/6e15d8d5/benchmark_ascii_6e15d8d5.png)
+*   ![ASCII Benchmark](data/02e966f1/02e966f1/benchmark_ascii_02e966f1.png)
 
 ### 7.8 The Shuffled Gauntlet (Permutations)
 *   **ROUND:** **100.0% Accuracy.** Stable recall across multi-shuffled datasets.
 *   **GRU:** **100.0% Accuracy.** Matches performance with 4x capacity.
-*   ![Permutations Benchmark](data/6e15d8d5/6e15d8d5/benchmark_perms_vs_gru_6e15d8d5.png)
+*   ![Permutations Benchmark](data/02e966f1/02e966f1/benchmark_perms_vs_gru_02e966f1.png)
 
 ### 7.9 The Sandwich Duel (Phasic Sovereignty vs. Vector Memory)
 The ultimate "Show and Tell" of the Crystalline Era ($v1.0.0$). We compare **UIT-ROUND** ($512N$) against a **GRU** ($512N$) baseline across the full ASCII domain ($n=256$).
 
-![Scientific Duel Story](data/UIT_efe843c7/plots/scientific_duel_story_efe843c7.png)
+![Scientific Duel Story](data/UIT_c1d3c3c9/plots/scientific_duel_story_c1d3c3c9.png)
 
 *   **UIT-ROUND:** **100.0% Success (256/256).** Bit-perfect identity relay.
 *   **GRU Baseline:** **0.39% Success (1/256).** Vector memory drift collapse.
@@ -185,13 +185,13 @@ In **UIT-ROUND**, the hidden state is a **Sovereign Phasic Identity**. Because t
 
 ---
 
-## 8. Live Crystalline Verification (UID: efe843c7)
+## 8. Live Crystalline Verification (UID: c1d3c3c9)
 
 The Crystalline Factory ($v1.0.0$) generates unique, isolated verification artifacts for every scientific run.
 
-- 📊 **Scientific Story**: [Crystalline vs Vector Duel (Alpha-Batch)](data/UIT_efe843c7/plots/scientific_duel_story_efe843c7.png)
-- 📝 **Execution Audit**: [Scientific Duel Log (efe843c7)](data/UIT_efe843c7/logs/scientific_duel_efe843c7.txt)
-- 📂 **Full Data Directory**: [data/UIT_efe843c7](data/UIT_efe843c7)
+- 📊 **Scientific Story**: [Crystalline vs Vector Duel (Alpha-Batch)](data/UIT_c1d3c3c9/plots/scientific_duel_story_c1d3c3c9.png)
+- 📝 **Execution Audit**: [Scientific Duel Log (efe843c7)](data/UIT_c1d3c3c9/logs/scientific_duel_c1d3c3c9.txt)
+- 📂 **Full Data Directory**: [data/UIT_c1d3c3c9](data/UIT_c1d3c3c9)
 
 ---
 
