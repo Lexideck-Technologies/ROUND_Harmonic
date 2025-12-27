@@ -1,0 +1,10 @@
+Curriculum (Scalar): Final Acc=0.7344, Max Len=15
+Teacher Forcing (Fixed): Final Acc=0.8556, Max Len=200
+Annealed Forcing: Final Acc=0.0647, Max Len=65
+Resonant Teacher: Final Acc=0.7823, Max Len=200
+Stability First: Final Acc=0.0745, Max Len=155
+Handheld Harmonic: Final Acc=1.0000, Max Len=200
+Scalar Resonance: Final Acc=0.9083, Max Len=15
+Oscillator Lock: Final Acc=0.9995, Max Len=200
+GRU (Scalar): Final Acc=0.8219, Max Len=10
+GRU (One-Hot): Final Acc=0.8564, Max Len=100

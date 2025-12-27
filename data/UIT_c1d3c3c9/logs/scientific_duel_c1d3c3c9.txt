@@ -1,0 +1,24 @@
+[19:06:15] Starting Industrial Crystalline Duel | UID: c1d3c3c9
+[19:06:15] --- PHASE 0: GRU BASELINE TRAINING ---
+[19:06:19] GRU Step 0 | Dec Acc: 3.12% | Enc Acc: 0.00%
+[19:06:22] GRU Step 250 | Dec Acc: 43.75% | Enc Acc: 60.94%
+[19:06:24] GRU Step 500 | Dec Acc: 93.75% | Enc Acc: 95.31%
+[19:06:26] GRU Step 750 | Dec Acc: 100.00% | Enc Acc: 100.00%
+[19:06:26] --- [GRU BASELINE LOCKED] ---
+[19:06:26] --- PHASE 1: UIT-ROUND CRYSTALLIZATION ---
+[19:06:26] UIT Decoder 0 | Acc: 1.56% | Conf: 0.2062
+[19:06:28] UIT Decoder 250 | Acc: 53.12% | Conf: 0.2755
+[19:06:31] UIT Decoder 500 | Acc: 87.50% | Conf: 0.3025
+[19:06:33] UIT Decoder 750 | Acc: 98.44% | Conf: 0.3027
+[19:06:35] UIT Decoder 1000 | Acc: 100.00% | Conf: 0.3085
+[19:06:35] --- [UIT DECODER LOCKED] ---
+[19:06:37] --- PHASE 2: UIT ENCODER CRYSTALLIZATION ---
+[19:06:37] UIT Encoder 0 | Acc: 0.00% | Conf: 0.2464
+[19:06:41] UIT Encoder 250 | Acc: 100.00% | Conf: 0.2041
+[19:06:44] UIT Encoder 500 | Acc: 100.00% | Conf: 0.2106
+[19:06:44] --- [UIT ENCODER LOCKED] ---
+[19:06:44] --- PHASE 4: THE SCIENTIFIC RELAY DUEL ---
+[19:06:49] DUEL RESULTS | UIT-ROUND: 100.00% | GRU: 0.78%
+[19:06:49] --- PHASE 5: THE STORY VISUALIZATION ---
+[19:06:49] Premium Scientific Story Plot Saved: data/UIT_c1d3c3c9/plots/scientific_duel_story_c1d3c3c9.png
+[19:06:49] Workshop complete. Duel Artifacts in: data/UIT_c1d3c3c9
