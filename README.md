@@ -191,7 +191,7 @@ The Crystalline Factory ($v1.0.0$) generates unique, isolated verification artif
 
 - 📊 **Scientific Story**: [Crystalline vs Vector Duel (Alpha-Batch)](data/UIT_efe843c7/plots/scientific_duel_story_efe843c7.png)
 - 📝 **Execution Audit**: [Scientific Duel Log (efe843c7)](data/UIT_efe843c7/logs/scientific_duel_efe843c7.txt)
-- 📂 **Full Data Directory**: [g:/My Drive/Lexideck/Lexideck2025/Research/ROUND_Harmonic_0_2_0/data/UIT_efe843c7](data/UIT_efe843c7)
+- 📂 **Full Data Directory**: [data/UIT_efe843c7](data/UIT_efe843c7)
 
 ---
 
