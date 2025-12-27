@@ -228,22 +228,46 @@ The core hypothesis of UIT is that **discrete logic is a special case of continu
 
 ---
 
-## Glossary of Terms
+## 11. UIT_ROUND Crystalline Glossary
 
-### Cryostasis (Gradient Vault)
-A v0.8.0 feature where the neuron, upon detecting Harmonic Phase Lock (Resonance > Threshold), autonomously zeros its own gradients. This effectively "freezes" the weights for that neuron, converting it from a learning unit to a fixed feature extractor. This protects knowledge from "The Storm" (Noise/Fine-Tuning).
+### Phasic Sovereignty
+The core achievement of UIT_ROUND. It refers to the property of a neural hidden state being a **Universal Identity** rather than a local dialect. Because the phase is locked to a topological manifold, it can be handed from a frozen Decoder to a frozen Encoder with bit-perfect integrity (Zero-Loss Relay).
 
-### Phase Angle Lock
-The geometric condition where a neuron's phase aligns with a harmonic potential well ($2\pi k$). This is the signal for "Grokking" or "Compression."
+### Structural Snap (v0.9.0)
+The renormalization protocol that forces a fuzzy, floating-point phase $\phi$ to the nearest integer grid point on the manifold. This prevents the chaotic accumulation of error (Vector Drift) and enables the "Diamond Lock" required for bit-perfect reconstruction.
 
-### Spinor Monism
-The realization (v0.6.3) that a single harmonic configuration can solve disparate tasks.
+### Mogura Winding (The Hearing Instinct)
+The geometric axiom for **Decoding**. Information is ingested via recursive phase-shifts: $\phi_{t+1} = 0.5\phi_t + \text{bit}_t \cdot \pi$. This winds the bit-stream into a unique residue on the circle.
 
-### Phase Accumulation
-The core mechanic of the `PhaseAccumulator`. Unlike standard neurons that use multiplicative gates, ROUND updates its state via simple addition: $\phi_{t+1} = \phi_t + \Delta\phi_t$.
+### Bernoulli Unwinding (The Speaking Instinct)
+The geometric axiom for **Encoding/Generation**. Information is extracted from the phase residue via recursive doubling: $\phi_{t+1} = 2\phi_t \pmod{2\pi}$. If $\phi \ge \pi$, the model "speaks" a bit (1); otherwise, it speaks a zero.
 
-### Spinor Cover (Double Cover)
-The mathematical technique of projecting inputs onto the $4\pi$ range to resolve topological "twists."
+### Crystalline Identity (The Crystal)
+A model state that has been frozen into a non-volatile form. Once a neuron achieves **Resonant Lock**, its weights are saved as a `.pt` Crystal. These can be hot-swapped or chained together within the **Crystalline Factory** framework.
 
-### Harmonic Reciprocal ($2^{-9}$)
-The optimized learning rate (`LR = 0.001953125`) and Locking Threshold used in v0.8.0. It aligns the step size of gradient descent with the underlying geometry of the phase circle.
+### Sovereign Map
+The topological "Address Book" for a domain. It is a tensor containing the exact terminal phase addresses for a set of concepts (e.g., all 256 ASCII characters). It is used for **Sovereign Seeding** (Renormalization) of new modules.
+
+### Full Spectral Signature
+Unlike legacy neurons that only output a magnitude, UIT-ROUND outputs both the **Cosine and Sine** components of the phase. This provides a unambiguous spectral identity, resolving the +/- symmetry that plagues single-component phase models.
+
+### Standard Part (Activation)
+The macroscopic, non-phasic component of the U-neuron's activation (tanh-gated). It handles the "Standard Part" of information, while the phase manifold handles the "Crystalline Part."
+
+### Informatic Fiber (Epsilon)
+The infinitesimal dendritic integration parameter. It represents the "fiber" of knowledge that connects the macroscopic activation to the underlying phasic identity.
+
+### Landauer Efficiency (Informatic Loss)
+A loss metric inspired by Landauer's principle, penalizing informational erasure (weight changes) to encourage energy-efficient, stable knowledge retention.
+
+### Phasic Inertia
+The stability mechanism where the learning rate is dynamically damped by $(1.0 - \text{Confidence})$. As a neuron finds its resonant "groove," it gains inertia and resists further updates, protecting its knowledge from learning-rate noise.
+
+---
+
+### Legacy Terms (Harmonic Era)
+
+- **Cryostasis (Gradient Vault)**: The v0.8.0 precursor to Crystalline Identity.
+- **Spinor Monism**: The realization that a single harmonic cell can solve disparate logic/topology tasks.
+- **Double Cover (Spinor)**: Projecting inputs onto the $4\pi$ range to resolve topological "twists."
+- **Harmonic Reciprocal ($2^{-9}$)**: The optimized learning rate for aligning gradient descent with phase geometry.
