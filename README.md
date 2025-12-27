@@ -179,7 +179,7 @@ The ultimate "Show and Tell" of the Crystalline Era ($v1.0.0$). We compare **UIT
 ![Scientific Duel Story](data/UIT_c1d3c3c9/plots/scientific_duel_story_c1d3c3c9.png)
 
 *   **UIT-ROUND:** **100.0% Success (256/256).** Bit-perfect identity relay.
-*   **GRU Baseline:** **0.39% Success (1/256).** Vector memory drift collapse.
+*   **GRU Baseline:** **0.78% Success (1/128).** Vector memory drift collapse.
 
 #### Why is this Remarkable?
 This result represents the achievement of **Air-Tight Neural Communication**. While both models achieved 100% accuracy on isolated tasks (Hearing and Speaking), the GRU collapsed when forced to relay its "Knowledge" to another frozen module. 
