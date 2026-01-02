@@ -90,23 +90,39 @@ All plots are automatically generated in `data/[UID]/` during a battery run.
 
 ### 1. The Sandwich Duel (v1.3.0 Standard)
 *   **UIT-ROUND:** **100.0% Success (256/256).** Bit-perfect identity relay.
-*   **GRU Baseline:** **0.78% Success (1/128).** Vector memory drift collapse.
+*   **GRU Baseline:** **1.17% Success** (Collapse). Vector memory drift cannot sustain identity through the frozen relay.
 
 ![Scientific Duel Story](data/UIT_cc6dc810/plots/sandwich_duel_story_cc6dc810.png)
 
 ### 2. Crystalline Loop
-*   **Success Rate:** **100% (Air-Tight).**
-*   **Mechanism:** Decoder (Ear) $\rightarrow$ Phase $\rightarrow$ Encoder (Voice) $\rightarrow$ Bits.
+*   **Result:** **Coherence Verified.**
+*   **Mechanism:** 256x8 Bit Reconstruction Matrix.
+*   **Visualization:** The "Green Wall" indicates perfect bit reconstruction across the entire sequence length.
+*   **Plot:** ![Crystalline Loop](data/UIT_cc6dc810/plots/crystalline_coherence_duel_cc6dc810.png)
 
 ### 3. Prism Stack (Restored)
 *   **Fix:** Matched Hidden Size to Modular Space (18).
-*   **Result:** **100% Convergence** (vs GRU 99%).
+*   **Result:** **100% Convergence** (vs GRU 99%). The Prism Stack demonstrates the ability to lock onto modular arithmetic logic.
 *   **Plot:** ![Prism Stack](data/UIT_cc6dc810/plots/prism_stack_duel_cc6dc810.png)
 
-### 4. U-Matrix (7-Octave)
+### 4. Color Algebra (Crayola-64)
+*   **Result:** **Vector Mixture Verified.**
+*   **Mechanism:** Tests the ability to perform algebraic operations on high-dimensional color vectors (Add/Subtract).
+*   **Plot:** ![Color Algebra](data/UIT_cc6dc810/plots/color_algebra_duel_cc6dc810.png)
+
+### 5. Transparency Duel
+*   **Result:** **Inverse Mapping Confirmed.**
+*   **Mechanism:** Measures the "Warp" or distortion introduced by the network. UIT-ROUND maintains high transparency (low warp), preserving the signal's topological properties.
+*   **Plot:** ![Transparency Duel](data/UIT_cc6dc810/plots/transparency_duel_cc6dc810.png)
+
+### 6. U-Matrix (7-Octave Spectrum)
 *   **Innovation:** 7-Octave Harmonic Spectrum + Spin-π (0.5).
 *   **Result:** **Continuous Signal Lock** (0.0013 MSE vs GRU 0.0002).
-*   **Plot:** ![U-Matrix 7-Octave](data/placeholder/u_matrix_7octave_placeholder.png)
+*   **Note:** The red "prediction" line tracks the blue "truth" signal with high fidelity, demonstrating the liquid dynamics of the U-Matrix.
+*   **Plot:** ![U-Matrix 7-Octave](data/UIT_cc6dc810/plots/u_matrix_7octave_cc6dc810.png)
+
+*Additional Confirmation: Standard U-Matrix Logic*
+![U-Matrix Logic](data/UIT_cc6dc810/plots/u_matrix_duel_cc6dc810.png)
 
 ---
 
