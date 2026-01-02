@@ -168,7 +168,7 @@ ROUND_Harmonic_0_2_0/
 ### Key Components
 1.  **UIT_ROUND.py (The Crystal)**: Implements the `UITNeuronCell` with harmonic spin control, Bernoulli unwinding, and geometric alignment. It explicitly models the "Phasic Identity" (phase angle) and uses a "spin multiplier" to control the phase range. It includes "Diagnostic Harmonics" (cosine/sine projections at specific frequencies) which are crucial for the "Confidence" metric.
 2.  **UIT_run_battery.py (The Factory)**: The central hub. It runs a relay duel between a GRU baseline and the UIT-ROUND model, then triggers the external benchmark suite located in `UIT_Benchmarks`.
-3.  **UIT_Benchmarks (The Gauntlet)**: Contains the specialized tests. The "Sandwich Duel" and "Crystalline Loop" seem to be the primary integrity checks.
+3.  **UIT_Benchmarks (The Gauntlet)**: The specialized experimental suite. It contains the **Sandwich Duel** (Codec Transfer), **Crystalline Loop** (Behavioral Inversion), **Prism Stack** (Geometric Logic), **Color Algebra** (Vector Manipulation), **Transparency Duel** (Expansibility), and **U-Matrix** (Harmonic Triangulation) tests.
 
 ---
 
