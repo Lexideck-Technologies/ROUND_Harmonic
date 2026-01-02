@@ -90,7 +90,7 @@ All plots are automatically generated in `data/[UID]/` during a battery run.
 
 ### 1. The Sandwich Duel (v1.3.0 Standard)
 *   **UIT-ROUND:** **100.0% Success (256/256).** Bit-perfect identity relay.
-*   **GRU Baseline:** **0.39% Success (1/256).** Vector memory drift collapse.
+*   **GRU Baseline:** **0.78% Success (1/128).** Vector memory drift collapse.
 
 ![Scientific Duel Story](data/UIT_cc6dc810/plots/sandwich_duel_story_cc6dc810.png)
 
