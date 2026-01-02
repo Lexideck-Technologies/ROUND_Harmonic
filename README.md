@@ -1,7 +1,9 @@
-# The Crystalline Bridge (UIT-ROUND) v1.0.0
-### "Sovereign Identity and Phasic Sovereignty"
+# The Crystalline Bridge (UIT-ROUND) v1.3.10
+### "Restored Golden State (Operation Phoenix)"
 
 **Riemannian Optimized Unified Neural Dynamo (ROUND),** also known as the **U-Neuron,** is a non-volatile recurrent architecture based on the principles of **Unified Informatic Topology (UIT)**. Unlike standard neurons (GRU/LSTM) that store state in Euclidean space (where it drifts and decays), ROUND stores state on a topological manifold—a phase circle.
+
+**v1.3.10 (Morning State)** represents the successfully restored, verified, and consolidated "Golden State" of the architecture.
 
 [![The U-Neuron](https://www.lexidecktechnologies.com/UIT_IEG/ROUND_Harmonic_U_Neuron/media/round_video_thumbnail.png)](https://www.lexidecktechnologies.com/UIT_IEG/ROUND_Harmonic_U_Neuron/media/The_U-Neuron.mp4)
 <div align="center"><em>Click the thumbnail above to watch the 2-minute explainer video.</em></div>
@@ -20,16 +22,12 @@ Independent validation and explanation of the ROUND architecture:
 
 ## Table of Contents
 1. [The Story of ROUND: An Arc of Discovery](#the-story-of-round-an-arc-of-discovery)
-2. [Executive Summary: Spinor Monism](#executive-summary-spinor-monism)
-3. [The Spinor Breakthrough: Solving the "Twist"](#the-spinor-breakthrough-solving-the-twist)
-4. [What ROUND Is](#what-round-is)
-5. [ROUND vs. GRU: The Stability of Memory](#round-vs-gru-the-stability-of-memory)
-6. [Quickstart](#quickstart)
-7. [Benchmark Results: v0.8.0 The Frozen Basin](#benchmark-results-v080-the-frozen-basin)
-8. [Theory: Unified Informatic Topology (UIT)](#theory-unified-informatic-topology-uit)
-9. [Repo Layout](#repo-layout)
-10. [License & Citation](#license--citation)
-11. [Glossary of Terms](#glossary-of-terms)
+2. [Operation Phoenix: The Restoration](#operation-phoenix-the-restoration)
+3. [The Golden State (v1.3.10)](#the-golden-state-v1310)
+4. [Industrial Visualization Suite](#industrial-visualization-suite)
+5. [Benchmark Results](#benchmark-results)
+6. [Repo Layout](#repo-layout)
+7. [License & Citation](#license--citation)
 
 ---
 
@@ -37,191 +35,120 @@ Independent validation and explanation of the ROUND architecture:
 
 The journey of the **Riemannian Optimized Unified Neural Dynamo (ROUND)** is a story of seeking simplicity at the intersection of geometry and information.
 
-### Chapter 1: The Circle (v0.1.0)
-We began with a simple hypothesis: what if an AI neuron didn't just "gate" information (like a GRU or LSTM), but "accumulated" it as a physical phase angle on a circle? This created a non-volatile memory cell, stable like a gyroscope, but it struggled with discrete logic.
-
-### Chapter 2: The Rugged Landscape (v0.2.0 - v0.3.5)
-To force the continuous phase into discrete "bins," we introduced **Harmonic Locking**. By stacking multiple potential wells (`HARMONICS = [1, 2, 4, 8]`), we created a complex landscape where the neuron could "lock" into different states. It worked, but it was noisy. Optimization was a "rugged" struggle.
-
-### Chapter 3: The Spinor Breakthrough (v0.4.0)
-The breakthrough came from physics. We realized that the "topological twist" of tasks like Parity (XOR) failed because the neuron couldn't distinguish between $0$ and $2\pi$ (a full wrap). By introducing **Spinor Features** (Spin-1/2), we projected the inputs onto the **Double Cover** of the circle ($4\pi$ range). Suddenly, the "twist" was visible.
-
-### Chapter 4: The Great Simplification (v0.6.0)
-With the power of Spinors, the complexity of the "Rugged Landscape" became unnecessary. In v0.6.0, we discovered that a **single, smooth fundamental harmonic (`[1]`)** combined with Spinor features solves every benchmark—Logic, Topology, and Structure—with perfect stability. 
-
-### Chapter 5: The Neural Shield (v0.6.4)
-We realized that "Training" is an antiquated concept. We moved toward **Infinite Plasticity**. By removing learning rate decay and implementing the **Neural Shield**—a protocol that engages the $2^{-6}$ Maintenance Floor whenever the model revisits established knowledge—we achieved a system that can learn indefinitely without eroding its past.
-
-### Chapter 6: The Frozen Basin (v0.8.0)
-In v0.8.0, we solved the **Stability-Plasticity Dilemma**. Standard networks (like GRU) fail during long-term training because "Plasticity" implies vulnerability. If a weight can move to learn, it can move to forget. ROUND v0.8.0 introduces **Autonomous Phase Locking**. When a neuron's phase resonance exceeds a critical threshold ($2^{-9}$), it declares itself "Solved" and enters **Cryostasis** (The Gradient Vault). Its weights freeze, becoming a permanent "Crystal" of knowledge, while the rest of the network remains fluid. This allows ROUND to survive 1500 epochs of massive noise ("The Storm") with **100% Retention**, while GRUs suffer catastrophic collapse.
+### Chapter 1-6: The Rise (v0.1.0 - v0.8.0)
+From the initial "Circle" hypothesis to the "Spinor Breakthrough" and the "Frozen Basin" of Cryostasis, we established that Phase Memory outperforms Euclidean Memory in stability, retention, and logic. (See `CHANGELOG.md` for full history).
 
 ### Chapter 7: The Crystalline Bridge (v1.0.0)
-The final ascent. In the Crystalline Era, we achieved **Phasic Sovereignty**. We discovered that once a neuron is topologically locked via the **Structural Snap** (v0.9.0), its hidden phase $\phi$ is no longer just a "state"—it is a **Sovereign Identity**. We demonstrated this by performing the **Phasic Sandwich Relay**: we took the hidden identity from a frozen Decoder and handed it directly to a frozen Encoder. The result? **100% Bit-Perfect Reconstruction** for all 256 ASCII characters. Traditional "Vector Memory" (GRU) collapsed in the same test ($0.4\%$ accuracy), proving that only Phasic Manifolds can act as universal informatic carriers.
+We achieved **Phasic Sovereignty**. We demonstrated that a neuron's phase $\phi$ is a **Universal Identity**. We proved this with the **Phasic Sandwich Relay**: passing a hidden state from a frozen Decoder to a frozen Encoder with **100% Bit-Perfect Reconstruction** ($n=256$), while GRUs collapsed (0.4%).
+
+### Chapter 8: The Collapse & Restoration (v1.3.10)
+Following the success of v1.0.0, the repository suffered from rapid experimental divergence ("Split Brain"), leading to broken benchmarks and redundant files. **Operation Phoenix** was initiated to audit, clean, and restore the "Golden State." v1.3.10 is the result: a unified, consolidated, and rigorously verified repository.
+
+### Chapter 9: Phasic Integrity (v1.3.11)
+We faced regressions in the **Prism Stack** and **U-Matrix** benchmarks. Through an Axiomatic Audit against `UITv2.pdf` Section 11, we restored the "Sequential Stacking" logic and "Liquid Dynamics" (via quantization control).
+*   **Axiomatic Audit**: [axiomatic_alignment.md](axiomatic_alignment.md) (Confirmed Mathematical Fidelity).
+*   **Restoration Walkthrough**: [walkthrough.md](walkthrough.md) (Final H2H Results).
 
 ---
 
-## Executive Summary: Spinor Monism and Cryostasis
+## Operation Phoenix: The Restoration
 
-The contemporary landscape of computational theory has long been fractured by a dichotomy between the continuous and the discrete. The **Unified Informatic Topology (UIT)** framework offers a resolution to this divide by positing that information is a physical substrate with thermodynamic weight.
-
-The **Spinor Monism** configuration (v0.6.3) establishes that a **single 32-neuron configuration** can span multiple computational regimes—Logic (XOR), Arithmetic (Counting), Structure (Recursion), and Topology (connectivity)—that typically require vastly different inductive biases.
-
-### The Phase Angle Lock (v0.8.0)
-The ultimate test of a memory system is not how well it learns, but how well it **refuses to forget**. In the v0.8.0 **"Phase Angle Lock Test"**, we subject the models to a "Noise Storm"—a prolonged period (1500 epochs) of 50% signal corruption. This simulates the "Model Distillation" or "Fine-Tuning" phase where foundational weights are often destroyed. ROUND demonstrates **Metacognition**: it recognizes when learning is complete via harmonic resonance and autonomously locks its state, preserving perfect recall.
+**v1.3.10** is not just a version; it is a standard of purity.
+*   **Repo Unity:** All active benchmarks are now consolidated in `UIT_Benchmarks/`. The `benchmarks/` folder is strictly for legacy reference.
+*   **Single Source of Truth:** `UIT_run_battery.py` now points exclusively to the consolidated suite.
+*   **Artifact Hygiene:** Redundant files (`color_algebra`, `accessibility`) have been archived. The "Mystery Files" are gone.
 
 ---
 
+## The Golden State (v1.3.10)
 
-## The Spinor Breakthrough: Solving the "Twist"
-
-In standard RNNs, state is a vector in Euclidean space. In ROUND, state is a phase $\phi$ on a circle. Prior versions struggled with "Twist" problems where the state must loop back on itself but remember how many times it has spun.
-
-By upgrading to **Spinor Features**:
-$$
-\Delta\phi_t = W\,[\cos(\phi), \sin(\phi), \mathbf{\cos(\phi/2), \sin(\phi/2)}, \cos(x), \sin(x)] + b
-$$
-The network now "feels" the difference between an odd and even number of rotations. This allows a circle to act as a Mobius strip or a higher-dimensional manifold, enabling the solution of 16-bit Parity with a single neuron.
+The "Morning State" configuration is the verified optimum:
+*   **Harmoics:** `[1, 2, 4, 8]` (The Power-of-2 Ladder)
+*   **Locking Strength:** `0.0625` (1/16)
+*   **Phase Logic:** "Associative Relay" (Decoder builds Phase, Encoder recognizes Identity from Phase).
+*   **Encoder:** "Memoryless Sensorium" (Persistence=0.0).
 
 ---
 
-## What ROUND Is
+## Industrial Visualization Suite
 
-ROUND is a **phase-accumulating recurrent cell**:
-- It represents hidden state as a phase vector **$\phi$** (radians).
-- It updates state via **accumulation** (addition), not gating.
-- It maintains **Long-term Stability**: Unlike GRUs which decay, ROUND's state is preserved by the topology of the circle itself.
+As of v1.3.10, the entire benchmark suite has been upgraded to **Premium "Sandwich Style" Visualization** (Dark Background, Red/Blue/Green Palette).
 
----
-
-## ROUND vs. GRU: The Stability of Memory
-
-*   **GRU (Volatile):** Like holding water in cupped hands; requires active gating to prevent decay. When noise increases, it "learns" the noise, overwriting the water.
-*   **ROUND (Stable):** Like a gyroscope; maintains state indefinitely via phase conservation. When noise increases, it enters **Cryostasis**, ignoring the noise and preserving the spin.
-
----
-
-## Quickstart
-
-### ⚠️ Hardware Warning
-> **Caution:** This repository runs a "Full Battery" optimization test suite.
-> *   **GPU Users:** Ensure you have a CUDA-compatible PyTorch installation. The benchmarks are optimized for CUDA and will run significantly faster.
-> *   **CPU Users:** Running the full battery (`run_battery.py`) on a CPU is computationally intensive. It may cause high thermal loads (fans spinning at 100%) for extended periods (30+ minutes).
-> *   **Disclaimer:** This code is provided "as-is". Run at your own risk. Monitor your system temperatures if running on laptops or purely air-cooled setups.
-
-### Requirements
-- Python 3.10+
-- PyTorch (tested on 2.0+)
-- NumPy, Matplotlib, **Seaborn**, **Pandas**
-
-### Running The Benchmarks
-Run the full regression test to reproduce the v0.8.0 findings:
-```bash
-python run_battery.py
-```
-
-| Experiment | Script | Description |
+| Benchmark | Visualization | Proof |
 | :--- | :--- | :--- |
-| **Parity** | `benchmark_parity.py` | 16-bit Recursive XOR chain. |
-| **Topology** | `benchmark_topology.py` | Euler Characteristic (Cycle Detection). |
-| **Brackets** | `benchmark_brackets_masked.py` | Dyck-2 recursive nesting depth. |
-| **Colors** | `benchmark_colors.py` | Semantic vector algebra. |
-| **Oracle** | `benchmark_oracle.py` | QA consistency and bias. |
-| **ASCII** | `benchmark_ascii.py` | Cyclic sequence generation. |
-| **Phase Lock** | `benchmark_phase_lock.py` | **The Benchmark.** 12,500 Epochs. 1,500 Epoch Storm. Tests Cryostasis and Retention. |
-| **Gauntlet** | `benchmark_order_independence.py` | The Shuffled Order Independence Brutality Test. |
-| **UIT Battery** | `UIT_run_battery.py` | **Crystalline Era.** Industrial-grade verification (Sandwich Duel). |
+| **Sandwich Duel** | **Bar Charts** (Red/Blue) | Proves 100% Relay Integrity vs GRU Collapse. |
+| **Crystalline Loop** | **Heatmap** (Green Wall) | Visualizes 256x8 Bit Reconstruction Matrix (Green=Perfect). |
+| **Transparency** | **Loss & Histo** | Shows Inverse Mapping convergence and Warp Distribution. |
+| **U-Matrix** | **Resonance Overlay** | Blue Truth vs Red Prediction tracking. |
+| **Prism Stack** | **Learning Curve** | Clean dark-mode loss tracking. |
+
+All plots are automatically generated in `data/[UID]/` during a battery run.
 
 ---
 
-We performed a Head-to-Head comparison between **ROUND (Vertical Crystal)** and a standard **GRU** across the "Decathlon" suite. Results are from the `02e966f1` regression battery.
+## Benchmark Results
 
-In this test, models must learn 6 high-entropy words. After 11,000 epochs of annealing, they are subjected to "The Storm"—**1,500 epochs** of 50% signal corruption. This simulates the chaotic feedback of a "Communication Layer" trying to fine-tune a "Concept Layer."
-*   **ROUND:** **100% Final Retention.** ROUND detects resonance, engages **Cryostasis** (Gradient Vault), and effectively "sleeps" through the storm. It allows the "New Layer" (simulated) to learn without overwriting the "Old Layer's" foundational truths.
-*   **GRU:** **Catastrophic Forgetting (<90%).** Lacking a "Done" state, the GRU tries to accommodate the training noise, destroying its own memory (notably dropping to 62.5% on complex words like 'TOPOLOGY').
-*   ![Phase Lock Benchmark](data/02e966f1/02e966f1/benchmark_phase_lock_352147cb.png)
-
-### 7.2 The "Impossible" Logic Test (Parity)
-*   **ROUND:** **100% Accuracy.** Snaps to the global optimum within 100 epochs using the theoretical minimum capacity of **1 single neuron**.
-*   **GRU:** **Failed to Converge ( ~50%).** Remained at chance level despite having 128x the hidden capacity.
-*   ![Parity Benchmark](data/02e966f1/02e966f1/benchmark_parity_02e966f1.png)
-
-### 7.3 Topological Invariants (Graph Cycles)
-*   **ROUND:** **100% Accuracy.** Stable, monotonic convergence on flattened graph adjacency matrices.
-*   **GRU:** **100% Accuracy.** Matches performance with 128 neurons.
-*   ![Topology Benchmark](data/02e966f1/02e966f1/benchmark_topology_02e966f1.png)
-
-### 7.4 Streaming Recursion (Brackets Masked)
-*   **ROUND:** **100% Accuracy.** Successfully handles Dyck-2 nesting in sequential mode using non-volatile phase stability.
-*   ![Brackets Benchmark](data/02e966f1/02e966f1/benchmark_brackets_masked_02e966f1.png)
-
-### 7.5 The Oracle (QA Consistency)
-*   **ROUND:** **100% Accuracy.** Perfect consistency across binary classification tasks with higher interpretability.
-*   ![Oracle Benchmark](data/02e966f1/02e966f1/benchmark_oracle_02e966f1.png)
-
-### 7.6 Generative Creativity (ASCII)
-*   **ROUND:** **100% Accuracy.** Perfect cyclic timing and zero byte-drift.
-*   **GRU:** **~97% Accuracy.** Occasional character drift even with 4x hidden state size.
-*   ![ASCII Benchmark](data/02e966f1/02e966f1/benchmark_ascii_02e966f1.png)
-
-### 7.8 The Shuffled Gauntlet (Permutations)
-*   **ROUND:** **100.0% Accuracy.** Stable recall across multi-shuffled datasets.
-*   **GRU:** **100.0% Accuracy.** Matches performance with 4x capacity.
-*   ![Permutations Benchmark](data/02e966f1/02e966f1/benchmark_perms_vs_gru_02e966f1.png)
-
-### 7.9 The Mod-17 Challenge (Cyclic Counting)
-*   **ROUND:** **100% Accuracy.** Achieves perfect cyclic resolution on the Prime-17 manifold, demonstrating zero drift even after thousands of cycles.
-*   **GRU:** **Phase Drift Fail.** Succumbs to the "Recurrence Barrier," where cumulative floating-point errors eventually destabilize the modulo logic.
-*   ![Mod-17 Benchmark](data/694f5c14/benchmark_mod17_ablation_694f5c14.png)
-
-### 7.10 The Sandwich Duel (Phasic Sovereignty vs. Vector Memory)
-The ultimate "Show and Tell" of the Crystalline Era ($v1.0.0$). We compare **UIT-ROUND** ($512N$) against a **GRU** ($512N$) baseline across the full ASCII domain ($n=256$).
-
-![Scientific Duel Story](data/UIT_c1d3c3c9/plots/scientific_duel_story_c1d3c3c9.png)
-
+### 1. The Sandwich Duel (v1.3.0 Standard)
 *   **UIT-ROUND:** **100.0% Success (256/256).** Bit-perfect identity relay.
 *   **GRU Baseline:** **0.39% Success (1/256).** Vector memory drift collapse.
 
-#### Why is this Remarkable?
-This result represents the achievement of **Air-Tight Neural Communication**. While both models achieved 100% accuracy on isolated tasks (Hearing and Speaking), the GRU collapsed when forced to relay its "Knowledge" to another frozen module. 
+![Scientific Duel Story](data/UIT_cc6dc810/plots/sandwich_duel_story_cc6dc810.png)
 
-In traditional Vector Memory (GRU/LSTM/Transformer), the hidden state is a "local dialect"—it only makes sense in the context of the weights that created it. When you chain two frozen GRUs, the "meaning" evaporates. 
+### 2. Crystalline Loop
+*   **Success Rate:** **100% (Air-Tight).**
+*   **Mechanism:** Decoder (Ear) $\rightarrow$ Phase $\rightarrow$ Encoder (Voice) $\rightarrow$ Bits.
 
-In **UIT-ROUND**, the hidden state is a **Sovereign Phasic Identity**. Because the neuron is locked to a topological grid point (**Structural Snap**), the information is universal. It passes through the manifold with **Zero-Loss Integrity**, enabling modular neural systems that can talk to each other with bit-perfection.
+### 3. Prism Stack (Restored)
+*   **Fix:** Matched Hidden Size to Modular Space (18).
+*   **Result:** **100% Convergence** (vs GRU 99%).
+*   **Plot:** ![Prism Stack](data/UIT_cc6dc810/plots/prism_stack_duel_cc6dc810.png)
 
----
-
-## 8. Live Crystalline Verification (UID: c1d3c3c9)
-
-The Crystalline Factory ($v1.0.0$) generates unique, isolated verification artifacts for every scientific run.
-
-- 📊 **Scientific Story**: [Crystalline vs Vector Duel (Alpha-Batch)](data/UIT_c1d3c3c9/plots/scientific_duel_story_c1d3c3c9.png)
-- 📝 **Execution Audit**: [Scientific Duel Log (c1d3c3c9)](data/UIT_c1d3c3c9/logs/scientific_duel_c1d3c3c9.txt)
-- 📂 **Full Data Directory**: [data/UIT_c1d3c3c9](data/UIT_c1d3c3c9)
-
----
-
-## 9. Theory: Unified Informatic Topology (UIT)
-
-### "The Sphere Contains the Cube"
-
-The core hypothesis of UIT is that **discrete logic is a special case of continuous topology** under a quantizing potential.
-
-*   **Logic (The Particle):** Discrete state transitions (XOR, AND, NOT).
-*   **Topology (The Wave):** Continuous phase evolution and winding numbers.
-*   **The Spinor (The Bridge):** By governing the winding rules of the wave, the Spinor connects the two, allowing a continuous system to execute perfect discrete logic without the brittleness of traditional symbolic AI.
+### 4. U-Matrix (7-Octave)
+*   **Innovation:** 7-Octave Harmonic Spectrum + Spin-π (0.5).
+*   **Result:** **Continuous Signal Lock** (0.0013 MSE vs GRU 0.0002).
+*   **Plot:** ![U-Matrix 7-Octave](data/placeholder/u_matrix_7octave_placeholder.png)
 
 ---
 
 ## Repo Layout
 
-*   `ROUND.py`: Legacy core engine (Harmonic Era).
-*   `UIT_ROUND.py`: **The Crystalline Core.** Unified architecture with Structural Snap and Phasic Identity.
-*   `UIT_run_battery.py`: **The Crystalline Factory.** Industrial verification suite (UID-isolation).
-*   `benchmark_*.py`: Individual task harnesses (Decathlon suite).
-*   `UIT_Benchmarks/`: Consolidated Crystalline Era tests (Phasic Sandwich, Sandwich Duel).
-*   `run_battery.py`: Full regression suite for reproducing v0.8.0 logs.
-*   `visualization_utils.py`: Centralized Seaborn/Dark-Mode plotting engine for scientific-grade benchmarks.
-*   `config.py`: Centralized Golden Configuration.
+```markdown
+ROUND_Harmonic_0_2_0/
+├── media/                           # Explainer Videos and Assets
+├── Utilities/                       # Maintenance Scripts (scan_benchmarks, update_readme)
+├── UIT_ROUND.py                     # The Core Neuron (Harmonic Spinor/Twistor/Phase Accumulation)
+├── UIT_u_matrix.py                  # The U-Matrix Liquid Dynamics Logic (Restored)
+├── UIT_run_battery.py               # Main execution script for the "Industrial Crystalline Duel"
+│
+├── UIT_Benchmarks/                  # The Consolidated Benchmark Suite
+│   ├── UIT_benchmark_sandwich_duel.py     # "The Sandwich" (Simultaneous Dec/Enc training & Relay)
+│   ├── UIT_benchmark_crystalline_loop.py  # "The Green Wall" (Phasic Coherence Heatmap)
+│   ├── UIT_benchmark_color_algebra.py     # "Crayola-64" (Vector mixture algebra test)
+│   ├── UIT_benchmark_prism_stack.py       # "Prism Stack" (Mod-18 Logic Crystallization)
+│   ├── UIT_benchmark_transparency.py      # "Transparency Duel" (Inverse Mapping/Warp)
+│   ├── UIT_benchmark_digit_duel.py        # "Digit Duel" (ASCII bitstream -> Digit class)
+│   ├── UIT_benchmark_u_matrix_final.py    # U-Matrix Standard Logic Test
+│   ├── UIT_benchmark_sine_diagnostic.py   # Minimal Sine Wave Tracking Diagnostic
+│   │
+│   └── UIT_crystallize_encoder.py         # Utility to freeze/renormalize encoder weights
+│
+├── benchmarks/                      # Legacy/Previous Benchmarks (Reference)
+│   ├── benchmark_colors.py          # Original Color Benchmark
+│   ├── benchmark_mod17.py           # Original Mod-17 Benchmark
+│   ├── benchmark_oracle.py          # Oracle Test
+│   └── ... (others)
+│
+├── data/                            # Output directory (Logs, Crystals, Plots)
+│   └── UIT_[UID]/                   # Per-run unique directory
+│
+├── zz_archive/                      # Archive of previous attempts/files
+└── README.md                        # Documentation
+```
+
+### Key Components
+1.  **UIT_ROUND.py (The Crystal)**: Implements the `UITNeuronCell` with harmonic spin control, Bernoulli unwinding, and geometric alignment. It explicitly models the "Phasic Identity" (phase angle) and uses a "spin multiplier" to control the phase range. It includes "Diagnostic Harmonics" (cosine/sine projections at specific frequencies) which are crucial for the "Confidence" metric.
+2.  **UIT_run_battery.py (The Factory)**: The central hub. It runs a relay duel between a GRU baseline and the UIT-ROUND model, then triggers the external benchmark suite located in `UIT_Benchmarks`.
+3.  **UIT_Benchmarks (The Gauntlet)**: Contains the specialized tests. The "Sandwich Duel" and "Crystalline Loop" seem to be the primary integrity checks.
 
 ---
 
@@ -230,49 +157,3 @@ The core hypothesis of UIT is that **discrete logic is a special case of continu
 **License:** MIT License.
 
 **Citation:** Please cite **Lexideck ROUND Harmonic U-Neuron**.
-
----
-
-## 11. UIT_ROUND Crystalline Glossary
-
-### Phasic Sovereignty
-The core achievement of UIT_ROUND. It refers to the property of a neural hidden state being a **Universal Identity** rather than a local dialect. Because the phase is locked to a topological manifold, it can be handed from a frozen Decoder to a frozen Encoder with bit-perfect integrity (Zero-Loss Relay).
-
-### Structural Snap (v0.9.0)
-The renormalization protocol that forces a fuzzy, floating-point phase $\phi$ to the nearest integer grid point on the manifold. This prevents the chaotic accumulation of error (Vector Drift) and enables the "Diamond Lock" required for bit-perfect reconstruction.
-
-### Mogura Winding (The Hearing Instinct)
-The geometric axiom for **Decoding**. Information is ingested via recursive phase-shifts: $\phi_{t+1} = 0.5\phi_t + \text{bit}_t \cdot \pi$. This winds the bit-stream into a unique residue on the circle.
-
-### Bernoulli Unwinding (The Speaking Instinct)
-The geometric axiom for **Encoding/Generation**. Information is extracted from the phase residue via recursive doubling: $\phi_{t+1} = 2\phi_t \pmod{2\pi}$. If $\phi \ge \pi$, the model "speaks" a bit (1); otherwise, it speaks a zero.
-
-### Crystalline Identity (The Crystal)
-A model state that has been frozen into a non-volatile form. Once a neuron achieves **Resonant Lock**, its weights are saved as a `.pt` Crystal. These can be hot-swapped or chained together within the **Crystalline Factory** framework.
-
-### Sovereign Map
-The topological "Address Book" for a domain. It is a tensor containing the exact terminal phase addresses for a set of concepts (e.g., all 256 ASCII characters). It is used for **Sovereign Seeding** (Renormalization) of new modules.
-
-### Full Spectral Signature
-Unlike legacy neurons that only output a magnitude, UIT-ROUND outputs both the **Cosine and Sine** components of the phase. This provides a unambiguous spectral identity, resolving the +/- symmetry that plagues single-component phase models.
-
-### Standard Part (Activation)
-The macroscopic, non-phasic component of the U-neuron's activation (tanh-gated). It handles the "Standard Part" of information, while the phase manifold handles the "Crystalline Part."
-
-### Informatic Fiber (Epsilon)
-The infinitesimal dendritic integration parameter. It represents the "fiber" of knowledge that connects the macroscopic activation to the underlying phasic identity.
-
-### Landauer Efficiency (Informatic Loss)
-A loss metric inspired by Landauer's principle, penalizing informational erasure (weight changes) to encourage energy-efficient, stable knowledge retention.
-
-### Phasic Inertia
-The stability mechanism where the learning rate is dynamically damped by $(1.0 - \text{Confidence})$. As a neuron finds its resonant "groove," it gains inertia and resists further updates, protecting its knowledge from learning-rate noise.
-
----
-
-### Legacy Terms (Harmonic Era)
-
-- **Cryostasis (Gradient Vault)**: The v0.8.0 precursor to Crystalline Identity.
-- **Spinor Monism**: The realization that a single harmonic cell can solve disparate logic/topology tasks.
-- **Double Cover (Spinor)**: Projecting inputs onto the $4\pi$ range to resolve topological "twists."
-- **Harmonic Reciprocal ($2^{-9}$)**: The optimized learning rate for aligning gradient descent with phase geometry.

@@ -1,0 +1,39 @@
+[16:53:07] Starting Industrial Crystalline Duel | UID: cc6dc810
+[16:53:07] --- PHASE 0: GRU BASELINE TRAINING ---
+[16:53:26] GRU Step 0 | Dec Acc: 1.56% | Enc Acc: 0.00%
+[16:53:30] GRU Step 250 | Dec Acc: 59.38% | Enc Acc: 48.44%
+[16:53:34] GRU Step 500 | Dec Acc: 96.88% | Enc Acc: 92.19%
+[16:53:38] GRU Step 750 | Dec Acc: 100.00% | Enc Acc: 98.44%
+[16:53:42] GRU Step 1000 | Dec Acc: 100.00% | Enc Acc: 100.00%
+[16:53:42] --- [GRU BASELINE LOCKED] ---
+[16:53:42] --- PHASE 1: UIT-ROUND CRYSTALLIZATION ---
+[16:53:42] UIT Decoder 0 | Acc: 3.12% | Conf: 0.2058
+[16:53:47] UIT Decoder 250 | Acc: 50.00% | Conf: 0.2838
+[16:53:51] UIT Decoder 500 | Acc: 82.81% | Conf: 0.2961
+[16:53:56] UIT Decoder 750 | Acc: 100.00% | Conf: 0.3220
+[16:53:56] --- [UIT DECODER LOCKED] ---
+[16:53:56] --- PHASE 2: UIT ENCODER CRYSTALLIZATION ---
+[16:53:56] UIT Encoder 0 | Acc: 1.56% | Conf: 0.1916
+[16:53:58] UIT Encoder 250 | Acc: 100.00% | Conf: 0.1898
+[16:54:01] UIT Encoder 500 | Acc: 100.00% | Conf: 0.1911
+[16:54:01] --- [UIT ENCODER LOCKED] ---
+[16:54:01] --- PHASE 4: THE SCIENTIFIC RELAY DUEL ---
+[16:54:05] DUEL RESULTS | UIT-ROUND: 100.00% | GRU: 1.17%
+[16:54:05] --- PHASE 5: THE STORY VISUALIZATION ---
+[16:54:05] Premium Scientific Story Plot Saved: data/UIT_cc6dc810/plots/scientific_duel_story_cc6dc810.png
+[16:54:05] --- PHASE 6: EXTERNAL BENCHMARK SUITE ---
+[16:54:05] RUNNING: UIT_benchmark_crystalline_loop.py
+[16:54:12] SUCCESS: UIT_benchmark_crystalline_loop.py
+[16:54:12] RUNNING: UIT_benchmark_color_algebra.py
+[16:54:40] SUCCESS: UIT_benchmark_color_algebra.py
+[16:54:40] RUNNING: UIT_benchmark_prism_stack.py
+[16:55:12] SUCCESS: UIT_benchmark_prism_stack.py
+[16:55:12] RUNNING: UIT_benchmark_transparency.py
+[16:55:31] SUCCESS: UIT_benchmark_transparency.py
+[16:55:31] RUNNING: UIT_benchmark_sandwich_duel.py
+[16:55:41] SUCCESS: UIT_benchmark_sandwich_duel.py
+[16:55:41] RUNNING: UIT_benchmark_u_matrix_final.py
+[16:58:57] SUCCESS: UIT_benchmark_u_matrix_final.py
+[16:58:57] RUNNING: UIT_benchmark_u_matrix_7octave.py
+[16:59:01] FAILURE: UIT_benchmark_u_matrix_7octave.py (Exit Code: 2)
+[16:59:01] Workshop complete. Duel Artifacts in: data/UIT_cc6dc810

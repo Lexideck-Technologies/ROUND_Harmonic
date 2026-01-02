@@ -1,0 +1,13 @@
+--- [CRYSTALLINE LOOP BENCHMARK] ---
+Loading Decoder: UIT_ascii_decoder_ultra.pt
+Loading Encoder: UIT_ascii_encoder_ultra.pt
+
+[PHASIC ALIGNMENT CHECK]
+  Decoder: delta_phi_mean=3.141593, persistence=1.0
+  Encoder: delta_phi_mean=3.141593, persistence=1.0
+  Force-aligning Encoder Manifold to Decoder Sanctuary (Mogura Mode)...
+  Final Decoder: delta_phi_mean=3.141593, persistence=0.5
+  Final Encoder: delta_phi_mean=3.141593, persistence=0.5
+
+[RESULTS] Relay Success: 256/256 (100.00%)
+[CONCLUSION] The Crystalline Loop is 100% Air-Tight.

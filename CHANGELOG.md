@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.3.11] - "Industrial Crystal" - 2025-12-31
+### Added
+*   **Premium Visualization Suite:** Upgraded all active benchmarks (`crystalline_loop`, `sandwich_duel`, `transparency`, `u_matrix`, `prism_stack`) to use the "Sandwich Style" Dark Mode standard (Red/Blue/Green palettes, high-contrast text).
+*   **Heatmap Visualization:** Added 256x8 bit-reconstruction heatmap to `crystalline_loop`.
+*   **Resonance Overlay:** Added Truth-vs-Pred charts to `u_matrix`.
+
+### Changed
+*   **Repo Unity:** Consolidated all active UIT scripts into `UIT_Benchmarks/`.
+*   **Battery Logic:** `UIT_run_battery.py` now points exclusively to `UIT_Benchmarks/`.
+
+## [1.3.10] - "Operation Phoenix" - 2025-12-31
+### Fixed
+*   **Restored Golden State:** Resolved "Split Brain" repository state by archiving duplicate/broken files and verifying the integrity of `UIT_ROUND.py`.
+*   **Cleanup:** Archived `color_algebra`, `accessibility`, and `counting_relay` (deprecated/failed).
+*   **Repo Hygiene:** Moved all legacy artifacts to `data/zz_archive`.
+
 ## [1.0.0] - "The Crystalline Bridge" - 2025-12-26
 ### Added
 *   **The Structural Snap (Hard Renormalization):** Implemented a mandatory quantization step where neurons "snap" to the nearest integer phasic address. This eliminates floating-point drift and achieves the **Diamond Lock** ($256/256$ bit-perfection).
