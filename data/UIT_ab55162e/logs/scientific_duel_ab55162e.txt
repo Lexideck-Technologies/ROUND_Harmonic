@@ -1,0 +1,36 @@
+[16:51:33] Starting Industrial Crystalline Duel | UID: ab55162e
+[16:51:33] --- PHASE 0: GRU BASELINE TRAINING ---
+[16:51:37] GRU Step 0 | Dec Acc: 3.12% | Enc Acc: 0.00%
+[16:51:40] GRU Step 250 | Dec Acc: 56.25% | Enc Acc: 65.62%
+[16:51:42] GRU Step 500 | Dec Acc: 96.88% | Enc Acc: 98.44%
+[16:51:44] GRU Step 750 | Dec Acc: 100.00% | Enc Acc: 100.00%
+[16:51:44] --- [GRU BASELINE LOCKED] ---
+[16:51:44] --- PHASE 1: UIT-ROUND CRYSTALLIZATION ---
+[16:51:44] UIT Decoder 0 | Acc: 0.00% | Conf: 0.2051
+[16:51:46] UIT Decoder 250 | Acc: 51.56% | Conf: 0.2741
+[16:51:48] UIT Decoder 500 | Acc: 79.69% | Conf: 0.2913
+[16:51:51] UIT Decoder 750 | Acc: 100.00% | Conf: 0.3165
+[16:51:51] --- [UIT DECODER LOCKED] ---
+[16:51:51] --- PHASE 2: UIT ENCODER CRYSTALLIZATION ---
+[16:51:51] UIT Encoder 0 | Acc: 0.00% | Conf: 0.1891
+[16:51:52] UIT Encoder 250 | Acc: 100.00% | Conf: 0.1867
+[16:51:53] UIT Encoder 500 | Acc: 100.00% | Conf: 0.1874
+[16:51:53] --- [UIT ENCODER LOCKED] ---
+[16:51:53] --- PHASE 4: THE SCIENTIFIC RELAY DUEL ---
+[16:51:55] DUEL RESULTS | UIT-ROUND: 100.00% | GRU: 1.56%
+[16:51:55] --- PHASE 5: THE STORY VISUALIZATION ---
+[16:51:55] Premium Scientific Story Plot Saved: data/UIT_ab55162e/plots/scientific_duel_story_ab55162e.png
+[16:51:55] --- PHASE 6: EXTERNAL BENCHMARK SUITE ---
+[16:51:55] RUNNING: UIT_benchmark_crystalline_loop.py
+[16:51:59] SUCCESS: UIT_benchmark_crystalline_loop.py
+[16:51:59] RUNNING: UIT_benchmark_color_algebra.py
+[16:52:13] SUCCESS: UIT_benchmark_color_algebra.py
+[16:52:13] RUNNING: UIT_benchmark_prism_stack.py
+[16:52:31] SUCCESS: UIT_benchmark_prism_stack.py
+[16:52:31] RUNNING: UIT_benchmark_transparency.py
+[16:52:42] SUCCESS: UIT_benchmark_transparency.py
+[16:52:42] RUNNING: UIT_benchmark_sandwich_duel.py
+[16:52:48] SUCCESS: UIT_benchmark_sandwich_duel.py
+[16:52:48] RUNNING: UIT_benchmark_u_matrix_final.py
+[16:58:47] SUCCESS: UIT_benchmark_u_matrix_final.py
+[16:58:47] Workshop complete. Duel Artifacts in: data/UIT_ab55162e
