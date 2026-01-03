@@ -47,37 +47,33 @@ The harmonic architecture has been rigorously tested against a suite of tasks de
 **Crystalline Loop (`UIT_benchmark_crystalline_loop.py`):** Evaluates the stability of the phase information ("Phi Tail") in a recurrent loop. The artifact below demonstrates the persistent coherence of the U-Neuron (green) compared to signal degradation in standard models.
 ![Crystalline Coherence](data/UIT_cc6dc810/plots/crystalline_coherence_duel_cc6dc810.png)
 
-### 2. Logic & Topology
-*Tests the capability of Mogura Winding to handle structural complexity.*
+**Transparency (`UIT_benchmark_transparency.py`):** Demonstrates the geometric manipulability of the network, showing that the phase and epsilon weights can be independently steered.
+![Transparency Duel](data/UIT_cc6dc810/plots/transparency_duel_cc6dc810.png)
 
-**Parity (`benchmark_parity.py`):** Tests Modulo-2 logic capability. Solving parity requires non-linear separation that is trivial in phase space but difficult in linear space.
-![Parity Results](data/UIT_cc6dc810/plots/benchmark_parity_cc6dc810.png)
+### 2. Deep Geometric Logic
+*Tests the capability of Mogura Winding to handle structural complexity and stack-like memory.*
 
-**Topology (`benchmark_topology.py`):** Distinguishes between tree graphs ($x=1$) and cyclic graphs ($x \le 0$). This validates the network's ability to recognize topological invariants.
-![Topology Results](data/UIT_cc6dc810/plots/benchmark_topology_cc6dc810.png)
+**Prism Stack:** Validates the network's ability to separate multiplexed signals using phase geometry, effectively acting as a configurable prism.
+![Prism Stack](data/UIT_cc6dc810/plots/prism_stack_duel_cc6dc810.png)
 
-**Brackets (`benchmark_brackets_masked.py`):** Tests dyck-language recognition (balanced brackets). This requires stack-like memory which is naturally modeled by winding numbers in phase space.
-![Brackets Results](data/UIT_cc6dc810/plots/benchmark_brackets_masked_cc6dc810.png)
+**Complex Dynamics (The Sandwich Duel):** Illustrates the robustness of the U-Neuron in handling "sandwiched" dependencies where long-term context must be preserved across a noisy interval.
+![Sandwich Duel](data/UIT_cc6dc810/plots/sandwich_duel_story_cc6dc810.png)
 
+### 3. Harmonic Analysis & Ablation
+*Evaluating the contribution of U-Matrix harmonics.*
 
-### 3. Cognitive & Semantic
-*Tests high-level information processing and algorithmic reversibility.*
+**7-Octave Harmonic Profile:** Visualizes the rich spectral density enabled by the harmonic locking mechanism.
+![U-Matrix 7-Octave](data/UIT_cc6dc810/plots/u_matrix_7octave_cc6dc810.png)
+
+**Ablation Test:** This plot compares the full Harmonic U-Neuron against a version without expanded harmonics/subharmonics. The lower performance at the extremes demonstrates the necessity of the full harmonic spectrum for high-fidelity locking.
+![U-Matrix Duel (Ablation)](data/UIT_cc6dc810/plots/u_matrix_duel_cc6dc810.png)
+
+### 4. Cognitive & Semantic
+*Tests algebraic manipulation of semantic embeddings.*
 
 **Color Algebra (`UIT_benchmark_color_algebra.py`):** Tests algebraic manipulation of cyclic concepts (e.g. Red + Blue = Purple). This demonstrates the U-Neuron's ability to perform arithmetic on semantic embeddings.
-![Colors Results](data/UIT_cc6dc810/plots/benchmark_colors_cc6dc810.png)
+![Color Algebra](data/UIT_cc6dc810/plots/color_algebra_duel_cc6dc810.png)
 
-**Oracle (`benchmark_oracle.py`):** Tests meta-learning capabilities, evaluating how quickly the network can adapt to new rules.
-![Oracle Results](data/UIT_cc6dc810/plots/benchmark_oracle_cc6dc810.png)
-
-**Full Benchmark Summary:**
-
-| Benchmark | Accuracy (ROUND) | Accuracy (GRU) | Notes |
-| :--- | :--- | :--- | :--- |
-| **Parity** | **100%** | Failure | Robust modulation |
-| **Brackets** | **100%** | < 60% | Perfect stack emulation |
-| **Topology** | **100%** | Failure | Geometric recognition |
-| **Colors** | **100%** | varies | Semantic algebra |
-| **Clock** | **Locked** | Drift | Perfect periodicity |
 
 ---
 
