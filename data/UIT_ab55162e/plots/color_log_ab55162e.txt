@@ -1,0 +1,2 @@
+Final ROUND Acc: 0.9900
+Final GRU Acc: 0.9200
