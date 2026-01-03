@@ -114,13 +114,13 @@ To reproduce the `cc6dc810` benchmark results:
 .venv\Scripts\activate
 
 # Run the full battery
-python Research/ROUND_Harmonic_0_2_0/UIT_run_battery.py
+python UIT_run_battery.py
 ```
 
 To run a specific benchmark:
 
 ```bash
-python Research/ROUND_Harmonic_0_2_0/UIT_benchmark_crystalline_loop.py
+python UIT_benchmark_crystalline_loop.py
 ```
 
 ### Installation
