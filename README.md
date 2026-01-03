@@ -44,34 +44,40 @@ The harmonic architecture has been rigorously tested against a suite of tasks de
 ### 1. Thermodynamic Coherence & Phase Dynamics
 *Tests the interaction between the classical signal and the informatic wake.*
 
-| Benchmark | Script | Description |
-| :--- | :--- | :--- |
-| **Crystalline Loop** | `UIT_benchmark_crystalline_loop.py` | Evaluates the stability of the phase information ("Phi Tail") during recurrent processing. |
-| **Quantum Locking** | `UIT_benchmark_quantum_locking.py` | Tests the capability to lock phase states against perturbation. |
-| **Transparency** | `UIT_benchmark_transparency.py` | Demonstrates geometric manipulability by independently steering phase/epsilon weights. |
-| **Mod-N Clock** | `benchmark_clock.py` | **Perfect Phase Lock**. Tests ability to maintain precise periodic oscillations. |
-
+**Crystalline Loop (`UIT_benchmark_crystalline_loop.py`):** Evaluates the stability of the phase information ("Phi Tail") in a recurrent loop. The artifact below demonstrates the persistent coherence of the U-Neuron (green) compared to signal degradation in standard models.
 ![Crystalline Coherence](data/UIT_cc6dc810/plots/crystalline_coherence_duel_cc6dc810.png)
 
 ### 2. Logic & Topology
 *Tests the capability of Mogura Winding to handle structural complexity.*
 
-| Benchmark | Accuracy (ROUND) | Accuracy (GRU) | Description |
-| :--- | :--- | :--- | :--- |
-| **Parity** | **100%** | Failure | Tests Modulo-2 logic capability, requiring non-linear phase separation. |
-| **Brackets** | **100%** | < 60% | Tests dyck-language recognition, requiring stack-like memory. |
-| **Topology** | **100%** | Failure | Distinguishes between tree graphs and cyclic graphs. |
-| **XOR** | **100%** | Failure | Standard XOR logic test (`UIT_benchmark_xor.py`). |
+**Parity (`benchmark_parity.py`):** Tests Modulo-2 logic capability. Solving parity requires non-linear separation that is trivial in phase space but difficult in linear space.
+![Parity Results](data/UIT_cc6dc810/plots/benchmark_parity_cc6dc810.png)
+
+**Topology (`benchmark_topology.py`):** Distinguishes between tree graphs ($x=1$) and cyclic graphs ($x \le 0$). This validates the network's ability to recognize topological invariants.
+![Topology Results](data/UIT_cc6dc810/plots/benchmark_topology_cc6dc810.png)
+
+**Brackets (`benchmark_brackets_masked.py`):** Tests dyck-language recognition (balanced brackets). This requires stack-like memory which is naturally modeled by winding numbers in phase space.
+![Brackets Results](data/UIT_cc6dc810/plots/benchmark_brackets_masked_cc6dc810.png)
+
 
 ### 3. Cognitive & Semantic
 *Tests high-level information processing and algorithmic reversibility.*
 
-| Benchmark | Script | Result | Description |
+**Color Algebra (`UIT_benchmark_color_algebra.py`):** Tests algebraic manipulation of cyclic concepts (e.g. Red + Blue = Purple). This demonstrates the U-Neuron's ability to perform arithmetic on semantic embeddings.
+![Colors Results](data/UIT_cc6dc810/plots/benchmark_colors_cc6dc810.png)
+
+**Oracle (`benchmark_oracle.py`):** Tests meta-learning capabilities, evaluating how quickly the network can adapt to new rules.
+![Oracle Results](data/UIT_cc6dc810/plots/benchmark_oracle_cc6dc810.png)
+
+**Full Benchmark Summary:**
+
+| Benchmark | Accuracy (ROUND) | Accuracy (GRU) | Notes |
 | :--- | :--- | :--- | :--- |
-| **Color Algebra** | `UIT_benchmark_color_algebra.py` | **100%** | Tests algebraic manipulation of cyclic concepts (e.g. Red + Blue = Purple). |
-| **Oracle** | `benchmark_oracle.py` | **100%** | Tests meta-learning capabilities. |
-| **ASCII** | `benchmark_ascii.py` | **Pass** | Tests character-level sequence modeling. |
-| **CAM** | `benchmark_cam.py` | **100%** | Content Addressable Memory test. |
+| **Parity** | **100%** | Failure | Robust modulation |
+| **Brackets** | **100%** | < 60% | Perfect stack emulation |
+| **Topology** | **100%** | Failure | Geometric recognition |
+| **Colors** | **100%** | varies | Semantic algebra |
+| **Clock** | **Locked** | Drift | Perfect periodicity |
 
 ---
 
