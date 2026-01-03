@@ -1,6 +1,6 @@
 # UIT-ROUND: Harmonic 0.2.0
 
-[![Watch the video](media/round_video_thumbnail.png)](media/The_U-Neuron.mp4)
+[![Watch the video](media/round_video_thumbnail.png)](https://www.lexidecktechnologies.com/UIT_IEG/ROUND_Harmonic_U_Neuron/media/The_U-Neuron.mp4)
 *Click to watch "The U-Neuron" concept video*
 
 ## Unified Informatic Topology (UIT) Implementation
@@ -99,9 +99,9 @@ ROUND_Harmonic_0_2_0/
 For a complete theoretical grounding, refer to the following documentation:
 
 *   **[UITv2.pdf](media/UITv2.pdf)**: "Unified Informatic Topology: A Framework Merging Information Thermodynamics, Quantum Mechanics, and Relativity". The primary theoretical paper.
-*   **[The_U-Neuron.mp4](media/The_U-Neuron.mp4)**: Video explainer of the architecture.
+*   **[The_U-Neuron.mp4](https://www.lexidecktechnologies.com/UIT_IEG/ROUND_Harmonic_U_Neuron/media/The_U-Neuron.mp4)**: Video explainer of the architecture.
 *   **[Unifying_Wave_and_Particle_Computation.pdf](media/Unifying_Wave_and_Particle_Computation.pdf)**: Conceptual deep dive.
-*   **[Phase_Memory_Solves_AI_Long-Term_Failure.m4a](media/Phase_Memory_Solves_AI_Long-Term_Failure.m4a)**: Audio conversation on the implications of phase memory.
+*   **[Phase_Memory_Solves_AI_Long-Term_Failure.m4a](https://www.lexidecktechnologies.com/UIT_IEG/ROUND_Harmonic_U_Neuron/media/Phase_Memory_Solves_AI_Long-Term_Failure.m4a)**: Audio conversation on the implications of phase memory.
 
 ---
 
