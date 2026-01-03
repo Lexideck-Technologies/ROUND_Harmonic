@@ -1,5 +1,8 @@
 # UIT-ROUND: Harmonic 0.2.0
 
+[![Watch the video](media/round_video_thumbnail.png)](media/The_U-Neuron.mp4)
+*Click to watch "The U-Neuron" concept video*
+
 ## Unified Informatic Topology (UIT) Implementation
 
 This repository contains the reference implementation of the **U-Neuron** architecture, derived from the **Unified Informatic Topology (UIT)** framework. The project validates the theoretical predictions of UITv2, specifically regarding the physicality of information and the thermodynamic costs of computation.
@@ -7,6 +10,13 @@ This repository contains the reference implementation of the **U-Neuron** archit
 At the core of this implementation is the algebraic number space $\mathcal{U}$, which unifies macroscopic signal processing with microscopic informatic thermodynamics:
 
 $$ \mathcal{U} = \{z = x + \epsilon e^{i\phi} \mid x \in \mathbb{R}_{limited}, \epsilon \in \mathbb{R}_{infinitesimal}\} $$
+
+---
+
+> [!IMPORTANT]
+> **Performance Warning:** These benchmarks are computationally intensive. The harmonic locking process involves high-frequency phase calculations and significant memory overhead for tracking the infinitesimal fiber. Running the full battery may stress consumer hardware. A CUDA-capable GPU with at least 8GB VRAM is recommended. The provided benchmarks were validated on an NVIDIA RTX 4090.
+
+---
 
 ## Architectural Specification: The U-Neuron
 
@@ -31,32 +41,54 @@ The harmonic architecture has been rigorously tested against a suite of tasks de
 **Batch UID:** `cc6dc810`
 **Code:** `UIT_run_battery.py`
 
-### 1. Thermodynamic Coherence
+### 1. Thermodynamic Coherence & Phase Dynamics
 *Tests the interaction between the classical signal and the informatic wake.*
 
-**Benchmark:** `UIT_benchmark_crystalline_loop.py`
-This test evaluates the stability of the phase information ("Phi Tail") during recurrent processing.
-![Crystalline Coherence](data/UIT_cc6dc810/plots/crystalline_coherence_duel_cc6dc810.png)
+| Benchmark | Script | Description |
+| :--- | :--- | :--- |
+| **Crystalline Loop** | `UIT_benchmark_crystalline_loop.py` | Evaluates the stability of the phase information ("Phi Tail") during recurrent processing. |
+| **Quantum Locking** | `UIT_benchmark_quantum_locking.py` | Tests the capability to lock phase states against perturbation. |
+| **Transparency** | `UIT_benchmark_transparency.py` | Demonstrates geometric manipulability by independently steering phase/epsilon weights. |
+| **Mod-N Clock** | `benchmark_clock.py` | **Perfect Phase Lock**. Tests ability to maintain precise periodic oscillations. |
 
-**Benchmark:** `UIT_benchmark_transparency.py`
-Demonstrates the geometric manipulability of the network, showing that the phase and epsilon weights can be independently steered.
+![Crystalline Coherence](data/UIT_cc6dc810/plots/crystalline_coherence_duel_cc6dc810.png)
 
 ### 2. Logic & Topology
 *Tests the capability of Mogura Winding to handle structural complexity.*
 
-| Benchmark | Script | Accuracy (ROUND) | Accuracy (GRU) | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| **Parity** | `benchmark_parity.py` | **100%** | Failure | Tests Modulo-2 logic capability, requiring non-linear phase separation. |
-| **Brackets** | `benchmark_brackets_masked.py` | **100%** | < 60% | Tests dyck-language recognition, requiring stack-like memory. |
-| **Topology** | `benchmark_topology.py` | **100%** | Failure | Distinguishes between tree graphs and cyclic graphs. |
+| Benchmark | Accuracy (ROUND) | Accuracy (GRU) | Description |
+| :--- | :--- | :--- | :--- |
+| **Parity** | **100%** | Failure | Tests Modulo-2 logic capability, requiring non-linear phase separation. |
+| **Brackets** | **100%** | < 60% | Tests dyck-language recognition, requiring stack-like memory. |
+| **Topology** | **100%** | Failure | Distinguishes between tree graphs and cyclic graphs. |
+| **XOR** | **100%** | Failure | Standard XOR logic test (`UIT_benchmark_xor.py`). |
 
-### 3. Cyclic Dynamics & Phase Algebra
-*Tests the precision of the phase algebra.*
+### 3. Cognitive & Semantic
+*Tests high-level information processing and algorithmic reversibility.*
 
 | Benchmark | Script | Result | Description |
 | :--- | :--- | :--- | :--- |
-| **Mod-N Clock** | `benchmark_clock.py` | **Perfect Phase Lock** | Tests ability to maintain precise periodic oscillations. |
-| **Color Algebra** | `benchmark_colors.py` | **100%** | Tests algebraic manipulation of cyclic color concepts. |
+| **Color Algebra** | `UIT_benchmark_color_algebra.py` | **100%** | Tests algebraic manipulation of cyclic concepts (e.g. Red + Blue = Purple). |
+| **Oracle** | `benchmark_oracle.py` | **100%** | Tests meta-learning capabilities. |
+| **ASCII** | `benchmark_ascii.py` | **Pass** | Tests character-level sequence modeling. |
+| **CAM** | `benchmark_cam.py` | **100%** | Content Addressable Memory test. |
+
+---
+
+## Repository Structure
+
+```text
+ROUND_Harmonic_0_2_0/
+├── media/                  # Artifacts (PDFs, Videos, Images)
+├── data/                   # Experimental outputs (Logs, Plots)
+├── UIT_Benchmarks/         # Specialized encoding experiments
+│   └── UIT_crystallize_encoder.py
+├── UIT_ROUND.py            # Core U-Neuron implementation
+├── u_matrix.py             # U-Matrix algebra utilities
+├── config.py               # Hyperparameters
+├── run_battery.py          # Main execution script
+└── [Benchmark Scripts...]  # Individual test files
+```
 
 ---
 
