@@ -1,0 +1,4632 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ROUND - Bloch Sphere Training</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three/examples/js/controls/OrbitControls.js"></script>
+    <style>
+      :root {
+        --bg: #0a0a0a;
+        --panel: rgba(18, 18, 18, 1.0);
+        --border: #2a2a2a;
+        --text: #e0e0e0;
+        --dim: #888888;
+        --accent: #44ff88;
+        --accent-dim: rgba(68, 255, 136, 0.5);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100vh;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "IBM Plex Sans", sans-serif;
+      }
+      
+      body.dragging {
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        cursor: grabbing !important;
+      }
+      
+      body.dragging * {
+        cursor: grabbing !important;
+      }
+
+      /* Training controls - top left */
+      #training-overlay {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        padding: 15px;
+        z-index: 10;
+        min-width: 240px;
+        /* backdrop-filter: blur(10px); - Disabled for performance */
+        /* -webkit-backdrop-filter: blur(10px); - Disabled for performance */
+      }
+
+      #training-overlay h2 {
+        margin: 0 0 12px 0;
+        font-size: 1.1em;
+        color: var(--accent);
+      }
+
+      #training-overlay p {
+        margin: 6px 0;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.85em;
+      }
+
+      /* Control canvases - top right */
+      #controls-overlay {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        padding: 15px;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        /* backdrop-filter: blur(10px); - Disabled for performance */
+        /* -webkit-backdrop-filter: blur(10px); - Disabled for performance */
+      }
+
+      .control-panel h3 {
+        font-size: 0.75em;
+        color: var(--dim);
+        text-align: center;
+        margin: 0 0 10px 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .stat-label {
+        color: var(--dim);
+        font-size: 0.7em;
+        margin-bottom: 3px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .stat-value {
+        color: var(--text);
+        font-weight: 600;
+        font-size: 1.1em;
+      }
+
+      button {
+        padding: 8px 15px;
+        margin: 5px 5px 5px 0;
+        background: var(--bg);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 3px;
+        cursor: pointer;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.85em;
+        transition: all 0.2s;
+      }
+
+      button:hover {
+        border-color: var(--accent);
+        background: rgba(68, 255, 136, 0.05);
+      }
+
+      button:active {
+        background: rgba(68, 255, 136, 0.1);
+      }
+
+      button.training {
+        background: rgba(255, 68, 68, 0.1);
+        border-color: #ff4444;
+        color: #ff4444;
+      }
+
+      button.training:hover {
+        background: rgba(255, 68, 68, 0.2);
+        border-color: #ff6666;
+      }
+
+      button:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
+
+      button:disabled:hover {
+        border-color: var(--border);
+        background: var(--bg);
+      }
+
+      canvas {
+        display: block;
+        border: 1px solid var(--border);
+        background: rgba(15, 15, 15, 0.5);
+        border-radius: 3px;
+      }
+
+      .legend {
+        position: absolute;
+        bottom: 80px;
+        left: 10px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        padding: 12px;
+        z-index: 10;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.75em;
+      }
+
+      .legend-title {
+        color: var(--accent);
+        margin-bottom: 8px;
+        font-weight: 600;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        margin: 4px 0;
+      }
+
+      .legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 8px;
+      }
+
+      /* Range Input Styling */
+      input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 2px;
+        background: var(--border);
+        outline: none;
+        border-radius: 1px;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+      }
+
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 10px;
+        height: 10px;
+        background: var(--accent);
+        border-radius: 50%;
+        cursor: grab;
+        transition: all 0.2s;
+      }
+      
+      input[type="range"]:active::-webkit-slider-thumb {
+        cursor: grabbing;
+      }
+
+      input[type="range"]::-moz-range-thumb {
+        width: 10px;
+        height: 10px;
+        background: var(--accent);
+        border: none;
+        border-radius: 50%;
+        cursor: grab;
+        transition: all 0.2s;
+      }
+      
+      input[type="range"]:active::-moz-range-thumb {
+        cursor: grabbing;
+      }
+
+      input[type="range"]:hover::-webkit-slider-thumb {
+        background: #5fffaa;
+        box-shadow: 0 0 8px var(--accent);
+      }
+
+      input[type="range"]:hover::-moz-range-thumb {
+        background: #5fffaa;
+        box-shadow: 0 0 8px var(--accent);
+      }
+
+      /* Select Dropdown Styling */
+      select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background: var(--bg);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 3px;
+        padding: 6px 8px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.8em;
+        cursor: pointer;
+        transition: all 0.2s;
+        background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%2344ff88' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        padding-right: 28px;
+      }
+
+      select:hover {
+        border-color: var(--accent);
+      }
+
+      select:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 1px var(--accent);
+      }
+
+      /* Checkbox Styling */
+      input[type="checkbox"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 14px;
+        height: 14px;
+        border: 1px solid var(--border);
+        border-radius: 2px;
+        background: var(--bg);
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s;
+      }
+
+      input[type="checkbox"]:hover {
+        border-color: var(--accent);
+      }
+
+      input[type="checkbox"]:checked {
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+
+      input[type="checkbox"]:checked::after {
+        content: "";
+        position: absolute;
+        left: 4px;
+        top: 1px;
+        width: 4px;
+        height: 8px;
+        border: solid var(--bg);
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+      }
+
+      /* Focus States */
+      button:focus,
+      input:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(68, 255, 136, 0.3);
+      }
+
+      input[type="range"]:focus {
+        outline: none;
+      }
+
+      input[type="range"]:focus::-webkit-slider-thumb {
+        box-shadow: 0 0 0 3px rgba(68, 255, 136, 0.3);
+      }
+
+      input[type="range"]:focus::-moz-range-thumb {
+        box-shadow: 0 0 0 3px rgba(68, 255, 136, 0.3);
+      }
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 4px;
+        transition: background 0.2s;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--dim);
+      }
+
+      ::-webkit-scrollbar-thumb:active {
+        background: var(--accent);
+      }
+
+      /* Convergence pulse animation */
+      @keyframes convergence-pulse {
+        0%, 100% {
+          background: rgba(51, 204, 102, 0.1);
+          border-color: var(--accent);
+          box-shadow: 0 0 0 0 rgba(51, 204, 102, 0.7);
+        }
+        50% {
+          background: rgba(51, 204, 102, 0.3);
+          border-color: var(--accent);
+          box-shadow: 0 0 0 10px rgba(51, 204, 102, 0);
+        }
+      }
+
+        .convergence-active {
+         animation: convergence-pulse 1.5s ease-in-out infinite;
+        }
+
+      /* Responsive overlay layout */
+      #top-row,
+      #bottom-row {
+        position: absolute;
+        left: 10px;
+        right: 10px;
+        display: flex;
+        gap: 10px;
+        pointer-events: none;
+      }
+
+      #top-row {
+        top: 10px;
+        align-items: flex-start;
+        height:auto;
+        bottom: 340px;
+        min-height:300px;
+      }
+
+      #bottom-row {
+        height: calc(min(320px, 50% - 19px));
+        bottom: 10px;
+        align-items: stretch;
+      }
+
+      #top-row > *,
+      #bottom-row > * {
+        pointer-events: auto;
+      }
+
+      .ui-card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        /* backdrop-filter: blur(10px); - Disabled for performance */
+        /* -webkit-backdrop-filter: blur(10px); - Disabled for performance */
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        z-index: 10;
+      }
+
+      #model-config {
+        flex: 0 1 320px;
+        min-width: 260px;
+        max-width: 360px;
+        padding: 15px;
+        max-height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+      }
+
+      #controls-overlay {
+        flex: 0 1 280px;
+        min-width: 220px;
+        max-width: 320px;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      #checkpoints-overlay {
+        flex: 0 0 280px;
+        min-width: 240px;
+        max-width: 320px;
+        display: flex;
+        flex-direction: column;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.7em;
+        padding: 0;
+        height: 100%;
+      }
+
+      #training-panel {
+        flex: 1 1 640px;
+        min-width: 520px;
+        max-width: 100%;
+        display: flex;
+        gap: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      #logs-column {
+        width: 30%;
+        min-width: 240px;
+        max-width: 280px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      #training-panel .training-body {
+        flex: 1;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      #log-content {
+        flex: 1;
+        min-height: 90px;
+        height: auto;
+      }
+
+      .panel-heading {
+        font-size: 0.75em;
+        color: var(--accent);
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: auto 1fr repeat(4, auto);
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 6px;
+        font-family: "JetBrains Mono", monospace;
+      }
+
+      .stats-grid .metric {
+        text-align: right;
+        font-size: 0.65em;
+        white-space: nowrap;
+      }
+
+      .stats-grid .metric-label {
+        color: var(--dim);
+        display: block;
+      }
+
+      .stats-grid .metric-value {
+        font-weight: 700;
+        font-size: 1.35em;
+        line-height: 1;
+        display: block;
+      }
+
+      #timeline-controls {
+        margin-top: 8px;
+      }
+
+      #timeline-slider {
+        width: 100%;
+        height: 4px;
+        cursor: grab;
+      }
+
+      .autocomplete-item.selected {
+        background: rgba(68, 255, 136, 0.2);
+      }
+
+      .autocomplete-item:hover {
+        background: rgba(68, 255, 136, 0.15);
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <div id="top-row">
+      <!-- Training Controls with Config -->
+      <div id="model-config" class="ui-card">
+      <h2 style="margin: 0 0 12px 0; font-size: 1.1em; color: var(--accent)">
+        Configuration
+      </h2>
+
+      <!-- Config Controls -->
+      <div
+        style="
+          margin-bottom: 12px;
+          padding-bottom: 12px;
+          border-bottom: 1px solid var(--border);
+        "
+      >
+        <div style="margin-bottom: 8px">
+          <label
+            style="
+              display: block;
+              margin-bottom: 4px;
+              color: var(--dim);
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 0.75em;
+            "
+            >Model</label
+          >
+          <select id="model-select" style="width: 100%">
+            <option value="round_v0.8" selected>ROUND v0.8 (Spinor)</option>
+            <option value="uit_v1.0">UIT-ROUND v1.0</option>
+            <option value="gru">GRU Baseline</option>
+          </select>
+        </div>
+        <div style="margin-bottom: 8px">
+          <label
+            style="
+              display: block;
+              margin-bottom: 4px;
+              color: var(--dim);
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 0.75em;
+            "
+            >Task</label
+          >
+          <select id="task" style="width: 100%">
+            <option value="xor">XOR (easy)</option>
+            <option value="parity4">4-bit Parity</option>
+            <option value="parity8">8-bit Parity</option>
+            <option value="parity16" selected>16-bit Parity (hard)</option>
+            <option value="majority">Majority Vote (8-bit)</option>
+            <option value="ascii_decoder">ASCII Decoder (256)</option>
+          </select>
+        </div>
+        <div style="margin-bottom: 8px">
+          <label
+            style="
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 4px;
+              color: var(--dim);
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 0.75em;
+            "
+          >
+            <span>Hidden</span>
+            <span id="hidden-val" style="color: var(--accent)">8</span>
+          </label>
+          <input
+            type="range"
+            id="hidden"
+            min="1"
+            max="16"
+            value="8"
+            step="1"
+            style="width: 100%"
+          />
+        </div>
+        <div style="margin-bottom: 8px">
+          <label
+            style="
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 4px;
+              color: var(--dim);
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 0.75em;
+            "
+          >
+            <span>Lock <span id="lock-delay-indicator" style="font-size: 0.85em; color: #ffaa44;">(delayed)</span></span>
+            <span id="lock-val" style="color: var(--accent)">0.10</span>
+          </label>
+          <input
+            type="range"
+            id="lock-strength"
+            min="0"
+            max="0.5"
+            value="0.1"
+            step="0.01"
+            style="width: 100%"
+          />
+        </div>
+
+        <div style="margin-bottom: 8px">
+          <label
+            title="Delayed locking: epochs before lock loss is applied (allows initial task learning)"
+            style="
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 4px;
+              color: var(--dim);
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 0.75em;
+            "
+          >
+            <span>Lock Delay</span>
+            <span id="lock-delay-val" style="color: var(--accent)">500</span>
+          </label>
+          <input
+            type="range"
+            id="lock-delay"
+            min="0"
+            max="2000"
+            value="500"
+            step="50"
+            style="width: 100%"
+          />
+        </div>
+
+        <!-- UIT-specific parameters -->
+        <div id="uit-params" style="display: none; border-top: 1px solid var(--border); padding-top: 8px; margin-top: 8px;">
+          <div style="margin-bottom: 8px">
+            <label
+              style="
+                display: block;
+                margin-bottom: 4px;
+                color: var(--dim);
+                font-family: 'JetBrains Mono', monospace;
+                font-size: 0.75em;
+              "
+              >Harmonics</label
+            >
+            <select id="harmonics-select" style="width: 100%">
+              <option value="[1]" selected>Spinor Monism [1]</option>
+              <option value="[1,2,4,8]">Full Spectrum [1,2,4,8]</option>
+              <option value="[0.125,0.25,0.5,1,2,4,8]">7-Octave Range</option>
+            </select>
+          </div>
+          <div style="margin-bottom: 8px">
+            <label
+              style="
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 4px;
+                color: var(--dim);
+                font-family: 'JetBrains Mono', monospace;
+                font-size: 0.75em;
+              "
+            >
+              <span>Quantization</span>
+              <span id="quant-val" style="color: var(--accent)">0.125</span>
+            </label>
+            <input
+              type="range"
+              id="quantization"
+              min="0"
+              max="0.5"
+              value="0.125"
+              step="0.025"
+              style="width: 100%"
+            />
+          </div>
+          <div style="margin-bottom: 8px">
+            <label
+              style="
+                display: block;
+                margin-bottom: 4px;
+                color: var(--dim);
+                font-family: 'JetBrains Mono', monospace;
+                font-size: 0.75em;
+              "
+              >Binary Alignment (ASCII)</label
+            >
+            <select id="binary-alignment" style="width: 100%">
+              <option value="false" selected>OFF</option>
+              <option value="true">ON</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom: 8px">
+          <label
+            style="
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 4px;
+              color: var(--dim);
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 0.75em;
+            "
+          >
+            <span>Learning Rate</span>
+            <span style="color: var(--accent);">2^<span id="lr-display">-5</span> = <span id="lr-val">0.03125</span></span>
+          </label>
+          <input
+            type="range"
+            id="lr-slider"
+            min="-9"
+            max="-3"
+            value="-5"
+            step="1"
+            style="width: 100%"
+          />
+        </div>
+      </div>
+      <!-- Training Controls -->
+      <div style="margin-top: 12px; display: flex; gap: 4px;">
+        <button id="train-btn" style="flex: 2;">▶ TRAIN</button>
+        <button id="step-btn" style="flex: 1;">⏭ STEP</button>
+        <button id="reset-btn-main" style="flex: 1;">🔄 RESET</button>
+      </div>
+
+      <div style="margin-top: 8px; display: flex; gap: 4px;">
+        <button id="benchmark-btn" style="flex: 1; padding: 6px; font-size: 0.75em;">📊 Benchmark</button>
+        <button id="benchmark-train-btn" style="flex: 1; padding: 6px; font-size: 0.75em;">📈 +Train</button>
+        <button id="settings-btn" style="flex: 1; padding: 6px; font-size: 0.75em;" title="Advanced Settings">⚙️ Settings</button>
+      </div>
+
+      <div style="margin-top: 10px">
+        <div
+          id="convergence-zone"
+          style="
+            padding: 8px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75em;
+            color: var(--dim);
+            cursor: pointer;
+            transition: all 0.2s;
+          "
+        >
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <input
+              type="checkbox"
+              id="stop-on-convergence"
+              style="cursor: pointer"
+            />
+            <span>Stop on Convergence (99%)</span>
+          </div>
+          <div id="convergence-info" style="margin-top: 4px; font-size: 0.9em; color: var(--accent); display: none;"></div>
+        </div>
+      </div>
+    </div>
+      <!-- Control Canvases -->
+      <div id="controls-overlay" class="ui-card">
+        <div class="control-panel">
+          <h3>Square Control (θ/φ)</h3>
+          <canvas id="square-control" width="200" height="200"></canvas>
+        </div>
+        <div class="control-panel">
+          <h3>Polar Control (r=θ, ∠=φ)</h3>
+          <canvas id="polar-control" width="200" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+    
+    <div id="bottom-row">
+      <!-- Merged Training Panel -->
+      <div id="training-panel" class="ui-card">
+        <!-- Left Column: Logs -->
+        <div
+          id="logs-column"
+          style="
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+          "
+        >
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+          "
+        >
+          <div class="panel-heading">
+            LOGS
+          </div>
+          </div>
+          <div
+            id="log-content"
+            style="
+              padding: 8px;
+              overflow-y: auto;
+            flex: 1;
+              background: rgba(0, 0, 0, 0.3);
+              border: 1px solid var(--border);
+              border-radius: 3px;
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 0.65em;
+              color: var(--dim);
+            "
+          ></div>
+        </div>
+
+        <!-- Right Column: Training Graph & Timeline -->
+        <div class="training-body">
+          <!-- Stats Grid -->
+          <div class="stats-grid" style="margin-bottom: 8px; flex-shrink: 0;">
+            <div class="panel-heading">
+              TRAINING
+            </div>
+            <div></div>
+            <div class="metric">
+              <span class="metric-label">EPOCH</span>
+              <span id="graph-epoch" class="metric-value" style="color: var(--text)">0</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">ACCURACY</span>
+              <span id="graph-acc" class="metric-value" style="color: #ff4444">0.00%</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">TASK LOSS</span>
+              <span id="graph-loss" class="metric-value" style="color: #44ff88">0.0000</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">LOCK LOSS</span>
+              <span id="graph-lock" class="metric-value" style="color: #ffaa44">0.0000</span>
+            </div>
+          </div>
+
+          <!-- Plot Configuration -->
+          <div id="plot-config" style="flex-shrink: 0;">
+            <div class="panel-heading" style="margin: 0 0 6px 0; cursor: pointer; user-select: none;" onclick="togglePlotConfig()">
+              <span id="plot-config-indicator" style="color: var(--dim); margin-right: 4px;">▼</span>
+              📊 PLOT CONFIG
+            </div>
+            <div id="plot-controls" style="display: none;">
+              <!-- Curve Toggles -->
+              <div style="margin-bottom: 8px;">
+                <div style="font-size: 0.7em; color: var(--dim); margin-bottom: 4px;">Curves:</div>
+                <div id="curve-toggles" style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.65em;">
+                  <!-- Will be populated by JavaScript -->
+                </div>
+              </div>
+              <!-- Expression Input -->
+              <div style="margin-bottom: 8px;">
+                <div style="font-size: 0.7em; color: var(--dim); margin-bottom: 4px;">Custom Expression:</div>
+                <div style="position: relative;">
+                  <div style="display: flex; gap: 4px;">
+                    <input type="text" id="plot-expression" placeholder="e.g., acc * 100, task + lock, phaseMean" 
+                      style="flex: 1; padding: 4px 6px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 0.7em;"
+                      onkeydown="handleExpressionKeydown(event)"
+                      oninput="updateExpressionAutocomplete(event)"
+                      autocomplete="off">
+                    <button onclick="addPlotExpression()" style="padding: 4px 8px; font-size: 0.7em; background: var(--accent); color: var(--bg); border: none; cursor: pointer;">Add</button>
+                  </div>
+                  <div id="expression-autocomplete" style="position: absolute; top: 100%; left: 0; right: 0; background: var(--panel); border: 1px solid var(--border); border-top: none; max-height: 120px; overflow-y: auto; display: none; z-index: 1000; font-size: 0.65em; font-family: 'JetBrains Mono', monospace;"></div>
+                </div>
+                <div id="expression-list" style="margin-top: 4px; font-size: 0.65em;">
+                  <!-- Expressions will be listed here -->
+                </div>
+              </div>
+              <!-- Variable Reference -->
+              <!-- <div style="font-size: 0.65em; color: var(--dim); max-height: 100px; overflow-y: auto;">
+                <div style="margin-bottom: 2px; font-weight: 600; color: var(--accent);">Available Variables:</div>
+                <div style="font-family: 'JetBrains Mono', monospace; line-height: 1.4;">
+                  <div>acc, task, lock, total, delta</div>
+                  <div>phaseMean, phaseStd, phaseMin, phaseMax</div>
+                  <div>activeNeurons, lockedNeurons, confidence</div>
+                  <div>epoch (current epoch index)</div>
+                </div>
+              </div> -->
+            </div>
+          </div>
+
+          <!-- Combined graph with minimap - takes all available space -->
+          <div style="position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column;">
+            <!-- Timeline navigation buttons -->
+            <div style="display: flex; gap: 4px; margin-bottom: 4px; justify-content: center; align-items: center;">
+              <button id="timeline-prev" style="padding: 4px 8px; font-size: 0.9em; background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: var(--text); cursor: pointer; border-radius: 3px;" title="Previous Epoch (←)">◀</button>
+              <span id="timeline-epoch-display" style="font-family: 'JetBrains Mono', monospace; font-size: 0.75em; color: var(--dim); min-width: 60px; text-align: center;">E0</span>
+              <button id="timeline-next" style="padding: 4px 8px; font-size: 0.9em; background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: var(--text); cursor: pointer; border-radius: 3px;" title="Next Epoch (→)">▶</button>
+            </div>
+            <canvas
+              id="timeline-minimap"
+              tabindex="0"
+              style="
+                width: 100%;
+                flex: 1;
+                min-height: 0;
+                display: block;
+                cursor: pointer;
+                border: 1px solid var(--border);
+                border-radius: 3px;
+                background: rgba(0, 0, 0, 0.3);
+                outline: none;
+              "
+            ></canvas>
+            <div
+              id="timeline-cursor"
+              style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 2px;
+                height: 100%;
+                background: var(--accent);
+                pointer-events: none;
+                opacity: 0.8;
+              "
+            ></div>
+          </div>
+
+          <!-- Stats Row -->
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              margin-top: 4px;
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 0.65em;
+              flex-shrink: 0;
+            "
+          >
+            <span style="color: var(--dim)"
+              >Active:
+              <span id="active-neurons" style="color: var(--text); font-weight: 600">0</span></span
+            >
+            <span style="color: var(--dim)"
+              >Locked:
+              <span id="locked-neurons" style="color: var(--text); font-weight: 600">0</span></span
+            >
+            <span style="color: var(--dim)"
+              >Δ/step:
+              <span style="color: var(--text); font-weight: 600" id="graph-delta">0.00%</span></span
+            >
+          </div>
+        </div>
+
+      </div>
+      <!-- Checkpoints Panel -->
+      <div id="checkpoints-overlay" class="ui-card">
+        <div
+          style="
+            padding: 10px 12px;
+            color: var(--accent);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <span>CHECKPOINTS</span>
+          <div style="display: flex; gap: 4px">
+            <button id="save-checkpoint-btn" style="padding: 3px 8px; font-size: 0.85em" title="Save Checkpoint">
+              💾
+            </button>
+            <button id="reset-btn" style="padding: 3px 8px; font-size: 0.85em; display: none" title="Reset">
+              ❌reset
+            </button>
+            <button
+              onclick="document.getElementById('load-checkpoint-input').click()"
+              style="padding: 3px 8px; font-size: 0.85em"
+              title="Load"
+            >
+              📂
+            </button>
+            <input type="file" id="load-checkpoint-input" accept=".json" style="display: none" />
+          </div>
+        </div>
+        <div
+          id="checkpoint-list"
+          style="
+            padding: 8px;
+            flex: 1;
+            overflow-y: auto;
+            color: var(--dim);
+          "
+        ></div>
+      </div>
+      </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script>
+      /**
+       * UIT-ROUND v1.0.0 - Full Spectral Architecture
+       */
+      class UITNeuronCell {
+        constructor(
+          inputSize,
+          hiddenSize,
+          harmonics = [1, 2, 4, 8],
+          spinMultiplier = 2.0,
+          quantizationStrength = 0.125,
+          useBinaryAlignment = false
+        ) {
+          this.inputSize = inputSize;
+          this.hiddenSize = hiddenSize;
+          this.harmonics = harmonics;
+          this.spinMultiplier = spinMultiplier;
+          this.quantizationStrength = quantizationStrength;
+          this.useBinaryAlignment = useBinaryAlignment;
+
+          // Linear projections for Standard Part (x) and Phase (phi)
+          this.weightIH = tf.variable(tf.randomNormal([inputSize, hiddenSize * 2], 0, Math.sqrt(2 / inputSize)));
+          this.weightHH = tf.variable(tf.zeros([hiddenSize, hiddenSize * 2])); // CRITICAL: Zero initialization like PyTorch reference
+          this.bias = tf.variable(tf.zeros([hiddenSize * 2]));
+
+          // Epsilon (Infinitesimal fiber strength)
+          const epsilonInit = new Float32Array(hiddenSize);
+          for (let j = 0; j < hiddenSize; j++) {
+            epsilonInit[j] = 0.125 * Math.pow(0.5, j % 5);
+          }
+          this.epsilon = tf.variable(tf.tensor1d(epsilonInit));
+
+          // Harmonic Identity - normalized properly
+          this.diagnosticHarmonics = tf.variable(tf.randomUniform([hiddenSize, harmonics.length], 0.5, 1.5));
+
+          // Phase Pre-Partitioning
+          const spread = (2.0 * Math.PI) / hiddenSize;
+          tf.tidy(() => {
+            const biasData = new Float32Array(hiddenSize * 2);
+            for (let j = 0; j < hiddenSize; j++) {
+              biasData[hiddenSize + j] = j * spread;
+            }
+            this.bias.assign(tf.tensor1d(biasData));
+          });
+        }
+
+        forward(x, hPrev) {
+          return tf.tidy(() => {
+            const gates = tf.add(tf.add(tf.matMul(x, this.weightIH), tf.matMul(hPrev, this.weightHH)), this.bias);
+            const [xGate, phiGate] = tf.split(gates, 2, 1);
+
+            // Standard Part
+            const standardPart = tf.tanh(xGate);
+
+            // Phase accumulation
+            const phiShift = tf.mul(tf.sigmoid(phiGate), Math.PI * this.spinMultiplier);
+            let phiNext = tf.add(hPrev, phiShift);
+
+            // Quantization Sieve
+            const qGrid = Math.PI / 4;
+            const qSieve = tf.mul(tf.round(tf.div(phiNext, qGrid)), qGrid);
+            phiNext = tf.add(phiNext, tf.mul(tf.sub(qSieve, phiNext), this.quantizationStrength));
+
+            // Modulo wrap
+            phiNext = tf.mod(phiNext, 2.0 * Math.PI * this.spinMultiplier);
+
+            // Harmonic Coupling
+            let hCos = tf.zerosLike(phiNext);
+            let hSin = tf.zerosLike(phiNext);
+
+            for (let idx = 0; idx < this.harmonics.length; idx++) {
+              const h = this.harmonics[idx];
+              const harmWeights = tf.slice(this.diagnosticHarmonics, [0, idx], [this.hiddenSize, 1]).squeeze();
+              hCos = tf.add(hCos, tf.mul(harmWeights, tf.cos(tf.mul(phiNext, h))));
+              hSin = tf.add(hSin, tf.mul(harmWeights, tf.sin(tf.mul(phiNext, h))));
+            }
+
+            const confidence = tf.div(tf.abs(hCos), this.harmonics.length);
+            let output = tf.mul(standardPart, tf.add(1.0, tf.mul(this.epsilon, hCos)));
+
+            return {
+              output: tf.keep(output),
+              phiNext: tf.keep(phiNext),
+              confidence: tf.keep(confidence),
+              hCos: tf.keep(hCos),
+              hSin: tf.keep(hSin),
+            };
+          });
+        }
+
+        dispose() {
+          this.weightIH.dispose();
+          this.weightHH.dispose();
+          this.bias.dispose();
+          this.epsilon.dispose();
+          this.diagnosticHarmonics.dispose();
+        }
+      }
+
+      class UITModel {
+        constructor(inputSize, hiddenSize, outputSize, harmonics = [1, 2, 4, 8], spinMultiplier = 2.0, useBinaryAlignment = false) {
+          this.inputSize = inputSize;
+          this.hiddenSize = hiddenSize;
+          this.outputSize = outputSize;
+          this.harmonics = harmonics;
+          this.spinMultiplier = spinMultiplier;
+          this.useBinaryAlignment = useBinaryAlignment;
+          this.modelType = "uit_v1.0";
+
+          this.layer = new UITNeuronCell(inputSize, hiddenSize, harmonics, spinMultiplier, 0.125, useBinaryAlignment);
+
+          // Readout: [Standard Output, Cosine Identity, Sine Identity]
+          this.readout1 = tf.variable(tf.randomNormal([hiddenSize * 3, hiddenSize], 0, Math.sqrt(2 / (hiddenSize * 3))));
+          this.readout1Bias = tf.variable(tf.zeros([hiddenSize]));
+          this.readout2 = tf.variable(tf.randomNormal([hiddenSize, outputSize], 0, Math.sqrt(2 / hiddenSize)));
+          this.readout2Bias = tf.variable(tf.zeros([outputSize]));
+
+          this.phase = null;
+          this.hCos = null;
+          this.hSin = null;
+        }
+
+        forward(x) {
+          return tf.tidy(() => {
+            const is3D = x.rank === 3;
+            const [batch, seq, dim] = is3D ? x.shape : [x.shape[0], 1, x.shape[1]];
+
+            let hState = tf.zeros([batch, this.hiddenSize]);
+            let currentInput = null;
+            let finalHCos = null;
+            let finalHSin = null;
+
+            const seqLen = is3D ? seq : 1;
+
+            for (let t = 0; t < seqLen; t++) {
+              currentInput = is3D 
+                ? x.slice([0, t, 0], [batch, 1, dim]).reshape([batch, dim])
+                : x;
+
+              const result = this.layer.forward(currentInput, hState);
+              currentInput = result.output;
+              hState = result.phiNext;
+              finalHCos = result.hCos;
+              finalHSin = result.hSin;
+
+              if (t < seqLen - 1) {
+                result.confidence.dispose();
+                result.hCos.dispose();
+                result.hSin.dispose();
+              }
+            }
+
+            if (this.phase) this.phase.dispose();
+            if (this.hCos) this.hCos.dispose();
+            if (this.hSin) this.hSin.dispose();
+
+            this.phase = tf.keep(hState);
+            this.hCos = tf.keep(finalHCos);
+            this.hSin = tf.keep(finalHSin);
+
+            const combinedFeatures = tf.concat([currentInput, finalHCos, finalHSin], 1);
+            const hidden = tf.tanh(tf.add(tf.matMul(combinedFeatures, this.readout1), this.readout1Bias));
+            const logits = tf.add(tf.matMul(hidden, this.readout2), this.readout2Bias);
+
+            return tf.keep(logits);
+          });
+        }
+
+        loss(x, y, lockStrength = 0.1) {
+          return tf.tidy(() => {
+            const logits = this.forward(x);
+            let taskLoss;
+            if (this.outputSize > 1) {
+              taskLoss = tf.losses.softmaxCrossEntropy(y, logits).mean();
+            } else {
+              taskLoss = tf.losses.sigmoidCrossEntropy(y, logits).mean();
+            }
+
+            // CRITICAL: Divide by spinMultiplier for proper phase normalization
+            const pH = tf.mul(this.phase, 0.5 / this.spinMultiplier);
+            const lockLoss = tf.mean(tf.square(tf.sin(pH)));
+
+            return {
+              total: tf.add(taskLoss, tf.mul(lockLoss, lockStrength)),
+              task: taskLoss,
+              lock: lockLoss,
+            };
+          });
+        }
+
+        predict(x) {
+          return tf.tidy(() => {
+            const logits = this.forward(x);
+            if (this.outputSize > 1) {
+              return tf.argMax(logits, 1);
+            } else {
+              return tf.sigmoid(logits).greater(0.5).asType("float32");
+            }
+          });
+        }
+
+        getWeights() {
+          return [
+            this.layer.weightIH,
+            this.layer.weightHH,
+            this.layer.bias,
+            this.layer.epsilon,
+            this.layer.diagnosticHarmonics,
+            this.readout1,
+            this.readout1Bias,
+            this.readout2,
+            this.readout2Bias,
+          ];
+        }
+
+        async getPhaseArray() {
+          return this.phase ? await this.phase.array() : null;
+        }
+
+        async exportWeights() {
+          const weights = {};
+          weights.weightIH = await this.layer.weightIH.array();
+          weights.weightHH = await this.layer.weightHH.array();
+          weights.bias = await this.layer.bias.array();
+          weights.epsilon = await this.layer.epsilon.array();
+          weights.diagnosticHarmonics = await this.layer.diagnosticHarmonics.array();
+          weights.readout1 = await this.readout1.array();
+          weights.readout1Bias = await this.readout1Bias.array();
+          weights.readout2 = await this.readout2.array();
+          weights.readout2Bias = await this.readout2Bias.array();
+          return weights;
+        }
+
+        importWeights(weights) {
+          try {
+            this.layer.weightIH.assign(tf.tensor(weights.weightIH));
+            this.layer.weightHH.assign(tf.tensor(weights.weightHH));
+            this.layer.bias.assign(tf.tensor(weights.bias));
+            this.layer.epsilon.assign(tf.tensor(weights.epsilon));
+            this.layer.diagnosticHarmonics.assign(tf.tensor(weights.diagnosticHarmonics));
+            this.readout1.assign(tf.tensor(weights.readout1));
+            this.readout1Bias.assign(tf.tensor(weights.readout1Bias));
+            this.readout2.assign(tf.tensor(weights.readout2));
+            this.readout2Bias.assign(tf.tensor(weights.readout2Bias));
+          } catch (err) {
+            throw new Error(`Failed to load checkpoint weights: ${err.message}. The checkpoint was saved with a different model configuration (hidden size, input/output size, or model type) than the current model. Please ensure the model configuration matches the checkpoint before loading.`);
+          }
+        }
+
+        dispose() {
+          this.layer.dispose();
+          this.readout1.dispose();
+          this.readout1Bias.dispose();
+          this.readout2.dispose();
+          this.readout2Bias.dispose();
+          if (this.phase) this.phase.dispose();
+          if (this.hCos) this.hCos.dispose();
+          if (this.hSin) this.hSin.dispose();
+        }
+      }
+
+      /**
+       * GRU Baseline for comparison
+       */
+      class GRUBaseline {
+        constructor(inputSize, hiddenSize, outputSize) {
+          this.inputSize = inputSize;
+          this.hiddenSize = hiddenSize;
+          this.outputSize = outputSize;
+          this.modelType = "gru";
+
+          // GRU gates: reset, update, candidate
+          this.Wir = tf.variable(tf.randomNormal([inputSize, hiddenSize], 0, 0.1));
+          this.Whr = tf.variable(tf.randomNormal([hiddenSize, hiddenSize], 0, 0.1));
+          this.br = tf.variable(tf.zeros([hiddenSize]));
+
+          this.Wiu = tf.variable(tf.randomNormal([inputSize, hiddenSize], 0, 0.1));
+          this.Whu = tf.variable(tf.randomNormal([hiddenSize, hiddenSize], 0, 0.1));
+          this.bu = tf.variable(tf.zeros([hiddenSize]));
+
+          this.Wic = tf.variable(tf.randomNormal([inputSize, hiddenSize], 0, 0.1));
+          this.Whc = tf.variable(tf.randomNormal([hiddenSize, hiddenSize], 0, 0.1));
+          this.bc = tf.variable(tf.zeros([hiddenSize]));
+
+          // Output projection
+          this.Wo = tf.variable(tf.randomNormal([hiddenSize, outputSize], 0, 0.1));
+          this.bo = tf.variable(tf.zeros([outputSize]));
+
+          this.phase = null; // Dummy for compatibility
+        }
+
+        forward(x) {
+          return tf.tidy(() => {
+            const is3D = x.rank === 3;
+            const [batch, seq, dim] = is3D ? x.shape : [x.shape[0], 1, x.shape[1]];
+
+            let h = tf.zeros([batch, this.hiddenSize]);
+
+            const seqLen = is3D ? seq : 1;
+
+            for (let t = 0; t < seqLen; t++) {
+              const xt = is3D 
+                ? x.slice([0, t, 0], [batch, 1, dim]).reshape([batch, dim])
+                : x;
+
+              // Reset gate
+              const rt = tf.sigmoid(
+                tf.add(tf.add(tf.matMul(xt, this.Wir), tf.matMul(h, this.Whr)), this.br)
+              );
+
+              // Update gate
+              const ut = tf.sigmoid(
+                tf.add(tf.add(tf.matMul(xt, this.Wiu), tf.matMul(h, this.Whu)), this.bu)
+              );
+
+              // Candidate
+              const ct = tf.tanh(
+                tf.add(tf.add(tf.matMul(xt, this.Wic), tf.matMul(tf.mul(rt, h), this.Whc)), this.bc)
+              );
+
+              // New hidden state
+              h = tf.add(tf.mul(ut, h), tf.mul(tf.sub(1, ut), ct));
+            }
+
+            // Store dummy phase for visualization compatibility
+            if (this.phase) this.phase.dispose();
+            this.phase = tf.keep(tf.zeros([batch, this.hiddenSize])); // GRU has no phase
+
+            const logits = tf.add(tf.matMul(h, this.Wo), this.bo);
+            return tf.keep(logits);
+          });
+        }
+
+        loss(x, y, lockStrength = 0.0) {
+          return tf.tidy(() => {
+            const logits = this.forward(x);
+            let taskLoss;
+            if (this.outputSize > 1) {
+              taskLoss = tf.losses.softmaxCrossEntropy(y, logits).mean();
+            } else {
+              taskLoss = tf.losses.sigmoidCrossEntropy(y, logits).mean();
+            }
+
+            return {
+              total: taskLoss,
+              task: taskLoss,
+              lock: tf.scalar(0), // No lock loss for GRU
+            };
+          });
+        }
+
+        predict(x) {
+          return tf.tidy(() => {
+            const logits = this.forward(x);
+            if (this.outputSize > 1) {
+              return tf.argMax(logits, 1);
+            } else {
+              return tf.sigmoid(logits).greater(0.5).asType("float32");
+            }
+          });
+        }
+
+        getWeights() {
+          return [
+            this.Wir, this.Whr, this.br,
+            this.Wiu, this.Whu, this.bu,
+            this.Wic, this.Whc, this.bc,
+            this.Wo, this.bo
+          ];
+        }
+
+        async getPhaseArray() {
+          return null; // GRU has no phase
+        }
+
+        async exportWeights() {
+          return {
+            Wir: await this.Wir.array(),
+            Whr: await this.Whr.array(),
+            br: await this.br.array(),
+            Wiu: await this.Wiu.array(),
+            Whu: await this.Whu.array(),
+            bu: await this.bu.array(),
+            Wic: await this.Wic.array(),
+            Whc: await this.Whc.array(),
+            bc: await this.bc.array(),
+            Wo: await this.Wo.array(),
+            bo: await this.bo.array(),
+          };
+        }
+
+        importWeights(weights) {
+          try {
+            this.Wir.assign(tf.tensor(weights.Wir));
+            this.Whr.assign(tf.tensor(weights.Whr));
+            this.br.assign(tf.tensor(weights.br));
+            this.Wiu.assign(tf.tensor(weights.Wiu));
+            this.Whu.assign(tf.tensor(weights.Whu));
+            this.bu.assign(tf.tensor(weights.bu));
+            this.Wic.assign(tf.tensor(weights.Wic));
+            this.Whc.assign(tf.tensor(weights.Whc));
+            this.bc.assign(tf.tensor(weights.bc));
+            this.Wo.assign(tf.tensor(weights.Wo));
+            this.bo.assign(tf.tensor(weights.bo));
+          } catch (err) {
+            throw new Error(`Failed to load checkpoint weights: ${err.message}. The checkpoint was saved with a different model configuration (hidden size, input/output size, or model type) than the current model. Please ensure the model configuration matches the checkpoint before loading.`);
+          }
+        }
+
+        dispose() {
+          [this.Wir, this.Whr, this.br,
+           this.Wiu, this.Whu, this.bu,
+           this.Wic, this.Whc, this.bc,
+           this.Wo, this.bo].forEach(t => t.dispose());
+          if (this.phase) this.phase.dispose();
+        }
+      }
+
+      /**
+       * ROUND v0.8 - Browser-compatible version
+       */
+      class ROUNDModel {
+        constructor(
+          inputDim,
+          hiddenSize,
+          outputDim = 1,
+          spinor = true,
+          steps = 20
+        ) {
+          this.inputDim = inputDim;
+          this.hiddenSize = hiddenSize;
+          this.outputDim = outputDim;
+          this.spinor = spinor;
+          this.steps = steps;
+          this.modelType = "round_v0.8";
+
+          this.embedW = tf.variable(tf.fill([inputDim, hiddenSize], Math.PI));
+          this.embedB = tf.variable(tf.zeros([hiddenSize]));
+
+          const featDim = spinor ? 6 : 4;
+          this.phaseW = tf.variable(
+            tf.zeros([hiddenSize * featDim, hiddenSize])
+          );
+          this.phaseB = tf.variable(tf.fill([hiddenSize], Math.PI / 2));
+
+          const inCosIdx = spinor ? 4 : 2;
+          tf.tidy(() => {
+            const indices = [];
+            for (let i = 0; i < hiddenSize; i++) {
+              indices.push([i * featDim + inCosIdx, i]);
+            }
+            const updates = tf.fill([hiddenSize], -Math.PI / 2);
+            const newPhaseW = tf.tensorScatterUpdate(
+              this.phaseW,
+              indices,
+              updates
+            );
+            this.phaseW.assign(newPhaseW);
+          });
+
+          const readDim = spinor ? 5 : 3;
+          this.readW = tf.variable(
+            tf.randomNormal([hiddenSize * readDim, outputDim], 0, 0.1)
+          );
+          this.readB = tf.variable(tf.zeros([outputDim]));
+          this.phase = null;
+        }
+
+        forward(x) {
+          const logits = tf.tidy(() => {
+            const is3D = x.rank === 3;
+            const [batch, seq, dim] = is3D
+              ? x.shape
+              : [x.shape[0], 1, x.shape[1]];
+
+            const xFlat = is3D ? x.reshape([batch * seq, dim]) : x;
+            const embedFlat = tf.add(
+              tf.matMul(xFlat, this.embedW),
+              this.embedB
+            );
+            const embed = is3D
+              ? embedFlat.reshape([batch, seq, this.hiddenSize])
+              : embedFlat;
+
+            const inCos = tf.cos(embed);
+            const inSin = tf.sin(embed);
+
+            let phase = tf.zeros([x.shape[0], this.hiddenSize]);
+
+            for (let t = 0; t < this.steps; t++) {
+              const c1 = tf.cos(phase);
+              const s1 = tf.sin(phase);
+              let feat = [c1, s1];
+
+              if (this.spinor) {
+                const pH = tf.mul(phase, 0.5);
+                feat.push(tf.cos(pH), tf.sin(pH));
+              }
+
+              // For 3D input, use the last sequence step's embedding for all accumulation steps
+              // (matching ROUND.py behavior where xp is used for all steps)
+              const inCosT =
+                inCos.rank === 3
+                  ? inCos.slice([0, seq - 1, 0], [-1, 1, -1]).squeeze([1])
+                  : inCos;
+              const inSinT =
+                inSin.rank === 3
+                  ? inSin.slice([0, seq - 1, 0], [-1, 1, -1]).squeeze([1])
+                  : inSin;
+              feat.push(inCosT, inSinT);
+
+              const delta = tf.add(
+                tf.matMul(tf.concat(feat, 1), this.phaseW),
+                this.phaseB
+              );
+              phase = tf.add(phase, delta);
+            }
+
+            if (this.phase) this.phase.dispose();
+            this.phase = tf.keep(phase);
+
+            const c1 = tf.cos(phase);
+            const s1 = tf.sin(phase);
+            let readFeat = [c1, s1];
+
+            if (this.spinor) {
+              const pH = tf.mul(phase, 0.5);
+              readFeat.push(tf.cos(pH), tf.sin(pH));
+            }
+            readFeat.push(phase);
+
+            return tf.add(
+              tf.matMul(tf.concat(readFeat, 1), this.readW),
+              this.readB
+            );
+          });
+
+          return logits;
+        }
+
+        loss(x, y, lockStrength = 0.1) {
+          return tf.tidy(() => {
+            const logits = this.forward(x);
+            const taskLoss = tf.losses.sigmoidCrossEntropy(y, logits).mean();
+
+            const pH = tf.mul(this.phase, 0.5);
+            const lockLoss = tf.mean(tf.square(tf.sin(pH)));
+
+            return {
+              total: tf.add(taskLoss, tf.mul(lockLoss, lockStrength)),
+              task: taskLoss,
+              lock: lockLoss,
+            };
+          });
+        }
+
+        predict(x) {
+          return tf.tidy(() =>
+            tf.sigmoid(this.forward(x)).greater(0.5).asType("float32")
+          );
+        }
+
+        getWeights() {
+          return [
+            this.embedW,
+            this.embedB,
+            this.phaseW,
+            this.phaseB,
+            this.readW,
+            this.readB,
+          ];
+        }
+
+        async getPhaseArray() {
+          return this.phase ? await this.phase.array() : null;
+        }
+
+        async exportWeights() {
+          return {
+            embedW: await this.embedW.array(),
+            embedB: await this.embedB.array(),
+            phaseW: await this.phaseW.array(),
+            phaseB: await this.phaseB.array(),
+            readW: await this.readW.array(),
+            readB: await this.readB.array(),
+          };
+        }
+
+        importWeights(weights) {
+          try {
+            this.embedW.assign(tf.tensor(weights.embedW));
+            this.embedB.assign(tf.tensor(weights.embedB));
+            this.phaseW.assign(tf.tensor(weights.phaseW));
+            this.phaseB.assign(tf.tensor(weights.phaseB));
+            this.readW.assign(tf.tensor(weights.readW));
+            this.readB.assign(tf.tensor(weights.readB));
+          } catch (err) {
+            throw new Error(`Failed to load checkpoint weights: ${err.message}. The checkpoint was saved with a different model configuration (hidden size, input/output size, or model type) than the current model. Please ensure the model configuration matches the checkpoint before loading.`);
+          }
+        }
+
+        dispose() {
+          [
+            this.embedW,
+            this.embedB,
+            this.phaseW,
+            this.phaseB,
+            this.readW,
+            this.readB,
+          ].forEach((t) => t.dispose());
+          if (this.phase) this.phase.dispose();
+        }
+      }
+
+      // Global state
+      let scene, camera, renderer, sphere, controls;
+      let model, optimizer;
+      let isTraining = false;
+      let epoch = 0;
+      let phasePoints = [];
+      let trailObjects = [];
+      let selectedNeurons = new Set(); // Track selected neuron indices
+      let neuronObjects = []; // Store neuron mesh objects with their indices
+      let neuronLabels = []; // Store label sprites for selected neurons
+      let labelRenderer = null; // CSS2DRenderer for text labels
+
+      const neuronColors = [
+        0x44ff88, 0xffaa44, 0xff4488, 0x44aaff, 0xffff44, 0xff44ff, 0x44ffff,
+        0xffffff,
+      ];
+      const trailLength = 50;
+      const neuronTrails = [];
+      let squareCtx, polarCtx;
+
+      let trainData = {};
+      let testData = {};
+
+      // Timeline state
+      let phaseHistory = []; // Store full phase snapshots at each epoch
+      let timelineMode = "live"; // 'live' or 'scrubbing'
+      let currentTimelineEpoch = 0;
+      let lastConvergenceTime = 0; // Track last convergence time in milliseconds
+
+      // Performance Settings System
+      const defaultSettings = {
+        antialias: false,
+        backdropBlur: false,
+        highDpi: false,
+        imageSmoothing: false,
+        sphereRes: 32,
+        torusRes: 32,
+        dotRes: 16,
+        ringRes: 16,
+        trailSegments: 10,
+        showWireframe: false,
+        wireframeOpacity: 0
+      };
+
+      let currentSettings = { ...defaultSettings };
+
+      // Preset configurations
+      const presets = {
+        performance: {
+          antialias: false,
+          backdropBlur: false,
+          highDpi: false,
+          imageSmoothing: false,
+          sphereRes: 16,
+          torusRes: 16,
+          dotRes: 8,
+          ringRes: 8,
+          trailSegments: 5,
+          showWireframe: false,
+          wireframeOpacity: 0
+        },
+        balanced: {
+          antialias: false,
+          backdropBlur: false,
+          highDpi: false,
+          imageSmoothing: true,
+          sphereRes: 32,
+          torusRes: 32,
+          dotRes: 16,
+          ringRes: 16,
+          trailSegments: 10,
+          showWireframe: false,
+          wireframeOpacity: 0
+        },
+        quality: {
+          antialias: true,
+          backdropBlur: true,
+          highDpi: true,
+          imageSmoothing: true,
+          sphereRes: 64,
+          torusRes: 64,
+          dotRes: 32,
+          ringRes: 32,
+          trailSegments: 20,
+          showWireframe: true,
+          wireframeOpacity: 30
+        }
+      };
+
+      // Load settings from localStorage
+      function loadSettings() {
+        try {
+          const saved = localStorage.getItem('round_bloch_settings');
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            currentSettings = { ...defaultSettings, ...parsed };
+          }
+        } catch (e) {
+          console.warn('Failed to load settings:', e);
+        }
+        applySettings();
+      }
+
+      // Save settings to localStorage
+      function saveSettings() {
+        try {
+          localStorage.setItem('round_bloch_settings', JSON.stringify(currentSettings));
+        } catch (e) {
+          console.warn('Failed to save settings:', e);
+        }
+      }
+
+      // Apply a preset configuration
+      function applyPreset(presetName) {
+        if (presets[presetName]) {
+          currentSettings = { ...presets[presetName] };
+          saveSettings();
+          applySettings();
+          // Reinitialize scene with new settings
+          if (typeof initThreeJS === 'function') {
+            initThreeJS();
+            if (typeof updateVisuals === 'function') {
+              updateVisuals();
+            }
+          }
+        }
+      }
+
+      // Apply settings to the application (non-destructive updates only)
+      function applySettings() {
+        // Update CSS backdrop filters
+        const panels = document.querySelectorAll('#training-panel, #controls-overlay, .ui-card');
+        
+        // Check if current settings match balanced preset
+        const isBalancedMode = !currentSettings.backdropBlur && 
+          currentSettings.sphereRes === 32 && 
+          currentSettings.torusRes === 32 &&
+          currentSettings.dotRes === 16 &&
+          currentSettings.ringRes === 16 &&
+          currentSettings.trailSegments === 10 &&
+          !currentSettings.antialias &&
+          !currentSettings.highDpi &&
+          currentSettings.imageSmoothing &&
+          !currentSettings.showWireframe;
+        
+        panels.forEach(panel => {
+          if (currentSettings.backdropBlur) {
+            panel.style.backdropFilter = 'blur(10px)';
+            panel.style.webkitBackdropFilter = 'blur(10px)';
+            // Make background semi-transparent so blur is visible
+            panel.style.background = 'rgba(18, 18, 18, 0.7)';
+          } else if (isBalancedMode) {
+            panel.style.backdropFilter = 'none';
+            panel.style.webkitBackdropFilter = 'none';
+            // Use 75% opacity for balanced mode (simple transparency without blur)
+            panel.style.background = 'rgba(18, 18, 18, 0.75)';
+          } else {
+            panel.style.backdropFilter = 'none';
+            panel.style.webkitBackdropFilter = 'none';
+            // Restore original background opacity for performance mode
+            panel.style.background = '';
+          }
+        });
+
+        // Note: Three.js settings (antialias, pixel ratio, geometry resolutions) require scene recreation
+        // which is handled by calling initThreeJS() after applying settings
+      }
+
+      // Initialize settings modal
+      function initSettingsModal() {
+        const modal = document.getElementById('settings-modal');
+        const openBtn = document.getElementById('settings-btn');
+        const closeBtn = document.getElementById('settings-close');
+        const applyBtn = document.getElementById('settings-apply');
+        const resetBtn = document.getElementById('settings-reset');
+
+        // Populate settings UI
+        function updateSettingsUI() {
+          const antialiasEl = document.getElementById('setting-antialias');
+          if (antialiasEl) antialiasEl.checked = currentSettings.antialias;
+          const backdropBlurEl = document.getElementById('setting-backdrop-blur');
+          if (backdropBlurEl) backdropBlurEl.checked = currentSettings.backdropBlur;
+          const highDpiEl = document.getElementById('setting-high-dpi');
+          if (highDpiEl) highDpiEl.checked = currentSettings.highDpi;
+          const imageSmoothingEl = document.getElementById('setting-image-smoothing');
+          if (imageSmoothingEl) imageSmoothingEl.checked = currentSettings.imageSmoothing;
+          const sphereResEl = document.getElementById('setting-sphere-res');
+          if (sphereResEl) sphereResEl.value = currentSettings.sphereRes;
+          const sphereResValueEl = document.getElementById('setting-sphere-res-value');
+          if (sphereResValueEl) sphereResValueEl.textContent = currentSettings.sphereRes;
+          const torusResEl = document.getElementById('setting-torus-res');
+          if (torusResEl) torusResEl.value = currentSettings.torusRes;
+          const torusResValueEl = document.getElementById('setting-torus-res-value');
+          if (torusResValueEl) torusResValueEl.textContent = currentSettings.torusRes;
+          const dotResEl = document.getElementById('setting-dot-res');
+          if (dotResEl) dotResEl.value = currentSettings.dotRes;
+          const dotResValueEl = document.getElementById('setting-dot-res-value');
+          if (dotResValueEl) dotResValueEl.textContent = currentSettings.dotRes;
+          const ringResEl = document.getElementById('setting-ring-res');
+          if (ringResEl) ringResEl.value = currentSettings.ringRes;
+          const ringResValueEl = document.getElementById('setting-ring-res-value');
+          if (ringResValueEl) ringResValueEl.textContent = currentSettings.ringRes;
+          const trailSegmentsEl = document.getElementById('setting-trail-segments');
+          if (trailSegmentsEl) trailSegmentsEl.value = currentSettings.trailSegments;
+          const trailSegmentsValueEl = document.getElementById('setting-trail-segments-value');
+          if (trailSegmentsValueEl) trailSegmentsValueEl.textContent = currentSettings.trailSegments;
+          const showWireframeEl = document.getElementById('setting-show-wireframe');
+          if (showWireframeEl) showWireframeEl.checked = currentSettings.showWireframe;
+          const wireframeOpacityEl = document.getElementById('setting-wireframe-opacity');
+          if (wireframeOpacityEl) wireframeOpacityEl.value = currentSettings.wireframeOpacity;
+          const wireframeOpacityValueEl = document.getElementById('setting-wireframe-opacity-value');
+          if (wireframeOpacityValueEl) wireframeOpacityValueEl.textContent = currentSettings.wireframeOpacity;
+        }
+
+        // Update value displays on slider change
+        const sphereResEl = document.getElementById('setting-sphere-res');
+        if (sphereResEl) {
+          sphereResEl.addEventListener('input', (e) => {
+            const valueEl = document.getElementById('setting-sphere-res-value');
+            if (valueEl) valueEl.textContent = e.target.value;
+          });
+        }
+        const torusResEl = document.getElementById('setting-torus-res');
+        if (torusResEl) {
+          torusResEl.addEventListener('input', (e) => {
+            const valueEl = document.getElementById('setting-torus-res-value');
+            if (valueEl) valueEl.textContent = e.target.value;
+          });
+        }
+        const dotResEl = document.getElementById('setting-dot-res');
+        if (dotResEl) {
+          dotResEl.addEventListener('input', (e) => {
+            const valueEl = document.getElementById('setting-dot-res-value');
+            if (valueEl) valueEl.textContent = e.target.value;
+          });
+        }
+        const ringResEl = document.getElementById('setting-ring-res');
+        if (ringResEl) {
+          ringResEl.addEventListener('input', (e) => {
+            const valueEl = document.getElementById('setting-ring-res-value');
+            if (valueEl) valueEl.textContent = e.target.value;
+          });
+        }
+        const trailSegmentsEl = document.getElementById('setting-trail-segments');
+        if (trailSegmentsEl) {
+          trailSegmentsEl.addEventListener('input', (e) => {
+            const valueEl = document.getElementById('setting-trail-segments-value');
+            if (valueEl) valueEl.textContent = e.target.value;
+          });
+        }
+        const wireframeOpacityEl = document.getElementById('setting-wireframe-opacity');
+        if (wireframeOpacityEl) {
+          wireframeOpacityEl.addEventListener('input', (e) => {
+            const valueEl = document.getElementById('setting-wireframe-opacity-value');
+            if (valueEl) valueEl.textContent = e.target.value;
+          });
+        }
+
+        // Track if modal listeners have been added
+        let modalListenersAdded = false;
+
+        // Helper function to handle apply settings
+        function handleApplySettings() {
+          const antialiasEl = document.getElementById('setting-antialias');
+          if (antialiasEl) currentSettings.antialias = antialiasEl.checked;
+          const backdropBlurEl = document.getElementById('setting-backdrop-blur');
+          if (backdropBlurEl) currentSettings.backdropBlur = backdropBlurEl.checked;
+          const highDpiEl = document.getElementById('setting-high-dpi');
+          if (highDpiEl) currentSettings.highDpi = highDpiEl.checked;
+          const imageSmoothingEl = document.getElementById('setting-image-smoothing');
+          if (imageSmoothingEl) currentSettings.imageSmoothing = imageSmoothingEl.checked;
+          const sphereResEl = document.getElementById('setting-sphere-res');
+          if (sphereResEl) currentSettings.sphereRes = parseInt(sphereResEl.value);
+          const torusResEl = document.getElementById('setting-torus-res');
+          if (torusResEl) currentSettings.torusRes = parseInt(torusResEl.value);
+          const dotResEl = document.getElementById('setting-dot-res');
+          if (dotResEl) currentSettings.dotRes = parseInt(dotResEl.value);
+          const ringResEl = document.getElementById('setting-ring-res');
+          if (ringResEl) currentSettings.ringRes = parseInt(ringResEl.value);
+          const trailSegmentsEl = document.getElementById('setting-trail-segments');
+          if (trailSegmentsEl) currentSettings.trailSegments = parseInt(trailSegmentsEl.value);
+          const showWireframeEl = document.getElementById('setting-show-wireframe');
+          if (showWireframeEl) currentSettings.showWireframe = showWireframeEl.checked;
+          const wireframeOpacityEl = document.getElementById('setting-wireframe-opacity');
+          if (wireframeOpacityEl) currentSettings.wireframeOpacity = parseInt(wireframeOpacityEl.value);
+
+          saveSettings();
+          applySettings();
+          const modalEl = document.getElementById('settings-modal');
+          if (modalEl) modalEl.style.display = 'none';
+          
+          // Reinitialize scene with new settings
+          if (typeof initThreeJS === 'function') {
+            initThreeJS();
+            // Update visualizations with new geometry settings
+            if (typeof updateVisuals === 'function') {
+              updateVisuals();
+            }
+          }
+        }
+
+        // Helper function to handle reset settings
+        function handleResetSettings() {
+          currentSettings = { ...defaultSettings };
+          updateSettingsUI();
+          saveSettings();
+          applySettings();
+          if (typeof initThreeJS === 'function') {
+            initThreeJS();
+            // Update visualizations with new geometry settings
+            if (typeof updateVisuals === 'function') {
+              updateVisuals();
+            }
+          }
+        }
+
+        // Open modal
+        if (openBtn) {
+          openBtn.addEventListener('click', () => {
+            const modalEl = document.getElementById('settings-modal');
+            if (modalEl) {
+              updateSettingsUI();
+              modalEl.style.display = 'block';
+              
+              // Add modal listeners on first open
+              if (!modalListenersAdded) {
+                // Background click listener
+                modalEl.addEventListener('click', (e) => {
+                  if (e.target === modalEl) {
+                    modalEl.style.display = 'none';
+                  }
+                });
+                
+                // Apply button listener
+                const applyBtnEl = document.getElementById('settings-apply');
+                if (applyBtnEl) {
+                  applyBtnEl.addEventListener('click', handleApplySettings);
+                }
+                
+                // Reset button listener
+                const resetBtnEl = document.getElementById('settings-reset');
+                if (resetBtnEl) {
+                  resetBtnEl.addEventListener('click', handleResetSettings);
+                }
+                
+                // Close button listener
+                const closeBtnEl = document.getElementById('settings-close');
+                if (closeBtnEl) {
+                  closeBtnEl.addEventListener('click', () => {
+                    modalEl.style.display = 'none';
+                  });
+                }
+                
+                // Preset button listeners
+                const presetPerformanceBtn = document.getElementById('preset-performance');
+                if (presetPerformanceBtn) {
+                  presetPerformanceBtn.addEventListener('click', () => {
+                    applyPreset('performance');
+                    updateSettingsUI();
+                  });
+                }
+                
+                const presetBalancedBtn = document.getElementById('preset-balanced');
+                if (presetBalancedBtn) {
+                  presetBalancedBtn.addEventListener('click', () => {
+                    applyPreset('balanced');
+                    updateSettingsUI();
+                  });
+                }
+                
+                const presetQualityBtn = document.getElementById('preset-quality');
+                if (presetQualityBtn) {
+                  presetQualityBtn.addEventListener('click', () => {
+                    applyPreset('quality');
+                    updateSettingsUI();
+                  });
+                }
+                
+                modalListenersAdded = true;
+              }
+            }
+          });
+        }
+
+        // Close on background click (if modal exists at init time)
+        if (modal) {
+          modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+              modal.style.display = 'none';
+            }
+          });
+        }
+
+        // Apply and reset button listeners are added when modal opens (see openBtn handler above)
+      }
+
+      /**
+       * Task Data Generators
+       */
+      function genXOR() {
+        const x = [[0, 0], [0, 1], [1, 0], [1, 1]];
+        const y = [[0], [1], [1], [0]];
+        return {
+          train: { x: tf.tensor2d(x), y: tf.tensor2d(y) },
+          test: { x: tf.tensor2d(x), y: tf.tensor2d(y) },
+        };
+      }
+
+      function gen4Bit() {
+        const x = [], y = [];
+        for (let i = 0; i < 16; i++) {
+          const bits = [];
+          let par = 0;
+          for (let j = 0; j < 4; j++) {
+            const b = (i >> j) & 1;
+            bits.push(b);
+            par ^= b;
+          }
+          x.push(bits);
+          y.push([par]);
+        }
+        return {
+          train: { x: tf.tensor2d(x), y: tf.tensor2d(y) },
+          test: { x: tf.tensor2d(x), y: tf.tensor2d(y) },
+        };
+      }
+
+      function gen8Bit() {
+        const xTrain = [], yTrain = [];
+        const xTest = [], yTest = [];
+
+        for (let i = 0; i < 256; i++) {
+          const bits = [];
+          let par = 0;
+          for (let j = 0; j < 8; j++) {
+            const b = (i >> j) & 1;
+            bits.push(b);
+            par ^= b;
+          }
+          if (i < 200) {
+            xTrain.push(bits);
+            yTrain.push([par]);
+          } else {
+            xTest.push(bits);
+            yTest.push([par]);
+          }
+        }
+
+        return {
+          train: { x: tf.tensor2d(xTrain), y: tf.tensor2d(yTrain) },
+          test: { x: tf.tensor2d(xTest), y: tf.tensor2d(yTest) },
+        };
+      }
+
+      // Generate 16-bit parity data
+      function genParity16() {
+        const xTrain = [],
+          yTrain = [];
+        const xTest = [],
+          yTest = [];
+        const trainNums = new Set();
+        const testNums = new Set();
+
+        while (trainNums.size < 800) {
+          const num = Math.floor(Math.random() * 65536);
+          if (!trainNums.has(num)) trainNums.add(num);
+        }
+        while (testNums.size < 200) {
+          const num = Math.floor(Math.random() * 65536);
+          if (!trainNums.has(num) && !testNums.has(num)) testNums.add(num);
+        }
+
+        for (const num of trainNums) {
+          const bits = [];
+          let par = 0;
+          for (let j = 0; j < 16; j++) {
+            const b = (num >> j) & 1;
+            bits.push(b);
+            par ^= b;
+          }
+          xTrain.push(bits);
+          yTrain.push([par]);
+        }
+
+        for (const num of testNums) {
+          const bits = [];
+          let par = 0;
+          for (let j = 0; j < 16; j++) {
+            const b = (num >> j) & 1;
+            bits.push(b);
+            par ^= b;
+          }
+          xTest.push(bits);
+          yTest.push([par]);
+        }
+
+        console.log(
+          `Generated ${xTrain.length} train, ${xTest.length} test samples`
+        );
+
+        return {
+          train: { x: tf.tensor2d(xTrain), y: tf.tensor2d(yTrain) },
+          test: { x: tf.tensor2d(xTest), y: tf.tensor2d(yTest) },
+        };
+      }
+
+      function genMajority() {
+        const xTrain = [], yTrain = [];
+        const xTest = [], yTest = [];
+
+        for (let i = 0; i < 2000; i++) {
+          const bits = [];
+          let count = 0;
+          for (let j = 0; j < 8; j++) {
+            const b = Math.random() > 0.5 ? 1 : 0;
+            bits.push(b);
+            count += b;
+          }
+          xTrain.push(bits);
+          yTrain.push([count > 4 ? 1 : 0]);
+        }
+
+        for (let i = 0; i < 500; i++) {
+          const bits = [];
+          let count = 0;
+          for (let j = 0; j < 8; j++) {
+            const b = Math.random() > 0.5 ? 1 : 0;
+            bits.push(b);
+            count += b;
+          }
+          xTest.push(bits);
+          yTest.push([count > 4 ? 1 : 0]);
+        }
+
+        return {
+          train: { x: tf.tensor2d(xTrain), y: tf.tensor2d(yTrain) },
+          test: { x: tf.tensor2d(xTest), y: tf.tensor2d(yTest) },
+        };
+      }
+
+      function genASCIIDecoder() {
+        const xTrain = [], yTrain = [];
+        const xTest = [], yTest = [];
+
+        // Training data: random ASCII characters
+        for (let i = 0; i < 2000; i++) {
+          const charId = Math.floor(Math.random() * 256);
+          const bits = [];
+          for (let j = 7; j >= 0; j--) {
+            bits.push((charId >> j) & 1);
+          }
+          const oneHot = new Array(256).fill(0);
+          oneHot[charId] = 1;
+          xTrain.push(bits.map(b => [b])); // [seq=8, features=1]
+          yTrain.push(oneHot);
+        }
+
+        // Test data
+        for (let i = 0; i < 500; i++) {
+          const charId = Math.floor(Math.random() * 256);
+          const bits = [];
+          for (let j = 7; j >= 0; j--) {
+            bits.push((charId >> j) & 1);
+          }
+          const oneHot = new Array(256).fill(0);
+          oneHot[charId] = 1;
+          xTest.push(bits.map(b => [b]));
+          yTest.push(oneHot);
+        }
+
+        console.log('ASCII Decoder: 2000 train, 500 test (3D format)');
+        return {
+          train: { x: tf.tensor3d(xTrain), y: tf.tensor2d(yTrain) },
+          test: { x: tf.tensor3d(xTest), y: tf.tensor2d(yTest) },
+        };
+      }
+
+      function getTaskConfig(taskName) {
+        const configs = {
+          xor: { inputSize: 2, outputSize: 1, is3D: false },
+          parity4: { inputSize: 4, outputSize: 1, is3D: false },
+          parity8: { inputSize: 8, outputSize: 1, is3D: false },
+          parity16: { inputSize: 16, outputSize: 1, is3D: false },
+          majority: { inputSize: 8, outputSize: 1, is3D: false },
+          ascii_decoder: { inputSize: 1, outputSize: 256, is3D: true },
+        };
+        return configs[taskName];
+      }
+
+      function generateTaskData(taskName) {
+        const generators = {
+          xor: genXOR,
+          parity4: gen4Bit,
+          parity8: gen8Bit,
+          parity16: genParity16,
+          majority: genMajority,
+          ascii_decoder: genASCIIDecoder,
+        };
+        return generators[taskName]();
+      }
+
+      async function init() {
+        const isFirstInit = !renderer;
+
+        // Load settings and initialize settings modal
+        if (isFirstInit) {
+          loadSettings();
+          initSettingsModal();
+        }
+
+        // Only init Three.js and canvases once
+        if (isFirstInit) {
+          initThreeJS();
+          initCanvases();
+        }
+
+        const taskName = document.getElementById("task").value;
+        const modelType = document.getElementById("model-select").value;
+        const hiddenSize = parseInt(document.getElementById("hidden").value);
+        
+        const taskConfig = getTaskConfig(taskName);
+        const inputSize = taskConfig.inputSize;
+        const outputSize = taskConfig.outputSize;
+
+        if (model) model.dispose();
+
+        // Create model based on selection
+        if (modelType === "round_v0.8") {
+        model = new ROUNDModel(inputSize, hiddenSize, outputSize, true, 20);
+        } else if (modelType === "uit_v1.0") {
+          const harmonicsStr = document.getElementById("harmonics-select").value;
+          const harmonics = JSON.parse(harmonicsStr);
+          const spinMultiplier = 1.0; // CRITICAL: Use 1.0 (2π range) not 2.0 (4π spinor)
+          const useBinaryAlignment = document.getElementById("binary-alignment").value === "true";
+          model = new UITModel(inputSize, hiddenSize, outputSize, harmonics, spinMultiplier, useBinaryAlignment);
+        } else if (modelType === "gru") {
+          model = new GRUBaseline(inputSize, hiddenSize, outputSize);
+        }
+
+        const datasets = generateTaskData(taskName);
+        trainData = datasets.train;
+        testData = datasets.test;
+
+        const lr = currentLR;
+        if (optimizer) optimizer = null;
+        optimizer = tf.train.adam(lr);
+
+        neuronTrails.length = 0;
+        for (let i = 0; i < hiddenSize; i++) {
+          neuronTrails.push([]);
+        }
+
+        // Reset all history arrays
+        Object.keys(hist).forEach(key => {
+          hist[key] = [];
+        });
+        epoch = 0;
+        phaseHistory = [];
+        
+        // Initialize epoch 0 with zero phases (per theory: ROUND.py line 92, UIT_ROUND.py line 164)
+        // Phases start at zero before any forward pass
+        const initialPhases = new Array(hiddenSize).fill(0);
+        
+        phaseHistory.push(initialPhases);
+        
+        // Initialize neuron trails with initial phases
+        neuronTrails.forEach((trail, i) => {
+          trail.length = 0;
+          const phi = initialPhases[i] || 0;
+          const locking = Math.sin(phi / 2) ** 2;
+          const theta = locking * Math.PI;
+          trail.push({ theta, phi });
+        });
+
+        document.getElementById("train-btn").onclick = toggleTraining;
+        document.getElementById("step-btn").onclick = step;
+        document.getElementById("reset-btn").onclick = reset;
+        document.getElementById("reset-btn-main").onclick = reset;
+        document.getElementById("save-checkpoint-btn").onclick = async () => {
+          await saveCheckpoint();
+        };
+        document.getElementById("benchmark-btn").onclick = async () => {
+          await runBenchmark(false);
+        };
+        document.getElementById("benchmark-train-btn").onclick = async () => {
+          await runBenchmark(true);
+        };
+
+        log(
+          `Initialized: ${modelType}, ${hiddenSize}H, LR=${lr}, Task=${taskName}`,
+          true
+        );
+
+        // Update display elements for epoch 0
+        document.getElementById("graph-epoch").textContent = 0;
+        document.getElementById("graph-acc").textContent = "0.00%";
+        document.getElementById("graph-loss").textContent = "0.0000";
+        document.getElementById("graph-lock").textContent = "0.0000";
+        const epochDisplay = document.getElementById("timeline-epoch-display");
+        if (epochDisplay) {
+          epochDisplay.textContent = "E0";
+        }
+        updateTimelineButtonStates();
+        document.getElementById("graph-delta").textContent = "0.00%";
+        document.getElementById("graph-delta").style.color = "";
+        currentTimelineEpoch = 0;
+        timelineMode = "live";
+
+        if (isFirstInit) {
+          animate();
+          initPlotControls(); // Initialize plot controls UI
+        }
+        updateVisuals();
+        drawTimelineMinimap();
+      }
+
+      function initThreeJS() {
+        // Dispose of old renderer if it exists
+        if (renderer) {
+          renderer.dispose();
+          if (renderer.domElement && renderer.domElement.parentNode) {
+            renderer.domElement.parentNode.removeChild(renderer.domElement);
+          }
+        }
+
+        // Clear old scene objects if they exist
+        if (scene) {
+          while(scene.children.length > 0) {
+            const obj = scene.children[0];
+            scene.remove(obj);
+            if (obj.geometry) obj.geometry.dispose();
+            if (obj.material) {
+              if (Array.isArray(obj.material)) {
+                obj.material.forEach(m => m.dispose());
+              } else {
+                obj.material.dispose();
+              }
+            }
+          }
+        }
+
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(
+          75,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          1000
+        );
+        renderer = new THREE.WebGLRenderer({ antialias: currentSettings.antialias, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(currentSettings.highDpi ? window.devicePixelRatio : 1);
+        renderer.setClearColor(0x000000, 1);
+        document.body.appendChild(renderer.domElement);
+
+        const ambientLight = new THREE.AmbientLight(0x404040);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(-50, 50, -50);
+        scene.add(directionalLight);
+
+        const geometry = new THREE.SphereGeometry(1, currentSettings.sphereRes, currentSettings.sphereRes);
+        const material = new THREE.MeshPhongMaterial({
+          color: 0x3366ff,
+          wireframe: true,
+          transparent: currentSettings.wireframeOpacity < 100,
+          opacity: currentSettings.wireframeOpacity / 100,
+          shininess: 0,
+        });
+        sphere = new THREE.Mesh(geometry, material);
+        sphere.visible = currentSettings.showWireframe && currentSettings.wireframeOpacity > 0;
+        scene.add(sphere);
+
+        const circleGeo = new THREE.TorusGeometry(1, 0.005, 8, currentSettings.torusRes);
+        const equator = new THREE.Mesh(
+          circleGeo,
+          new THREE.MeshBasicMaterial({ color: 0x44ff44 })
+        );
+        equator.rotation.x = Math.PI / 2;
+        scene.add(equator);
+
+        const meridian = new THREE.Mesh(
+          circleGeo,
+          new THREE.MeshBasicMaterial({ color: 0xff4444 })
+        );
+        scene.add(meridian);
+
+        const axesHelper = new THREE.AxesHelper(1.2);
+        scene.add(axesHelper);
+
+        addLabel("|0⟩", new THREE.Vector3(0, 1.2, 0));
+        addLabel("|1⟩", new THREE.Vector3(0, -1.2, 0));
+
+        camera.position.set(2, 1.0, 2);
+        camera.lookAt(new THREE.Vector3(0,0,0));
+        camera.setViewOffset(
+          window.innerWidth, window.innerHeight,
+          0, 0.1*window.innerHeight,
+          window.innerWidth, window.innerHeight
+        );
+        camera.updateProjectionMatrix();
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.target.set(0,-0.5,0);
+        controls.enableDamping = false;
+        controls.enablePan = true;
+        controls.zoomSpeed = 0.8;
+        controls.minDistance = 2;
+        controls.maxDistance = 4;
+        controls.target.set(0,0,0);
+        //controls.addEventListener('change', () => { controls.target.set(0,-0.50,0); });
+
+        // Add click handler for neuron selection
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        let mouseDownPos = null;
+        const DRAG_THRESHOLD = 5; // pixels
+        
+        // Track dragging state
+        renderer.domElement.addEventListener('mousedown', (e) => {
+          mouseDownPos = { x: e.clientX, y: e.clientY };
+        });
+        
+        renderer.domElement.addEventListener('click', (event) => {
+          // Prevent selection when controls disabled
+          if (controls.enabled === false) return;
+          
+          // Check if this was a drag (mouse moved significantly)
+          if (mouseDownPos) {
+            const dx = Math.abs(event.clientX - mouseDownPos.x);
+            const dy = Math.abs(event.clientY - mouseDownPos.y);
+            if (dx > DRAG_THRESHOLD || dy > DRAG_THRESHOLD) {
+              mouseDownPos = null;
+              return; // This was a drag, not a click
+            }
+          }
+          mouseDownPos = null;
+          
+          const rect = renderer.domElement.getBoundingClientRect();
+          mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+          mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+          
+          raycaster.setFromCamera(mouse, camera);
+          const intersects = raycaster.intersectObjects(neuronObjects, false);
+          
+          if (intersects.length > 0) {
+            const neuronIndex = intersects[0].object.userData.neuronIndex;
+            
+            if (event.ctrlKey || event.metaKey) {
+              // Multi-select: toggle this neuron
+              if (selectedNeurons.has(neuronIndex)) {
+                selectedNeurons.delete(neuronIndex);
+              } else {
+                selectedNeurons.add(neuronIndex);
+              }
+            } else {
+              // Single select: clear and select this neuron
+              selectedNeurons.clear();
+              selectedNeurons.add(neuronIndex);
+            }
+            
+            updateVisuals();
+          } else {
+            // Clicked empty space - deselect all (unless CTRL is held)
+            if (!event.ctrlKey && !event.metaKey) {
+              selectedNeurons.clear();
+              updateVisuals();
+            }
+          }
+        });
+      }
+
+      function initCanvases() {
+        squareCtx = document.getElementById("square-control").getContext("2d");
+        polarCtx = document.getElementById("polar-control").getContext("2d");
+      }
+
+      function createNeuronLabel(text, position, neuronColor) {
+        // Use settings for DPI
+        const dpr = currentSettings.highDpi ? window.devicePixelRatio || 1 : 1;
+        const baseWidth = 400; // Increased for better text quality
+        const baseHeight = 400; // Increased for better text quality
+        const canvas = document.createElement("canvas");
+        canvas.width = baseWidth * dpr;
+        canvas.height = baseHeight * dpr;
+        const ctx = canvas.getContext("2d");
+        
+        // Scale context for high DPI
+        ctx.scale(dpr, dpr);
+        
+        // Background with better opacity
+        ctx.fillStyle = "rgba(0, 0, 0, 0.95)";
+        ctx.fillRect(0, 0, baseWidth, baseHeight);
+        
+        // Convert neuron color (number) to hex string
+        const colorHex = typeof neuronColor === 'number' 
+          ? '#' + neuronColor.toString(16).padStart(6, '0')
+          : neuronColor || '#44ff88';
+        
+        // Border with neuron color
+        ctx.strokeStyle = colorHex;
+        ctx.lineWidth = 3;
+        ctx.strokeRect(2, 2, baseWidth - 4, baseHeight - 4);
+        
+        // Text rendering - extremely sharp and readable
+        const lines = text.split("\n");
+        const fontSize = 72; // Increased for better readability
+        const lineHeight = 96; // Increased proportionally
+        
+        // Use system font fallback for maximum sharpness
+        ctx.font = `${fontSize}px 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        
+        // Use settings for image smoothing
+        ctx.imageSmoothingEnabled = currentSettings.imageSmoothing;
+        if (currentSettings.imageSmoothing) {
+          ctx.imageSmoothingQuality = 'high';
+        }
+        
+        const startY = baseHeight / 2 - (lines.length - 1) * lineHeight / 2;
+        const centerX = baseWidth / 2;
+        
+        // Color mapping: phase (φ) = green (equator), theta (θ) = red (meridian)
+        const getLineColor = (line) => {
+          if (line.startsWith('N')) {
+            return "#ffffff"; // Neuron number - white
+          } else if (line.startsWith('θ')) {
+            return "#ff4444"; // Theta - red (meridian)
+          } else if (line.startsWith('φ')) {
+            return "#44ff44"; // Phase - green (equator)
+          } else if (line.startsWith('L')) {
+            return "#ffff44"; // Locking - yellow
+          }
+          return "#ffffff"; // Default white
+        };
+        
+        lines.forEach((line, i) => {
+          const y = startY + i * lineHeight;
+          const textColor = getLineColor(line);
+          
+          // Text shadow for readability
+          ctx.fillStyle = "rgba(0, 0, 0, 0.9)";
+          ctx.fillText(line, centerX + 1, y + 1);
+          // Main text with appropriate color
+          ctx.fillStyle = textColor;
+          ctx.fillText(line, centerX, y);
+        });
+        
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.needsUpdate = true;
+        // Use linear filtering - high DPI canvas ensures sharp text when scaled
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        texture.generateMipmaps = false;
+        
+        const spriteMaterial = new THREE.SpriteMaterial({ 
+          map: texture,
+          depthTest: false, // Always render on top
+          depthWrite: false
+        });
+        const sprite = new THREE.Sprite(spriteMaterial);
+        sprite.position.copy(position.clone().multiplyScalar(1.15)); // Slightly offset from neuron
+        sprite.scale.set(0.4, 0.4, 1); // Larger scale for better readability
+        sprite.renderOrder = 999; // Render on top
+        sprite.userData.isLabel = true;
+        return sprite;
+      }
+
+      function addLabel(text, position) {
+        const canvas = document.createElement("canvas");
+        canvas.width = 128;
+        canvas.height = 64;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "white";
+        ctx.font = "bold 48px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, 64, 32);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        const spriteMat = new THREE.SpriteMaterial({
+          map: texture,
+          transparent: true,
+          depthTest: false,
+          depthWrite: false
+        });
+        const sprite = new THREE.Sprite(spriteMat);
+        sprite.position.copy(position);
+        sprite.scale.set(0.5, 0.25, 1);
+        sprite.renderOrder = 100; // Lower render order so neuron labels appear on top
+        scene.add(sprite);
+      }
+
+      function setConfigLocked(locked) {
+        const configInputs = document.querySelectorAll("#model-config select, #model-config input[type='range']");
+        configInputs.forEach(input => {
+          input.disabled = locked;
+          input.style.opacity = locked ? "0.5" : "1";
+          input.style.cursor = locked ? "not-allowed" : "pointer";
+        });
+      }
+
+      // Helper function to stop training and remove convergence animation
+      function stopTraining() {
+        isTraining = false;
+        const btn = document.getElementById("train-btn");
+        btn.textContent = "▶ TRAIN";
+        btn.classList.remove("training");
+        // Always remove convergence animation when training stops
+        const zone = document.getElementById("convergence-zone");
+        if (zone) {
+          zone.classList.remove("convergence-active");
+        }
+      }
+
+      async function toggleTraining() {
+        isTraining = !isTraining;
+        const btn = document.getElementById("train-btn");
+        btn.textContent = isTraining ? "⏸ PAUSE" : "▶ TRAIN";
+        btn.classList.toggle("training", isTraining);
+
+        setConfigLocked(isTraining);
+
+        // Remove convergence animation when training is paused
+        if (!isTraining) {
+          const zone = document.getElementById("convergence-zone");
+          if (zone) {
+            zone.classList.remove("convergence-active");
+          }
+        }
+
+        if (isTraining) {
+          log(`Training started (${model.modelType})...`, true);
+          trainLoop();
+        } else {
+          log(`Training paused at E${epoch}`, true);
+        }
+      }
+
+      async function trainLoop() {
+        while (isTraining) {
+          await step();
+          await new Promise((r) => requestAnimationFrame(r));
+        }
+        
+        // Unlock config when training stops (for any reason)
+        setConfigLocked(false);
+        
+        // Remove convergence animation when training stops
+        const zone = document.getElementById("convergence-zone");
+        if (zone) {
+          zone.classList.remove("convergence-active");
+        }
+      }
+
+      async function step() {
+        const lockStr = parseFloat(
+          document.getElementById("lock-strength").value
+        );
+
+        const taskName = document.getElementById("task").value;
+        const isMultiClass = taskName === "ascii_decoder";
+
+        // Delayed locking: only apply lock loss after specified threshold
+        const delayThreshold = parseInt(document.getElementById("lock-delay").value);
+        const actualLockStr = epoch < delayThreshold ? 0.0 : lockStr;
+
+        optimizer.minimize(
+          () => {
+            const { total } = model.loss(trainData.x, trainData.y, actualLockStr);
+            return total;
+          },
+          true,
+          model.getWeights()
+        );
+
+        const metrics = model.loss(testData.x, testData.y, actualLockStr);
+        
+        // Calculate accuracy based on task type
+        let acc;
+        if (isMultiClass) {
+          // For multi-class (ASCII), get class indices from logits
+          acc = tf.tidy(() => {
+            const logits = model.forward(testData.x);
+            const pred = tf.argMax(logits, 1); // [batch] - class indices
+            const yTrue = tf.argMax(testData.y, 1); // [batch] - class indices from one-hot
+            return tf.mean(tf.cast(tf.equal(pred, yTrue), "float32"));
+          });
+        } else {
+          // For binary classification
+          acc = tf.tidy(() => {
+            const pred = model.predict(testData.x);
+            return tf.mean(tf.cast(tf.equal(pred, testData.y), "float32"));
+          });
+        }
+
+        const accuracy = acc.dataSync()[0];
+        const taskLoss = metrics.task.dataSync()[0];
+        const lockLoss = metrics.lock.dataSync()[0];
+        const totalLoss = metrics.total.dataSync()[0];
+
+        // Calculate accuracy delta
+        const delta = hist.acc.length > 0 ? accuracy - hist.acc[hist.acc.length - 1] : 0;
+
+        // Get phase statistics
+        const phases = await model.getPhaseArray();
+        let phaseMean = 0, phaseStd = 0, phaseMin = 0, phaseMax = 0;
+        if (phases && phases[0]) {
+          const phaseArray = phases[0];
+          const sum = phaseArray.reduce((a, b) => a + b, 0);
+          phaseMean = sum / phaseArray.length;
+          const variance = phaseArray.reduce((a, b) => a + Math.pow(b - phaseMean, 2), 0) / phaseArray.length;
+          phaseStd = Math.sqrt(variance);
+          phaseMin = Math.min(...phaseArray);
+          phaseMax = Math.max(...phaseArray);
+          
+          updateHistory(phaseArray);
+          phaseHistory.push(phaseArray.slice());
+        }
+
+        // Count active/locked neurons
+        let activeCount = 0, lockedCount = 0;
+        if (phases && phases[0]) {
+          phases[0].forEach(phi => {
+            const lockingStrength = Math.sin(phi / 2) ** 2;
+            if (lockingStrength < 0.1) {
+              lockedCount++;
+            } else {
+              activeCount++;
+            }
+          });
+        }
+
+        // Track comprehensive history
+        hist.acc.push(accuracy);
+        hist.task.push(taskLoss);
+        hist.lock.push(lockLoss);
+        hist.total.push(totalLoss);
+        hist.delta.push(delta);
+        hist.phaseMean.push(phaseMean);
+        hist.phaseStd.push(phaseStd);
+        hist.phaseMin.push(phaseMin);
+        hist.phaseMax.push(phaseMax);
+        hist.activeNeurons.push(activeCount);
+        hist.lockedNeurons.push(lockedCount);
+        
+        // Confidence tracking (for UIT models)
+        if (model.modelType === 'uit_v1.0' && model.layer && model.layer.confidence) {
+          // UIT models have confidence - would need to expose it
+          hist.confidence.push(0); // Placeholder
+        } else {
+          hist.confidence.push(0);
+        }
+        
+        // Track convergence (1 if converged at this epoch, 0 otherwise)
+        hist.converged.push(accuracy >= 0.99 ? 1 : 0);
+
+        epoch++;
+
+        // Update minimap/epoch tracking
+        if (timelineMode === "live") {
+          currentTimelineEpoch = epoch - 1;
+          // Update epoch display
+          const epochDisplay = document.getElementById("timeline-epoch-display");
+          if (epochDisplay) {
+            epochDisplay.textContent = `E${currentTimelineEpoch}`;
+          }
+          updateTimelineButtonStates();
+        }
+
+        updateVisuals();
+
+        // Update graph displays
+        document.getElementById("graph-epoch").textContent = epoch;
+        document.getElementById("graph-acc").textContent = (accuracy * 100).toFixed(2) + "%";
+        document.getElementById("graph-loss").textContent = taskLoss.toFixed(4);
+        document.getElementById("graph-lock").textContent = lockLoss.toFixed(4);
+        
+        // Update lock delay indicator
+        const lockDelayEl = document.getElementById("lock-delay-indicator");
+        if (lockDelayEl) {
+          if (epoch < delayThreshold) {
+            lockDelayEl.textContent = `(delayed: ${epoch}/${delayThreshold})`;
+            lockDelayEl.style.color = "#ffaa44";
+          } else {
+            lockDelayEl.textContent = "(active)";
+            lockDelayEl.style.color = "var(--accent)";
+          }
+        }
+        
+        // Calculate accuracy delta
+        if (hist.acc.length > 1) {
+          const delta = accuracy - hist.acc[hist.acc.length - 2];
+          const deltaStr = (delta >= 0 ? "+" : "") + (delta * 100).toFixed(2) + "%";
+          document.getElementById("graph-delta").textContent = deltaStr;
+          document.getElementById("graph-delta").style.color = delta >= 0 ? "#44ff88" : "#ff4444";
+        }
+
+      if (epoch % 5 === 0) {
+        drawTimelineMinimap();
+        if (accuracy >= 0.99) {
+          log(
+            `E${epoch}: Converged! Acc=${(accuracy * 100).toFixed(1)}%`,
+            true
+          );
+        } else if (epoch % 50 === 0) {
+          log(
+            `E${epoch}: Acc=${(accuracy * 100).toFixed(1)}%, Loss=${taskLoss.toFixed(3)}, Lock=${lockLoss.toFixed(3)}`
+          );
+        }
+      }
+
+      // --- ALWAYS update convergence time if we have true convergence ---
+      if (accuracy >= 0.99) {
+        lastConvergenceTime = Date.now();
+      }
+
+
+      // Check for convergence and animate/stop if enabled
+      if (accuracy >= 0.99) {
+        // Stop if checkbox is checked
+        if (document.getElementById("stop-on-convergence").checked) {
+          stopTraining();
+          log(
+            `Training stopped: Converged at E${epoch} with ${(accuracy * 100).toFixed(2)}% accuracy`,
+            true
+          );
+        }
+      }
+        
+        // Highlight convergence zone: ONLY animate if training is active, convergence happened in last second AND stop-on-convergence is NOT checked
+        const now = Date.now();
+        const zone = document.getElementById("convergence-zone");
+        const stopOnChecked = document.getElementById("stop-on-convergence").checked;
+        if (isTraining && !stopOnChecked && now - lastConvergenceTime < 1000) {
+          if (!zone.classList.contains("convergence-active")) {
+            zone.classList.add("convergence-active");
+          }
+        } else {
+          zone.classList.remove("convergence-active");
+        }
+
+        acc.dispose();
+        metrics.task.dispose();
+        metrics.lock.dispose();
+        metrics.total.dispose();
+      }
+
+      async function reset() {
+        stopTraining();
+        setConfigLocked(false);
+
+        // Save current state as checkpoint if there's training data
+        if (epoch > 0 || hist.acc.length > 0) {
+          try {
+            const config = {
+              model: document.getElementById("model-select").value,
+              task: document.getElementById("task").value,
+              hidden: parseInt(document.getElementById("hidden").value),
+              lock: parseFloat(document.getElementById("lock-strength").value),
+              lockDelay: parseInt(document.getElementById("lock-delay").value),
+              lr: currentLR,
+              spinor: true,
+            };
+
+            // Add UIT-specific params
+            if (config.model === "uit_v1.0") {
+              config.harmonics = JSON.parse(document.getElementById("harmonics-select").value);
+              config.quantization = parseFloat(document.getElementById("quantization").value);
+              config.spinMultiplier = 2.0;
+              config.useBinaryAlignment = document.getElementById("binary-alignment").value === "true";
+            }
+
+            const weights = await model.exportWeights();
+
+            const checkpoint = {
+              id: nextCheckpointId++,
+              timestamp: new Date().toISOString(),
+              epoch: epoch,
+              accuracy: hist.acc.length > 0 ? hist.acc[hist.acc.length - 1] : 0,
+              config: config,
+              weights: weights,
+              history: {
+                acc: hist.acc.slice(),
+                task: hist.task.slice(),
+                lock: hist.lock.slice(),
+              },
+              phaseHistory: phaseHistory.slice(-trailLength),
+            };
+
+            checkpoints.push(checkpoint);
+            updateCheckpointList();
+            log(
+              `Auto-saved checkpoint ${checkpoint.id} before reset (E${epoch}, Acc=${(checkpoint.accuracy * 100).toFixed(1)}%)`,
+              true
+            );
+          } catch (err) {
+            log(`Warning: Could not save checkpoint before reset: ${err.message}`, true);
+          }
+        }
+
+        log("Resetting model...", true);
+
+        // Reset all metrics and history
+        Object.keys(hist).forEach(key => {
+          hist[key] = [];
+        });
+        epoch = 0;
+        phaseHistory = [];
+        lastConvergenceTime = 0;
+        currentTimelineEpoch = 0;
+        timelineMode = "live";
+
+        // Clear neuron trails and selections
+        neuronTrails.forEach((trail) => (trail.length = 0));
+        selectedNeurons.clear();
+
+        // Reset all display elements to epoch 0
+        document.getElementById("graph-epoch").textContent = 0;
+        document.getElementById("graph-acc").textContent = "0.00%";
+        document.getElementById("graph-loss").textContent = "0.0000";
+        document.getElementById("graph-lock").textContent = "0.0000";
+        document.getElementById("active-neurons").textContent = "0";
+        document.getElementById("locked-neurons").textContent = "0";
+        document.getElementById("graph-delta").textContent = "0.00%";
+        document.getElementById("graph-delta").style.color = "";
+        const epochDisplay = document.getElementById("timeline-epoch-display");
+        if (epochDisplay) {
+          epochDisplay.textContent = "E0";
+        }
+        updateTimelineButtonStates();
+
+        // Clear convergence info and animation
+        const convergenceInfo = document.getElementById("convergence-info");
+        if (convergenceInfo) {
+          convergenceInfo.style.display = "none";
+          convergenceInfo.textContent = "";
+        }
+        const convergenceZone = document.getElementById("convergence-zone");
+        if (convergenceZone) {
+          convergenceZone.classList.remove("convergence-active");
+        }
+
+        // Re-initialize model (this sets up epoch 0 with initial phases)
+        await init();
+
+        // Update visualizations to show epoch 0
+        currentTimelineEpoch = 0;
+        timelineMode = "live";
+        drawTimelineMinimap();
+        updateVisuals();
+      }
+
+      function updateHistory(phases) {
+        phases.forEach((phi, i) => {
+          const locking = Math.sin(phi / 2) ** 2;
+          const theta = locking * Math.PI;
+
+          neuronTrails[i].push({ theta, phi });
+          if (neuronTrails[i].length > trailLength) neuronTrails[i].shift();
+        });
+      }
+
+      function updateVisuals() {
+        update3D();
+        updateSquareCanvas();
+        updatePolarCanvas();
+        updateStats();
+      }
+
+      function getPosition(theta, phi) {
+        const r = 1.0;
+        const y = r * Math.cos(theta);
+        const x = r * Math.sin(theta) * Math.cos(phi);
+        const z = r * Math.sin(theta) * Math.sin(phi);
+        return new THREE.Vector3(x, y, z);
+      }
+
+      function slerp(v1, v2, t) {
+        const dot = v1.dot(v2);
+        const clampedDot = Math.max(-1, Math.min(1, dot));
+        const omega = Math.acos(clampedDot);
+
+        if (Math.abs(omega) < 0.001) {
+          return v1.clone().lerp(v2, t);
+        }
+
+        const sinOmega = Math.sin(omega);
+        const a = Math.sin((1 - t) * omega) / sinOmega;
+        const b = Math.sin(t * omega) / sinOmega;
+
+        return v1.clone().multiplyScalar(a).add(v2.clone().multiplyScalar(b));
+      }
+
+      function update3D() {
+        phasePoints.forEach((p) => scene.remove(p));
+        phasePoints = [];
+        trailObjects.forEach((t) => scene.remove(t));
+        trailObjects = [];
+        // Remove old labels
+        neuronLabels.forEach((label) => scene.remove(label));
+        neuronLabels = [];
+        neuronObjects = [];
+
+        neuronTrails.forEach((history, i) => {
+          if (history.length === 0) return;
+          const color = neuronColors[i % neuronColors.length];
+
+          const current = history[history.length - 1];
+          const pos = getPosition(current.theta, current.phi);
+
+          // Neuron dot - larger and with glow
+          const dotGeo = new THREE.SphereGeometry(0.05, currentSettings.dotRes, currentSettings.dotRes);
+          const dotMat = new THREE.MeshBasicMaterial({ color: color });
+          const dot = new THREE.Mesh(dotGeo, dotMat);
+          dot.position.copy(pos);
+          dot.userData.neuronIndex = i; // Store index for raycasting
+          scene.add(dot);
+          phasePoints.push(dot);
+          neuronObjects.push(dot); // Store reference for selection
+
+          // Selection ring for selected neurons
+          if (selectedNeurons.has(i)) {
+            const ringGeo = new THREE.RingGeometry(0.06, 0.08, currentSettings.ringRes);
+            const ringMat = new THREE.MeshBasicMaterial({
+              color: 0xffffff,
+              side: THREE.DoubleSide,
+              transparent: true,
+              opacity: 0.8
+            });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.position.copy(pos);
+            ring.userData.isSelectionRing = true;
+            ring.lookAt(camera.position); // Face camera
+            scene.add(ring);
+            phasePoints.push(ring);
+
+            // Label showing neuron values
+            const locking = Math.sin(current.phi / 2) ** 2;
+            const theta = locking * Math.PI;
+            const labelText = `N${i}\nθ:${theta.toFixed(4)}\nφ:${current.phi.toFixed(4)}\nL:${locking.toFixed(4)}`;
+            const label = createNeuronLabel(labelText, pos, color);
+            scene.add(label);
+            neuronLabels.push(label);
+          }
+
+          // State vector line
+          const lineGeo = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(0, 0, 0),
+            pos,
+          ]);
+          const lineMat = new THREE.LineBasicMaterial({
+            color: color,
+            transparent: true,
+            opacity: 0.6,
+            linewidth: 2,
+          });
+          const line = new THREE.Line(lineGeo, lineMat);
+          scene.add(line);
+          phasePoints.push(line);
+
+          // Trail rendering (only last step)
+          if (history.length > 1) {
+            const slerpPoints = [];
+            const segmentsPerStep = currentSettings.trailSegments;
+
+            // Only render trail for the last step (last 2 points)
+            const lastIndex = history.length - 1;
+            const p1 = getPosition(
+              history[lastIndex - 1].theta,
+              history[lastIndex - 1].phi
+            ).normalize();
+            const p2 = getPosition(
+              history[lastIndex].theta,
+              history[lastIndex].phi
+            ).normalize();
+
+            for (let k = 0; k < segmentsPerStep; k++) {
+              const t = k / segmentsPerStep;
+              const interpolated = slerp(p1, p2, t);
+              slerpPoints.push(interpolated.clone().multiplyScalar(1.01)); // Slightly above sphere surface
+            }
+            slerpPoints.push(
+              getPosition(
+                history[lastIndex].theta,
+                history[lastIndex].phi
+              ).multiplyScalar(1.01)
+            );
+
+            // Use TubeGeometry for thicker trail (linewidth is not respected on most platforms)
+            const curve = new THREE.CatmullRomCurve3(slerpPoints);
+            const trailGeo = new THREE.TubeGeometry(curve, slerpPoints.length, 0.015, 8, false);
+            const trailMat = new THREE.MeshBasicMaterial({
+              color: color,
+              transparent: true,
+              opacity: 0.3
+            });
+            const trail = new THREE.Mesh(trailGeo, trailMat);
+            scene.add(trail);
+            trailObjects.push(trail);
+          }
+        });
+      }
+
+      function updateSquareCanvas() {
+        const w = squareCtx.canvas.width;
+        const h = squareCtx.canvas.height;
+        squareCtx.clearRect(0, 0, w, h);
+
+        squareCtx.strokeStyle = "#333";
+        squareCtx.beginPath();
+        for (let i = 0; i <= 4; i++) {
+          let x = i * (w / 4);
+          squareCtx.moveTo(x, 0);
+          squareCtx.lineTo(x, h);
+          let y = i * (h / 4);
+          squareCtx.moveTo(0, y);
+          squareCtx.lineTo(w, y);
+        }
+        squareCtx.stroke();
+
+        neuronTrails.forEach((history, i) => {
+          if (history.length === 0) return;
+          const color =
+            "#" +
+            neuronColors[i % neuronColors.length].toString(16).padStart(6, "0");
+
+          squareCtx.strokeStyle = color;
+          squareCtx.fillStyle = color;
+          squareCtx.lineWidth = 2;
+
+          // Only draw trail for last step (last 2 points)
+          // Interpolate phi values and calculate theta from phi using the locking formula
+          if (history.length > 1) {
+            squareCtx.globalAlpha = 0.5;
+            const lastIndex = history.length - 1;
+            const prevPt = history[lastIndex - 1];
+            const currPt = history[lastIndex];
+            
+            // Normalize phi values to [0, 2π)
+            let phi1 = prevPt.phi % (2 * Math.PI);
+            if (phi1 < 0) phi1 += 2 * Math.PI;
+            let phi2 = currPt.phi % (2 * Math.PI);
+            if (phi2 < 0) phi2 += 2 * Math.PI;
+            
+            // Find shortest path for phi (handle wrap-around)
+            let deltaPhi = phi2 - phi1;
+            if (deltaPhi > Math.PI) {
+              deltaPhi -= 2 * Math.PI;
+            } else if (deltaPhi < -Math.PI) {
+              deltaPhi += 2 * Math.PI;
+            }
+            
+            const segmentsPerStep = currentSettings.trailSegments;
+            squareCtx.beginPath();
+            
+            for (let k = 0; k <= segmentsPerStep; k++) {
+              const t = k / segmentsPerStep;
+              // Interpolate phi along shortest path
+              let phi = phi1 + deltaPhi * t;
+              // Normalize phi to [0, 2π)
+              phi = phi % (2 * Math.PI);
+              if (phi < 0) phi += 2 * Math.PI;
+              
+              // Calculate theta from phi using locking formula: theta = sin(phi/2)^2 * π
+              const locking = Math.sin(phi / 2) ** 2;
+              const theta = locking * Math.PI;
+              
+              // Use getPosition to get the 3D position (for consistency)
+              const pos = getPosition(theta, phi);
+              
+              // Project to canvas coordinates
+              const x = (phi / (2 * Math.PI)) * w;
+              const y = (theta / Math.PI) * h;
+              
+              if (k === 0) {
+                squareCtx.moveTo(x, y);
+              } else {
+                // Check if we crossed the wrap boundary
+                const prevT = (k - 1) / segmentsPerStep;
+                let prevPhi = phi1 + deltaPhi * prevT;
+                prevPhi = prevPhi % (2 * Math.PI);
+                if (prevPhi < 0) prevPhi += 2 * Math.PI;
+                const prevX = (prevPhi / (2 * Math.PI)) * w;
+                
+                // If we crossed the wrap boundary (x difference > half width), break the path
+                const dx = Math.abs(x - prevX);
+                if (dx > w / 2) {
+                  // Draw to edge, then start new segment from opposite edge
+                  if (prevX > x) {
+                    // Wrapped right to left
+                    squareCtx.lineTo(w, y);
+                    squareCtx.moveTo(0, y);
+                  } else {
+                    // Wrapped left to right
+                    squareCtx.lineTo(0, y);
+                    squareCtx.moveTo(w, y);
+                  }
+                }
+                squareCtx.lineTo(x, y);
+              }
+            }
+            squareCtx.stroke();
+          }
+
+          squareCtx.globalAlpha = 1.0;
+          const last = history[history.length - 1];
+          let phiNorm = last.phi % (2 * Math.PI);
+          if (phiNorm < 0) phiNorm += 2 * Math.PI;
+          squareCtx.beginPath();
+          squareCtx.arc(
+            (phiNorm / (2 * Math.PI)) * w,
+            (last.theta / Math.PI) * h,
+            4,
+            0,
+            2 * Math.PI
+          );
+          squareCtx.fill();
+        });
+      }
+
+      function updatePolarCanvas() {
+        const w = polarCtx.canvas.width;
+        const h = polarCtx.canvas.height;
+        const cx = w / 2,
+          cy = h / 2;
+        const maxR = w / 2 - 10;
+
+        polarCtx.clearRect(0, 0, w, h);
+
+        polarCtx.strokeStyle = "#333";
+        polarCtx.beginPath();
+        for (let i = 1; i <= 4; i++) {
+          polarCtx.moveTo(cx + i * (maxR / 4), cy);
+          polarCtx.arc(cx, cy, i * (maxR / 4), 0, 2 * Math.PI);
+        }
+        for (let i = 0; i < 8; i++) {
+          const ang = i * (Math.PI / 4);
+          polarCtx.moveTo(cx, cy);
+          polarCtx.lineTo(cx + Math.cos(ang) * maxR, cy + Math.sin(ang) * maxR);
+        }
+        polarCtx.stroke();
+
+        neuronTrails.forEach((history, i) => {
+          if (history.length === 0) return;
+          const color =
+            "#" +
+            neuronColors[i % neuronColors.length].toString(16).padStart(6, "0");
+
+          polarCtx.strokeStyle = color;
+          polarCtx.fillStyle = color;
+          polarCtx.lineWidth = 2;
+
+          // Only draw trail for last step (last 2 points)
+          // Interpolate phi values and calculate theta from phi using the locking formula
+          if (history.length > 1) {
+            polarCtx.globalAlpha = 0.5;
+            const lastIndex = history.length - 1;
+            const prevPt = history[lastIndex - 1];
+            const currPt = history[lastIndex];
+            
+            // Normalize phi values to [0, 2π)
+            let phi1 = prevPt.phi % (2 * Math.PI);
+            if (phi1 < 0) phi1 += 2 * Math.PI;
+            let phi2 = currPt.phi % (2 * Math.PI);
+            if (phi2 < 0) phi2 += 2 * Math.PI;
+            
+            // Find shortest path for phi (handle wrap-around)
+            let deltaPhi = phi2 - phi1;
+            if (deltaPhi > Math.PI) {
+              deltaPhi -= 2 * Math.PI;
+            } else if (deltaPhi < -Math.PI) {
+              deltaPhi += 2 * Math.PI;
+            }
+            
+            const segmentsPerStep = currentSettings.trailSegments;
+            polarCtx.beginPath();
+            
+            for (let k = 0; k <= segmentsPerStep; k++) {
+              const t = k / segmentsPerStep;
+              // Interpolate phi along shortest path
+              let phi = phi1 + deltaPhi * t;
+              // Normalize phi to [0, 2π)
+              phi = phi % (2 * Math.PI);
+              if (phi < 0) phi += 2 * Math.PI;
+              
+              // Calculate theta from phi using locking formula: theta = sin(phi/2)^2 * π
+              const locking = Math.sin(phi / 2) ** 2;
+              const theta = locking * Math.PI;
+              
+              // Use getPosition to get the 3D position (for consistency)
+              const pos = getPosition(theta, phi);
+              
+              // Project to polar canvas coordinates
+              const r = (theta / Math.PI) * maxR;
+              const x = cx + r * Math.cos(phi);
+              const y = cy + r * Math.sin(phi);
+              
+              if (k === 0) {
+                polarCtx.moveTo(x, y);
+              } else {
+                polarCtx.lineTo(x, y);
+              }
+            }
+            polarCtx.stroke();
+          }
+
+          polarCtx.globalAlpha = 1.0;
+          const last = history[history.length - 1];
+          const r = (last.theta / Math.PI) * maxR;
+          const x = cx + r * Math.cos(last.phi);
+          const y = cy + r * Math.sin(last.phi);
+
+          polarCtx.beginPath();
+          polarCtx.arc(x, y, 4, 0, 2 * Math.PI);
+          polarCtx.fill();
+        });
+      }
+
+      function updateStats() {
+        let active = 0, locked = 0;
+        neuronTrails.forEach((history) => {
+          if (history.length > 0) {
+            const last = history[history.length - 1];
+            const lockingStrength = Math.sin(last.phi / 2) ** 2;
+            if (lockingStrength < 0.1) {
+              locked++;
+            } else {
+              active++;
+            }
+          }
+        });
+        document.getElementById("active-neurons").textContent = active;
+        document.getElementById("locked-neurons").textContent = locked;
+      }
+
+      function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        sphere.rotation.y += 0.001;
+        
+        // Update selection rings to face camera
+        phasePoints.forEach((obj) => {
+          if (obj.userData && obj.userData.isSelectionRing) {
+            obj.lookAt(camera.position);
+          }
+        });
+        
+        renderer.render(scene, camera);
+      }
+
+      window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      // Training history for graph
+      // Expanded history tracking - all properties accessible per epoch
+      let hist = { 
+        acc: [],           // Test accuracy
+        task: [],          // Task loss
+        lock: [],          // Lock loss
+        total: [],         // Total loss
+        trainAcc: [],      // Train accuracy (if computed)
+        trainLoss: [],     // Train loss (if computed)
+        delta: [],         // Accuracy delta (change from previous epoch)
+        phaseMean: [],     // Mean phase value
+        phaseStd: [],      // Phase standard deviation
+        phaseMin: [],      // Min phase value
+        phaseMax: [],      // Max phase value
+        confidence: [],    // Confidence (for UIT models)
+        activeNeurons: [], // Count of active neurons
+        lockedNeurons: [], // Count of locked neurons
+        converged: []     // Convergence indicator (1 if converged at epoch, 0 otherwise)
+      };
+      
+      // Plot configuration
+      let plotConfig = {
+        curves: {
+          acc: { enabled: true, color: '#ff4444', label: 'Accuracy' },
+          task: { enabled: true, color: '#44ff88', label: 'Task Loss' },
+          lock: { enabled: true, color: '#ffaa44', label: 'Lock Loss' },
+          total: { enabled: false, color: '#44aaff', label: 'Total Loss' },
+          delta: { enabled: false, color: '#ffff44', label: 'Δ Accuracy' },
+          phaseMean: { enabled: false, color: '#ff44ff', label: 'Phase Mean' },
+          phaseStd: { enabled: false, color: '#44ffff', label: 'Phase Std' },
+          converged: { enabled: false, color: '#33cc66', label: 'Converged' }
+        },
+        expressions: [] // Array of {expr: string, color: string, enabled: boolean}
+      };
+
+      function log(msg, important = false) {
+        const logContent = document.getElementById("log-content");
+        const entry = document.createElement("div");
+        entry.style.margin = "2px 0";
+        entry.style.color = important ? "var(--text)" : "var(--dim)";
+        entry.style.fontWeight = important ? "600" : "normal";
+        entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        logContent.appendChild(entry);
+        logContent.scrollTop = logContent.scrollHeight;
+      }
+
+      function updateConvergenceInfo() {
+        const info = document.getElementById("convergence-info");
+        info.style.display = "none";
+      }
+
+      // Toggle plot config visibility
+      function togglePlotConfig() {
+        const controls = document.getElementById("plot-controls");
+        const indicator = document.getElementById("plot-config-indicator");
+        if (controls.style.display === 'none') {
+          controls.style.display = 'block';
+          indicator.textContent = '▲';
+        } else {
+          controls.style.display = 'none';
+          indicator.textContent = '▼';
+        }
+      }
+
+      // Initialize plot controls UI
+      function initPlotControls() {
+        const container = document.getElementById("curve-toggles");
+        if (!container) return;
+        
+        container.innerHTML = "";
+        Object.keys(plotConfig.curves).forEach(key => {
+          const curve = plotConfig.curves[key];
+          const checkbox = document.createElement("label");
+          checkbox.style.cssText = "display: flex; align-items: center; gap: 4px; cursor: pointer; user-select: none;";
+          checkbox.innerHTML = `
+            <input type="checkbox" ${curve.enabled ? 'checked' : ''} 
+              onchange="plotConfig.curves['${key}'].enabled = this.checked; drawTimelineMinimap();"
+              style="cursor: pointer;">
+            <span style="color: ${curve.color}; font-weight: 600;">●</span>
+            <span style="color: var(--text);">${curve.label}</span>
+          `;
+          container.appendChild(checkbox);
+        });
+        updateExpressionList();
+      }
+
+      // Expression evaluator - safe evaluation with variable access
+      function evaluateExpression(expr, epochIndex) {
+        if (!expr || epochIndex < 0 || epochIndex >= hist.acc.length) return null;
+        
+        try {
+          // Create safe context with epoch-accessible variables
+          const ctx = {
+            epoch: epochIndex,
+            acc: hist.acc[epochIndex] || 0,
+            task: hist.task[epochIndex] || 0,
+            lock: hist.lock[epochIndex] || 0,
+            total: hist.total[epochIndex] || 0,
+            delta: hist.delta[epochIndex] || 0,
+            phaseMean: hist.phaseMean[epochIndex] || 0,
+            phaseStd: hist.phaseStd[epochIndex] || 0,
+            phaseMin: hist.phaseMin[epochIndex] || 0,
+            phaseMax: hist.phaseMax[epochIndex] || 0,
+            activeNeurons: hist.activeNeurons[epochIndex] || 0,
+            lockedNeurons: hist.lockedNeurons[epochIndex] || 0,
+            confidence: hist.confidence[epochIndex] || 0,
+            // Math functions (available directly)
+            abs: Math.abs,
+            sin: Math.sin,
+            cos: Math.cos,
+            tan: Math.tan,
+            sqrt: Math.sqrt,
+            pow: Math.pow,
+            exp: Math.exp,
+            log: Math.log,
+            min: Math.min,
+            max: Math.max,
+            round: Math.round,
+            floor: Math.floor,
+            ceil: Math.ceil,
+            PI: Math.PI
+          };
+          
+          // Replace variable names in expression with ctx.variable
+          // Match word boundaries to avoid partial matches, but exclude Math.xxx
+          let safeExpr = expr.replace(/\b(acc|task|lock|total|delta|phaseMean|phaseStd|phaseMin|phaseMax|activeNeurons|lockedNeurons|confidence|epoch)\b(?![a-zA-Z])/g, 'ctx.$1');
+          
+          // Evaluate safely - variables are accessed via ctx, Math functions are global
+          const result = Function('ctx', 'Math', `return ${safeExpr}`)(ctx, Math);
+          return typeof result === 'number' && isFinite(result) ? result : null;
+        } catch (err) {
+          console.warn(`Expression evaluation error for "${expr}": ${err.message}`);
+          return null;
+        }
+      }
+
+      // Handle expression input keydown
+      function handleExpressionKeydown(event) {
+        const autocomplete = document.getElementById("expression-autocomplete");
+        const items = autocomplete.querySelectorAll('.autocomplete-item');
+        const selected = autocomplete.querySelector('.autocomplete-item.selected');
+        
+        if (event.key === 'Enter') {
+          if (selected) {
+            event.preventDefault();
+            const input = document.getElementById("plot-expression");
+            const word = selected.dataset.word;
+            const before = input.value.substring(0, input.selectionStart);
+            const after = input.value.substring(input.selectionEnd);
+            const lastWord = before.match(/\w+$/);
+            if (lastWord) {
+              input.value = before.substring(0, before.length - lastWord[0].length) + word + after;
+            } else {
+              input.value = before + word + after;
+            }
+            autocomplete.style.display = 'none';
+            input.focus();
+          } else {
+            addPlotExpression();
+          }
+        } else if (event.key === 'ArrowDown') {
+          event.preventDefault();
+          if (selected) {
+            selected.classList.remove('selected');
+            const next = selected.nextElementSibling || items[0];
+            if (next) next.classList.add('selected');
+          } else if (items[0]) {
+            items[0].classList.add('selected');
+          }
+        } else if (event.key === 'ArrowUp') {
+          event.preventDefault();
+          if (selected) {
+            selected.classList.remove('selected');
+            const prev = selected.previousElementSibling || items[items.length - 1];
+            if (prev) prev.classList.add('selected');
+          } else if (items[items.length - 1]) {
+            items[items.length - 1].classList.add('selected');
+          }
+        } else if (event.key === 'Escape') {
+          autocomplete.style.display = 'none';
+        }
+      }
+
+      // Update expression autocomplete suggestions
+      function updateExpressionAutocomplete(event) {
+        const input = event.target;
+        const value = input.value;
+        const autocomplete = document.getElementById("expression-autocomplete");
+        
+        const variables = ['acc', 'task', 'lock', 'total', 'delta', 'phaseMean', 'phaseStd', 'phaseMin', 'phaseMax', 'activeNeurons', 'lockedNeurons', 'confidence', 'epoch'];
+        const functions = ['abs', 'sin', 'cos', 'tan', 'sqrt', 'pow', 'exp', 'log', 'min', 'max', 'round', 'floor', 'ceil'];
+        const all = [...variables, ...functions];
+        
+        const lastWord = value.substring(0, input.selectionStart).match(/\w+$/);
+        if (!lastWord || lastWord[0].length < 1) {
+          autocomplete.style.display = 'none';
+          return;
+        }
+        
+        const prefix = lastWord[0].toLowerCase();
+        const matches = all.filter(item => item.toLowerCase().startsWith(prefix) && item.toLowerCase() !== prefix);
+        
+        if (matches.length === 0) {
+          autocomplete.style.display = 'none';
+          return;
+        }
+        
+        autocomplete.innerHTML = matches.slice(0, 8).map(word => 
+          `<div class="autocomplete-item" data-word="${word}" style="padding: 4px 8px; cursor: pointer; color: var(--text);" 
+            onmouseenter="this.classList.add('selected')" 
+            onmouseleave="this.classList.remove('selected')"
+            onclick="const input = document.getElementById('plot-expression'); const before = input.value.substring(0, input.selectionStart); const after = input.value.substring(input.selectionEnd); const lastWord = before.match(/\\w+$/); input.value = (lastWord ? before.substring(0, before.length - lastWord[0].length) : before) + '${word}' + after; document.getElementById('expression-autocomplete').style.display = 'none'; input.focus();">
+            <span style="color: var(--accent);">${word}</span>
+          </div>`
+        ).join('');
+        autocomplete.style.display = 'block';
+      }
+
+      // Add custom expression to plot
+      function addPlotExpression() {
+        const input = document.getElementById("plot-expression");
+        const expr = input.value.trim();
+        if (!expr) return;
+        
+        // Generate color
+        const colors = ['#ff44ff', '#44ffff', '#ffff44', '#ff8844', '#8844ff', '#44ff44'];
+        const color = colors[plotConfig.expressions.length % colors.length];
+        
+        plotConfig.expressions.push({
+          expr: expr,
+          color: color,
+          enabled: true
+        });
+        
+        input.value = "";
+        document.getElementById("expression-autocomplete").style.display = 'none';
+        updateExpressionList();
+        drawTimelineMinimap();
+      }
+
+      // Update expression list UI
+      function updateExpressionList() {
+        const container = document.getElementById("expression-list");
+        if (!container) return;
+        
+        if (plotConfig.expressions.length === 0) {
+          container.innerHTML = '<div style="color: var(--dim); font-size: 0.65em;">No custom expressions</div>';
+          return;
+        }
+        
+        container.innerHTML = plotConfig.expressions.map((expr, idx) => `
+          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px; font-size: 0.65em;">
+            <input type="checkbox" ${expr.enabled ? 'checked' : ''} 
+              onchange="plotConfig.expressions[${idx}].enabled = this.checked; drawTimelineMinimap();"
+              style="cursor: pointer;">
+            <span style="color: ${expr.color}; font-weight: 600;">●</span>
+            <span style="color: var(--text); font-family: 'JetBrains Mono', monospace; flex: 1;">${expr.expr}</span>
+            <button onclick="plotConfig.expressions.splice(${idx}, 1); updateExpressionList(); drawTimelineMinimap();" 
+              style="padding: 1px 4px; font-size: 0.7em; background: transparent; border: 1px solid var(--border); color: var(--dim); cursor: pointer;">×</button>
+          </div>
+        `).join("");
+      }
+
+      function drawTimelineMinimap() {
+        const canvas = document.getElementById("timeline-minimap");
+        if (!canvas) return;
+        
+        // Sync canvas resolution to actual display size
+        const rect = canvas.getBoundingClientRect();
+        const dpr = currentSettings.highDpi ? window.devicePixelRatio || 1 : 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        
+        const ctx = canvas.getContext("2d");
+        ctx.scale(dpr, dpr);
+        
+        const w = rect.width;
+        const h = rect.height;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (hist.acc.length < 2) return;
+
+        // Grid lines
+        ctx.strokeStyle = "rgba(255,255,255,0.05)";
+        ctx.lineWidth = 1;
+        for (let i = 1; i < 4; i++) {
+          const y = (i / 4) * h;
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(w, y);
+          ctx.stroke();
+        }
+
+        // --- WINDOWED PAN/POSITION LOGIC ---
+        let N = hist.acc.length;
+        let wSize = Math.floor(w); // px
+        let windowSize = Math.min(N, wSize);
+        let head = Math.max(0, Math.min(currentTimelineEpoch, N - 1));
+        let windowStart = 0;
+        if (N > windowSize) {
+          // Fractional analogy of timeline head:
+          let frac = head / Math.max(1, N - 1);
+          let scroll = Math.round(frac * (N - windowSize));
+          windowStart = Math.max(0, Math.min(scroll, N - windowSize));
+        }
+        // Helper to normalize value to 0-1 range for plotting
+        const normalizeValue = (value, minVal, maxVal) => {
+          if (maxVal === minVal) return 0.5;
+          return Math.max(0, Math.min(1, (value - minVal) / (maxVal - minVal)));
+        };
+
+        // Get value range for a data array
+        const getRange = (data, startIdx, endIdx) => {
+          let min = Infinity, max = -Infinity;
+          for (let i = startIdx; i < endIdx && i < data.length; i++) {
+            if (data[i] != null && isFinite(data[i])) {
+              min = Math.min(min, data[i]);
+              max = Math.max(max, data[i]);
+            }
+          }
+          if (min === Infinity) return { min: 0, max: 1 };
+          // Add padding
+          const padding = (max - min) * 0.1;
+          return { min: Math.max(0, min - padding), max: max + padding };
+        };
+
+        // Draw enabled curves
+        const curveScales = {};
+        Object.keys(plotConfig.curves).forEach(key => {
+          const curve = plotConfig.curves[key];
+          if (!curve.enabled || !hist[key] || hist[key].length === 0) return;
+          
+          const data = hist[key];
+          const range = getRange(data, windowStart, windowStart + windowSize);
+          curveScales[key] = range;
+          
+          ctx.strokeStyle = curve.color;
+          ctx.lineWidth = key === 'acc' ? 2.5 : 2;
+          ctx.globalAlpha = key === 'acc' ? 1.0 : 0.7;
+          ctx.beginPath();
+          
+          for (let j = 0; j < windowSize; ++j) {
+            let i = windowStart + j;
+            if (i >= data.length) break;
+            let x = (j / Math.max(1, windowSize - 1)) * w;
+            let normalized = normalizeValue(data[i], range.min, range.max);
+            let y = h - normalized * h;
+            if (j === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+        });
+        ctx.globalAlpha = 1.0;
+
+        // Draw enabled expressions
+        plotConfig.expressions.forEach(exprConfig => {
+          if (!exprConfig.enabled) return;
+          
+          const values = [];
+          for (let j = 0; j < windowSize; ++j) {
+            let i = windowStart + j;
+            const val = evaluateExpression(exprConfig.expr, i);
+            if (val != null) values.push(val);
+          }
+          
+          if (values.length === 0) return;
+          
+          const range = { min: Math.min(...values), max: Math.max(...values) };
+          if (range.min === range.max) range.max = range.min + 1;
+          
+          ctx.strokeStyle = exprConfig.color;
+          ctx.lineWidth = 2;
+          ctx.globalAlpha = 0.8;
+          ctx.setLineDash([5, 5]); // Dashed for expressions
+          ctx.beginPath();
+          
+          values.forEach((val, j) => {
+            let x = (j / Math.max(1, windowSize - 1)) * w;
+            let normalized = normalizeValue(val, range.min, range.max);
+            let y = h - normalized * h;
+            if (j === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          });
+          ctx.stroke();
+          ctx.setLineDash([]); // Reset
+        });
+        ctx.globalAlpha = 1.0;
+
+        // Draw axis labels
+        ctx.fillStyle = "rgba(255,255,255,0.5)";
+        ctx.font = "10px 'JetBrains Mono', monospace";
+        ctx.fillText("100%", 4, 12);
+        ctx.fillText("50%", 4, h / 2 + 4);
+        ctx.fillText("0%", 4, h - 4);
+
+            // Update cursor position
+            const cursor = document.getElementById("timeline-cursor");
+            if (cursor && hist.acc.length > 0) {
+              let relativeHead = Math.max(0, Math.min(currentTimelineEpoch - windowStart, windowSize - 1));
+              const cursorX = (relativeHead / Math.max(1, windowSize - 1)) * 100;
+              cursor.style.left = cursorX + "%";
+            }
+      }
+
+      // Checkpoint system
+      let checkpoints = [];
+      let nextCheckpointId = 1;
+
+      async function saveCheckpoint() {
+        const config = {
+          model: document.getElementById("model-select").value,
+          task: document.getElementById("task").value,
+          hidden: parseInt(document.getElementById("hidden").value),
+          lock: parseFloat(document.getElementById("lock-strength").value),
+          lockDelay: parseInt(document.getElementById("lock-delay").value),
+          lr: currentLR,
+          spinor: true, // Always true for ROUND models
+        };
+
+        // Add UIT-specific params
+        if (config.model === "uit_v1.0") {
+          config.harmonics = JSON.parse(document.getElementById("harmonics-select").value);
+          config.quantization = parseFloat(document.getElementById("quantization").value);
+          config.spinMultiplier = 2.0;
+          config.useBinaryAlignment = document.getElementById("binary-alignment").value === "true";
+        }
+
+        const weights = await model.exportWeights();
+
+        const checkpoint = {
+          id: nextCheckpointId++,
+          timestamp: new Date().toISOString(),
+          epoch: epoch,
+          accuracy: hist.acc.length > 0 ? hist.acc[hist.acc.length - 1] : 0,
+          config: config,
+          weights: weights,
+          history: {
+            acc: hist.acc.slice(),
+            task: hist.task.slice(),
+            lock: hist.lock.slice(),
+            total: hist.total.slice(),
+            delta: hist.delta.slice(),
+            phaseMean: hist.phaseMean.slice(),
+            phaseStd: hist.phaseStd.slice(),
+            phaseMin: hist.phaseMin.slice(),
+            phaseMax: hist.phaseMax.slice(),
+            activeNeurons: hist.activeNeurons.slice(),
+            lockedNeurons: hist.lockedNeurons.slice(),
+            confidence: hist.confidence.slice(),
+            converged: hist.converged.slice(),
+          },
+          phaseHistory: phaseHistory.slice(-trailLength), // Save last N epochs for trajectory
+        };
+
+        checkpoints.push(checkpoint);
+        updateCheckpointList();
+        log(
+          `Checkpoint ${checkpoint.id} saved (${config.model}, E${epoch}, Acc=${(
+            checkpoint.accuracy * 100
+          ).toFixed(1)}%)`,
+          true
+        );
+        return checkpoint;
+      }
+
+      function updateCheckpointList() {
+        const list = document.getElementById("checkpoint-list");
+        list.innerHTML = "";
+
+        if (checkpoints.length === 0) {
+          list.innerHTML =
+            '<div style="color: var(--dim); font-size: 0.9em; padding: 8px;">No checkpoints</div>';
+          return;
+        }
+
+        checkpoints.reverse().forEach((cp) => {
+          const item = document.createElement("div");
+          item.style.cssText =
+            "padding: 8px; margin: 4px 0; background: rgba(255,255,255,0.05); border-radius: 3px; cursor: pointer; border: 1px solid transparent;";
+          item.innerHTML = `
+              <div style="font-weight: 600; color: var(--accent);">CP #${
+                cp.id
+              }</div>
+              <div style="font-size: 0.85em; margin-top: 2px;">E${
+                cp.epoch
+              } | Acc: ${(cp.accuracy * 100).toFixed(1)}%</div>
+              <div style="font-size: 0.75em; color: var(--dim); margin-top: 2px;">${new Date(
+                cp.timestamp
+              ).toLocaleTimeString()}</div>
+            `;
+          item.onmouseenter = () => (item.style.borderColor = "var(--accent)");
+          item.onmouseleave = () => (item.style.borderColor = "transparent");
+          item.onclick = () => loadCheckpoint(cp);
+          list.appendChild(item);
+        });
+        checkpoints.reverse();
+      }
+
+      async function loadCheckpoint(cp) {
+        log(`Loading checkpoint ${cp.id} (${cp.config.model})...`, true);
+
+        // Restore UI configuration
+        document.getElementById("model-select").value = cp.config.model;
+        document.getElementById("task").value = cp.config.task;
+        document.getElementById("hidden").value = cp.config.hidden;
+        document.getElementById("hidden-val").textContent = cp.config.hidden;
+        document.getElementById("lock-strength").value = cp.config.lock;
+        document.getElementById("lock-val").textContent = cp.config.lock.toFixed(2);
+        
+        // Restore lock delay if present (default to 500 for old checkpoints)
+        const lockDelay = cp.config.lockDelay !== undefined ? cp.config.lockDelay : 500;
+        document.getElementById("lock-delay").value = lockDelay;
+        document.getElementById("lock-delay-val").textContent = lockDelay;
+
+        // Update LR slider
+        currentLR = cp.config.lr;
+        const power = Math.round(Math.log2(currentLR));
+        document.getElementById("lr-slider").value = power;
+        document.getElementById("lr-display").textContent = power;
+        document.getElementById("lr-val").textContent = currentLR.toFixed(6);
+
+        // Show/hide UIT params based on model
+        const uitParams = document.getElementById("uit-params");
+        if (cp.config.model === "uit_v1.0") {
+          uitParams.style.display = "block";
+          if (cp.config.harmonics) {
+            document.getElementById("harmonics-select").value = JSON.stringify(cp.config.harmonics);
+          }
+          if (cp.config.quantization !== undefined) {
+            document.getElementById("quantization").value = cp.config.quantization;
+            document.getElementById("quant-val").textContent = cp.config.quantization.toFixed(3);
+          }
+          if (cp.config.useBinaryAlignment !== undefined) {
+            document.getElementById("binary-alignment").value = cp.config.useBinaryAlignment.toString();
+          }
+        } else {
+          uitParams.style.display = "none";
+        }
+
+        // Recreate model with exact config
+        const taskConfig = getTaskConfig(cp.config.task);
+        if (model) model.dispose();
+
+        if (cp.config.model === "round_v0.8") {
+          model = new ROUNDModel(taskConfig.inputSize, cp.config.hidden, taskConfig.outputSize, true, 20);
+        } else if (cp.config.model === "uit_v1.0") {
+          model = new UITModel(
+            taskConfig.inputSize,
+            cp.config.hidden,
+            taskConfig.outputSize,
+            cp.config.harmonics || [1, 2, 4, 8],
+            cp.config.spinMultiplier || 2.0,
+            cp.config.useBinaryAlignment || false
+          );
+        } else if (cp.config.model === "gru") {
+          model = new GRUBaseline(taskConfig.inputSize, cp.config.hidden, taskConfig.outputSize);
+        }
+
+        // Restore weights
+        model.importWeights(cp.weights);
+
+        // Restore data
+        const datasets = generateTaskData(cp.config.task);
+        trainData = datasets.train;
+        testData = datasets.test;
+
+        // Restore history (handle old checkpoints that may not have all fields)
+        hist.acc = (cp.history.acc || []).slice();
+        hist.task = (cp.history.task || []).slice();
+        hist.lock = (cp.history.lock || []).slice();
+        hist.total = (cp.history.total || []).slice();
+        hist.delta = (cp.history.delta || []).slice();
+        hist.phaseMean = (cp.history.phaseMean || []).slice();
+        hist.phaseStd = (cp.history.phaseStd || []).slice();
+        hist.phaseMin = (cp.history.phaseMin || []).slice();
+        hist.phaseMax = (cp.history.phaseMax || []).slice();
+        hist.activeNeurons = (cp.history.activeNeurons || []).slice();
+        hist.lockedNeurons = (cp.history.lockedNeurons || []).slice();
+        hist.confidence = (cp.history.confidence || []).slice();
+        hist.converged = (cp.history.converged || []).slice();
+        epoch = cp.epoch;
+
+        // Restore phase history and rebuild trajectories
+        if (cp.phaseHistory && cp.phaseHistory.length > 0) {
+          phaseHistory = cp.phaseHistory.slice();
+          neuronTrails.forEach(trail => trail.length = 0);
+          
+          // Rebuild trajectory from saved phase history
+          phaseHistory.forEach(phases => {
+            if (phases && phases.length > 0) {
+              phases.forEach((phi, i) => {
+                if (i < neuronTrails.length) {
+                  const locking = Math.sin(phi / 2) ** 2;
+                  const theta = locking * Math.PI;
+                  neuronTrails[i].push({ theta, phi });
+                }
+              });
+            }
+          });
+
+          // Trim trails to max length
+          neuronTrails.forEach(trail => {
+            if (trail.length > trailLength) {
+              trail.splice(0, trail.length - trailLength);
+            }
+          });
+        }
+
+        // Restore optimizer
+        if (optimizer) optimizer = null;
+        optimizer = tf.train.adam(cp.config.lr);
+
+        // Update graph displays
+        document.getElementById("graph-epoch").textContent = epoch;
+        document.getElementById("graph-acc").textContent =
+          (cp.accuracy * 100).toFixed(2) + "%";
+        if (hist.task.length > 0) {
+          document.getElementById("graph-loss").textContent =
+            hist.task[hist.task.length - 1].toFixed(4);
+          document.getElementById("graph-lock").textContent =
+            hist.lock[hist.lock.length - 1].toFixed(4);
+        }
+
+        // Update timeline state
+        currentTimelineEpoch = epoch - 1;
+        timelineMode = "live";
+        
+        // Update epoch display
+        const epochDisplay = document.getElementById("timeline-epoch-display");
+        if (epochDisplay) {
+          epochDisplay.textContent = `E${currentTimelineEpoch}`;
+        }
+        updateTimelineButtonStates();
+
+        // Update all visualizations
+        drawTimelineMinimap();
+        updateVisuals();
+
+        log(`Checkpoint ${cp.id} loaded successfully`, true);
+      }
+
+      async function runBenchmark(withTraining = false) {
+        log(`Starting benchmark (${withTraining ? 'with' : 'without'} training)...`, true);
+        
+        const taskName = document.getElementById("task").value;
+        const isMultiClass = taskName === "ascii_decoder";
+        const startEpoch = epoch;
+
+        if (withTraining) {
+          // Train for 100 more epochs
+          log('Training for 100 epochs...', true);
+          isTraining = true;
+          for (let i = 0; i < 100; i++) {
+            await step();
+            if (!isTraining) break; // User interrupted
+          }
+          stopTraining();
+        }
+
+        // Generate fresh test data
+        log('Generating fresh test data...', true);
+        const freshData = generateTaskData(taskName);
+        
+        // Evaluate on fresh test data
+        const pred = model.predict(freshData.test.x);
+        let acc;
+        if (isMultiClass) {
+          acc = tf.tidy(() => {
+            const yTrue = tf.argMax(freshData.test.y, 1);
+            return tf.mean(tf.cast(tf.equal(pred, yTrue), "float32"));
+          });
+        } else {
+          acc = tf.tidy(() =>
+            tf.mean(tf.cast(tf.equal(pred, freshData.test.y), "float32"))
+          );
+        }
+        const accuracy = acc.dataSync()[0];
+        acc.dispose();
+        pred.dispose();
+
+        log(`Benchmark accuracy: ${(accuracy * 100).toFixed(2)}%`, true);
+
+        // Run full validation if applicable
+        if (['xor', 'parity4', 'parity8'].includes(taskName)) {
+          log('Running full validation...', true);
+          await validateFullSpace(taskName);
+        }
+
+        // Generate report
+        const report = {
+          model: model.modelType,
+          task: taskName,
+          accuracy: accuracy,
+          epochsTraining: withTraining ? 100 : 0,
+          totalEpochs: epoch,
+          timestamp: new Date().toISOString(),
+          config: {
+            hidden: model.hiddenSize,
+            lr: currentLR,
+          }
+        };
+
+        log(`Benchmark complete: ${JSON.stringify(report, null, 2)}`, true);
+        
+        // Auto-save checkpoint if accuracy improved
+        if (hist.acc.length > 0 && accuracy > hist.acc[hist.acc.length - 1]) {
+          log('Accuracy improved! Saving checkpoint...', true);
+          await saveCheckpoint();
+        }
+      }
+
+      async function validateFullSpace(taskName) {
+        let totalCorrect = 0;
+        let totalInputs = 0;
+        const errors = [];
+
+        if (taskName === 'xor') {
+          const allInputs = [[0,0], [0,1], [1,0], [1,1]];
+          const allOutputs = [0, 1, 1, 0];
+          
+          for (let i = 0; i < allInputs.length; i++) {
+            const x = tf.tensor2d([allInputs[i]]);
+            const y = tf.tensor2d([[allOutputs[i]]]);
+            const pred = model.predict(x);
+            const predVal = (await pred.arraySync())[0][0];
+            
+            if (predVal === allOutputs[i]) {
+              totalCorrect++;
+            } else {
+              errors.push({ input: allInputs[i], predicted: predVal, actual: allOutputs[i] });
+            }
+            totalInputs++;
+            x.dispose();
+            y.dispose();
+            pred.dispose();
+          }
+        } else if (taskName === 'parity4') {
+          for (let i = 0; i < 16; i++) {
+            const bits = [];
+            let par = 0;
+            for (let j = 0; j < 4; j++) {
+              const b = (i >> j) & 1;
+              bits.push(b);
+              par ^= b;
+            }
+            const x = tf.tensor2d([bits]);
+            const pred = model.predict(x);
+            const predVal = (await pred.arraySync())[0][0];
+            
+            if (predVal === par) {
+              totalCorrect++;
+            } else {
+              errors.push({ input: i, bits, predicted: predVal, actual: par });
+            }
+            totalInputs++;
+            x.dispose();
+            pred.dispose();
+          }
+        } else if (taskName === 'parity8') {
+          for (let i = 0; i < 256; i++) {
+            const bits = [];
+            let par = 0;
+            for (let j = 0; j < 8; j++) {
+              const b = (i >> j) & 1;
+              bits.push(b);
+              par ^= b;
+            }
+            const x = tf.tensor2d([bits]);
+            const pred = model.predict(x);
+            const predVal = (await pred.arraySync())[0][0];
+            
+            if (predVal === par) {
+              totalCorrect++;
+            } else {
+              errors.push({ input: i, bits, predicted: predVal, actual: par });
+            }
+            totalInputs++;
+            x.dispose();
+            pred.dispose();
+          }
+        }
+
+        const finalAcc = ((totalCorrect / totalInputs) * 100).toFixed(4);
+        log(`Full validation: ${finalAcc}% (${totalCorrect}/${totalInputs} correct)`, true);
+        
+        if (errors.length > 0 && errors.length <= 10) {
+          log(`Errors found:`, true);
+          errors.forEach(e => {
+            log(`  Input ${e.input}: pred=${e.predicted}, actual=${e.actual}`);
+          });
+        } else if (errors.length > 10) {
+          log(`  ${errors.length} errors (too many to display)`, true);
+        }
+
+        return { accuracy: finalAcc, correct: totalCorrect, wrong: errors.length };
+      }
+
+      function downloadCheckpoint(cp) {
+        const dataStr = JSON.stringify(cp, null, 2);
+        const blob = new Blob([dataStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `checkpoint_${cp.id}_e${cp.epoch}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      // Convergence zone interactions
+      const convergenceZone = document.getElementById("convergence-zone");
+      const convergenceCheckbox = document.getElementById("stop-on-convergence");
+      
+      convergenceZone.onclick = (e) => {
+        if (e.target !== convergenceCheckbox) {
+          convergenceCheckbox.checked = !convergenceCheckbox.checked;
+        }
+        drawTimelineMinimap();
+        
+        // Highlight zone on click
+        //convergenceZone.style.background = convergenceCheckbox.checked ? "rgba(51,204,102,0.1)" : "rgba(0,0,0,0.2)";
+        //convergenceZone.style.borderColor = convergenceCheckbox.checked ? "var(--accent)" : "var(--border)";
+      };
+      
+      convergenceCheckbox.onchange = () => {
+        drawTimelineMinimap();
+        //convergenceZone.style.background = convergenceCheckbox.checked ? "rgba(51,204,102,0.1)" : "rgba(0,0,0,0.2)";
+        //convergenceZone.style.borderColor = convergenceCheckbox.checked ? "var(--accent)" : "var(--border)";
+      };
+
+      // Config sliders with auto-reinit
+      let configChangeTimeout = null;
+
+      function scheduleReinit() {
+        if (configChangeTimeout) clearTimeout(configChangeTimeout);
+        configChangeTimeout = setTimeout(async () => {
+          if (epoch > 0) {
+            await saveCheckpoint();
+          }
+          init();
+        }, 500); // 500ms debounce
+      }
+
+      document.getElementById("model-select").onchange = () => {
+        const modelType = document.getElementById("model-select").value;
+        const uitParams = document.getElementById("uit-params");
+        if (modelType === "uit_v1.0") {
+          uitParams.style.display = "block";
+        } else {
+          uitParams.style.display = "none";
+        }
+        scheduleReinit();
+      };
+
+      document.getElementById("task").onchange = scheduleReinit;
+
+      document.getElementById("hidden").oninput = (e) => {
+        document.getElementById("hidden-val").textContent = e.target.value;
+        scheduleReinit();
+      };
+
+      document.getElementById("lock-strength").oninput = (e) => {
+        document.getElementById("lock-val").textContent = parseFloat(
+          e.target.value
+        ).toFixed(2);
+      };
+
+      document.getElementById("lock-delay").oninput = (e) => {
+        document.getElementById("lock-delay-val").textContent = e.target.value;
+      };
+
+      // UIT-specific parameter handlers
+      document.getElementById("quantization").oninput = (e) => {
+        document.getElementById("quant-val").textContent = parseFloat(
+          e.target.value
+        ).toFixed(3);
+      };
+
+      document.getElementById("harmonics-select").onchange = scheduleReinit;
+      document.getElementById("binary-alignment").onchange = scheduleReinit;
+
+      // LR slider control
+      let currentLR = 0.03125;
+      const lrSlider = document.getElementById("lr-slider");
+      lrSlider.oninput = () => {
+        const power = parseInt(lrSlider.value);
+        currentLR = Math.pow(2, power);
+        document.getElementById("lr-display").textContent = power;
+        document.getElementById("lr-val").textContent = currentLR.toFixed(6);
+        scheduleReinit();
+      };
+
+      // Load checkpoint from file
+      document.getElementById("load-checkpoint-input").onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          try {
+            const cp = JSON.parse(event.target.result);
+            checkpoints.push(cp);
+            nextCheckpointId = Math.max(nextCheckpointId, cp.id + 1);
+            updateCheckpointList();
+            await loadCheckpoint(cp);
+          } catch (err) {
+            log(`Error loading checkpoint: ${err.message}`, true);
+          }
+        };
+        reader.readAsText(file);
+      };
+
+
+      // Minimap dragging
+      const minimap = document.getElementById("timeline-minimap");
+      let minimapDragging = false;
+
+      // Update timeline navigation button states
+      function updateTimelineButtonStates() {
+        const N = hist.acc.length;
+        const prevBtn = document.getElementById("timeline-prev");
+        const nextBtn = document.getElementById("timeline-next");
+        if (prevBtn) {
+          prevBtn.disabled = currentTimelineEpoch <= 0;
+        }
+        if (nextBtn) {
+          nextBtn.disabled = currentTimelineEpoch >= Math.max(N - 1, 0);
+        }
+      }
+
+      // Navigate to a specific epoch
+      function navigateToEpoch(targetEpoch) {
+        const N = hist.acc.length;
+        if (N < 1) return;
+        
+        // Clamp to valid range
+        targetEpoch = Math.max(0, Math.min(targetEpoch, N - 1));
+        
+        // Determine if we're at the latest epoch
+        const atLatest = targetEpoch >= N - 1;
+        timelineMode = atLatest ? "live" : "scrubbing";
+        currentTimelineEpoch = targetEpoch;
+        
+        // Update metrics display
+        if (targetEpoch >= 0 && targetEpoch < hist.acc.length) {
+          document.getElementById("graph-epoch").textContent = targetEpoch + 1;
+          document.getElementById("graph-acc").textContent = (hist.acc[targetEpoch] * 100).toFixed(2) + "%";
+          document.getElementById("graph-loss").textContent = hist.task[targetEpoch].toFixed(4);
+          document.getElementById("graph-lock").textContent = hist.lock[targetEpoch].toFixed(4);
+        }
+        
+        // Update epoch display
+        const epochDisplay = document.getElementById("timeline-epoch-display");
+        if (epochDisplay) {
+          epochDisplay.textContent = `E${targetEpoch}`;
+        }
+        
+        // Update button states
+        updateTimelineButtonStates();
+        
+        // Rebuild neuron trails from phase history
+        if (targetEpoch >= 0 && targetEpoch < phaseHistory.length) {
+          neuronTrails.forEach((trail) => (trail.length = 0));
+          const startEpoch = Math.max(0, targetEpoch - trailLength);
+          for (let ep = startEpoch; ep <= targetEpoch; ep++) {
+            const phases = phaseHistory[ep];
+            if (phases) {
+              phases.forEach((phi, i) => {
+                if (i < neuronTrails.length) {
+                  const locking = Math.sin(phi / 2) ** 2;
+                  const theta = locking * Math.PI;
+                  neuronTrails[i].push({ theta, phi });
+                }
+              });
+            }
+          }
+          neuronTrails.forEach((trail) => {
+            if (trail.length > trailLength) {
+              trail.splice(0, trail.length - trailLength);
+            }
+          });
+        }
+        
+        // Update visualizations
+        drawTimelineMinimap();
+        updateVisuals();
+      }
+
+      // Navigate to previous epoch
+      function navigateToPreviousEpoch() {
+        if (currentTimelineEpoch > 0) {
+          navigateToEpoch(currentTimelineEpoch - 1);
+        }
+      }
+
+      // Navigate to next epoch
+      function navigateToNextEpoch() {
+        const N = hist.acc.length;
+        if (currentTimelineEpoch < N - 1) {
+          navigateToEpoch(currentTimelineEpoch + 1);
+        }
+      }
+
+      function updateMinimapPosition(e) {
+        const minimap = document.getElementById("timeline-minimap");
+        const rect = minimap.getBoundingClientRect();
+        const N = hist.acc.length;
+        if (N < 1) return;
+        
+        const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+        const w = rect.width;
+        
+        // Calculate windowed view (same logic as drawTimelineMinimap)
+        const wSize = Math.floor(w);
+        const windowSize = Math.min(N, wSize);
+        let windowStart = 0;
+        if (N > windowSize) {
+          // Calculate window start based on current head position
+          const head = Math.max(0, Math.min(currentTimelineEpoch, N - 1));
+          const frac = head / Math.max(1, N - 1);
+          const scroll = Math.round(frac * (N - windowSize));
+          windowStart = Math.max(0, Math.min(scroll, N - windowSize));
+        }
+        
+        // Map mouse X position to epoch within the visible window
+        const pct = x / w;
+        const epochInWindow = Math.round(pct * Math.max(windowSize - 1, 0));
+        const targetEpoch = Math.min(windowStart + epochInWindow, N - 1);
+        
+        // Determine if we're at the latest epoch
+        const sliderMax = N - 1;
+        const atLatest = targetEpoch >= sliderMax;
+        
+        // Use navigateToEpoch to update everything
+        navigateToEpoch(targetEpoch);
+      }
+
+minimap.addEventListener("mousedown", (e) => {
+  minimapDragging = true;
+  document.body.classList.add("dragging");
+  updateMinimapPosition(e);
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (minimapDragging) {
+    updateMinimapPosition(e);
+  }
+});
+
+document.addEventListener("mouseup", () => {
+  if (minimapDragging) {
+    minimapDragging = false;
+    document.body.classList.remove("dragging");
+  }
+});
+
+// Timeline navigation buttons
+const timelinePrevBtn = document.getElementById("timeline-prev");
+const timelineNextBtn = document.getElementById("timeline-next");
+const timelineEpochDisplay = document.getElementById("timeline-epoch-display");
+
+if (timelinePrevBtn) {
+  timelinePrevBtn.addEventListener("click", () => {
+    navigateToPreviousEpoch();
+  });
+}
+
+if (timelineNextBtn) {
+  timelineNextBtn.addEventListener("click", () => {
+    navigateToNextEpoch();
+  });
+}
+
+// Global keyboard navigation (left/right arrows) - only if not typing in an input
+document.addEventListener("keydown", (e) => {
+  // Check if user is typing in an input field
+  const activeElement = document.activeElement;
+  const isTyping = activeElement && (
+    activeElement.tagName === "INPUT" ||
+    activeElement.tagName === "TEXTAREA" ||
+    activeElement.isContentEditable ||
+    activeElement.getAttribute("contenteditable") === "true"
+  );
+  
+  // Only handle arrow keys if not typing
+  if (!isTyping && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
+    // Check if there's any training data to navigate
+    if (hist.acc.length > 0) {
+      e.preventDefault();
+      if (e.key === "ArrowLeft") {
+        navigateToPreviousEpoch();
+      } else if (e.key === "ArrowRight") {
+        navigateToNextEpoch();
+      }
+    }
+  }
+});
+
+      init();
+    </script>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; overflow-y: auto;">
+      <div style="max-width: 600px; margin: 50px auto; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 20px; font-family: 'IBM Plex Sans', sans-serif;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+          <h2 style="margin: 0; color: var(--accent); font-size: 1.2em;">⚙️ Advanced Settings</h2>
+          <button id="settings-close" style="background: transparent; border: none; color: var(--text); font-size: 1.5em; cursor: pointer; padding: 0 10px;">×</button>
+        </div>
+        
+        <div style="max-height: 70vh; overflow-y: auto; padding-right: 10px;">
+          <!-- Presets -->
+          <div style="margin-bottom: 25px;">
+            <h3 style="color: var(--accent); font-size: 0.9em; margin-bottom: 12px; text-transform: uppercase;">Presets</h3>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button id="preset-performance" style="flex: 1; min-width: 100px; padding: 10px; background: rgba(255,68,68,0.1); border: 1px solid rgba(255,68,68,0.3); color: #ff4444; cursor: pointer; border-radius: 5px; font-size: 0.85em; font-weight: 600; transition: all 0.2s;">⚡ Performance</button>
+              <button id="preset-balanced" style="flex: 1; min-width: 100px; padding: 10px; background: rgba(68,255,136,0.1); border: 1px solid rgba(68,255,136,0.3); color: var(--accent); cursor: pointer; border-radius: 5px; font-size: 0.85em; font-weight: 600; transition: all 0.2s;">⚖️ Balanced</button>
+              <button id="preset-quality" style="flex: 1; min-width: 100px; padding: 10px; background: rgba(68,136,255,0.1); border: 1px solid rgba(68,136,255,0.3); color: #4488ff; cursor: pointer; border-radius: 5px; font-size: 0.85em; font-weight: 600; transition: all 0.2s;">✨ Quality</button>
+            </div>
+            <div style="font-size: 0.7em; color: var(--dim); margin-top: 8px;">Quickly apply optimized settings for different use cases</div>
+          </div>
+
+          <!-- Performance Settings -->
+          <div style="margin-bottom: 25px;">
+            <h3 style="color: var(--accent); font-size: 0.9em; margin-bottom: 12px; text-transform: uppercase;">Performance & Graphics</h3>
+            
+            <div style="margin-bottom: 12px;">
+              <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                <span style="font-size: 0.85em;">Antialiasing</span>
+                <input type="checkbox" id="setting-antialias" style="cursor: pointer;">
+              </label>
+              <div style="font-size: 0.7em; color: var(--dim); margin-top: 4px;">Smooth edges in 3D rendering (may impact performance)</div>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+              <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                <span style="font-size: 0.85em;">Backdrop Blur</span>
+                <input type="checkbox" id="setting-backdrop-blur" style="cursor: pointer;">
+              </label>
+              <div style="font-size: 0.7em; color: var(--dim); margin-top: 4px;">Blur effect on UI panels (may impact performance)</div>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+              <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                <span style="font-size: 0.85em;">High DPI Rendering</span>
+                <input type="checkbox" id="setting-high-dpi" style="cursor: pointer;">
+              </label>
+              <div style="font-size: 0.7em; color: var(--dim); margin-top: 4px;">Use device pixel ratio for sharper rendering (may impact performance)</div>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+              <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                <span style="font-size: 0.85em;">Image Smoothing</span>
+                <input type="checkbox" id="setting-image-smoothing" style="cursor: pointer;">
+              </label>
+              <div style="font-size: 0.7em; color: var(--dim); margin-top: 4px;">Smooth text rendering in labels (may impact performance)</div>
+            </div>
+          </div>
+
+          <!-- Geometry Quality -->
+          <div style="margin-bottom: 25px;">
+            <h3 style="color: var(--accent); font-size: 0.9em; margin-bottom: 12px; text-transform: uppercase;">Geometry Quality</h3>
+            
+            <div style="margin-bottom: 12px;">
+              <label style="display: block; margin-bottom: 6px; font-size: 0.85em;">
+                Sphere Resolution: <span id="setting-sphere-res-value">32</span>
+              </label>
+              <input type="range" id="setting-sphere-res" min="16" max="64" step="8" value="32" style="width: 100%;">
+              <div style="font-size: 0.7em; color: var(--dim); margin-top: 4px;">Main Bloch sphere detail (16=low, 64=high)</div>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+              <label style="display: block; margin-bottom: 6px; font-size: 0.85em;">
+                Torus Resolution: <span id="setting-torus-res-value">32</span>
+              </label>
+              <input type="range" id="setting-torus-res" min="16" max="100" step="8" value="32" style="width: 100%;">
+              <div style="font-size: 0.7em; color: var(--dim); margin-top: 4px;">Equator/meridian circle detail</div>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+              <label style="display: block; margin-bottom: 6px; font-size: 0.85em;">
+                Neuron Dot Resolution: <span id="setting-dot-res-value">16</span>
+              </label>
+              <input type="range" id="setting-dot-res" min="8" max="32" step="4" value="16" style="width: 100%;">
+              <div style="font-size: 0.7em; color: var(--dim); margin-top: 4px;">Neuron point sphere detail</div>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+              <label style="display: block; margin-bottom: 6px; font-size: 0.85em;">
+                Selection Ring Resolution: <span id="setting-ring-res-value">16</span>
+              </label>
+              <input type="range" id="setting-ring-res" min="8" max="32" step="4" value="16" style="width: 100%;">
+              <div style="font-size: 0.7em; color: var(--dim); margin-top: 4px;">Selected neuron ring detail</div>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+              <label style="display: block; margin-bottom: 6px; font-size: 0.85em;">
+                Trail Segments: <span id="setting-trail-segments-value">10</span>
+              </label>
+              <input type="range" id="setting-trail-segments" min="5" max="50" step="5" value="10" style="width: 100%;">
+              <div style="font-size: 0.7em; color: var(--dim); margin-top: 4px;">Neuron trail smoothness (5=low, 50=high)</div>
+            </div>
+          </div>
+
+          <!-- Visual Effects -->
+          <div style="margin-bottom: 25px;">
+            <h3 style="color: var(--accent); font-size: 0.9em; margin-bottom: 12px; text-transform: uppercase;">Visual Effects</h3>
+            
+            <div style="margin-bottom: 12px;">
+              <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                <span style="font-size: 0.85em;">Show Bloch Sphere Wireframe</span>
+                <input type="checkbox" id="setting-show-wireframe" style="cursor: pointer;">
+              </label>
+              <div style="font-size: 0.7em; color: var(--dim); margin-top: 4px;">Display wireframe sphere (may impact performance)</div>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+              <label style="display: block; margin-bottom: 6px; font-size: 0.85em;">
+                Wireframe Opacity: <span id="setting-wireframe-opacity-value">0</span>%
+              </label>
+              <input type="range" id="setting-wireframe-opacity" min="0" max="100" step="5" value="0" style="width: 100%;">
+              <div style="font-size: 0.7em; color: var(--dim); margin-top: 4px;">Wireframe sphere transparency</div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div style="display: flex; gap: 10px; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
+            <button id="settings-reset" style="flex: 1; padding: 8px; background: rgba(255,68,68,0.1); border: 1px solid #ff4444; color: #ff4444; cursor: pointer; border-radius: 3px; font-size: 0.85em;">Reset to Defaults</button>
+            <button id="settings-apply" style="flex: 2; padding: 8px; background: var(--accent); border: none; color: var(--bg); cursor: pointer; border-radius: 3px; font-size: 0.85em; font-weight: 600;">Apply Settings</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
