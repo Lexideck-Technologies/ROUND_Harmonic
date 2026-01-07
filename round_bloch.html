@@ -996,8 +996,11 @@
         >
           <span>CHECKPOINTS</span>
           <div style="display: flex; gap: 4px">
-            <button id="save-checkpoint-btn" style="padding: 3px 8px; font-size: 0.85em" title="Save Checkpoint">
+            <button id="save-checkpoint-btn" style="padding: 3px 8px; font-size: 0.85em" title="Save Checkpoint to Memory">
               💾
+            </button>
+            <button id="download-current-btn" style="padding: 3px 8px; font-size: 0.85em" title="Download Current State as Checkpoint File">
+              ⬇️
             </button>
             <button id="reset-btn" style="padding: 3px 8px; font-size: 0.85em; display: none" title="Reset">
               ❌reset
@@ -1005,7 +1008,7 @@
             <button
               onclick="document.getElementById('load-checkpoint-input').click()"
               style="padding: 3px 8px; font-size: 0.85em"
-              title="Load"
+              title="Load Checkpoint from File"
             >
               📂
             </button>
@@ -1037,7 +1040,8 @@
           harmonics = [1, 2, 4, 8],
           spinMultiplier = 2.0,
           quantizationStrength = 0.125,
-          useBinaryAlignment = false
+          useBinaryAlignment = false,
+          persistence = 1.0
         ) {
           this.inputSize = inputSize;
           this.hiddenSize = hiddenSize;
@@ -1045,9 +1049,12 @@
           this.spinMultiplier = spinMultiplier;
           this.quantizationStrength = quantizationStrength;
           this.useBinaryAlignment = useBinaryAlignment;
+          this.persistence = persistence;
 
           // Linear projections for Standard Part (x) and Phase (phi)
-          this.weightIH = tf.variable(tf.randomNormal([inputSize, hiddenSize * 2], 0, Math.sqrt(2 / inputSize)));
+          // Use Kaiming uniform initialization (matching PyTorch)
+          const kaimingBound = Math.sqrt(3.0) * Math.sqrt(2.0 / inputSize);
+          this.weightIH = tf.variable(tf.randomUniform([inputSize, hiddenSize * 2], -kaimingBound, kaimingBound));
           this.weightHH = tf.variable(tf.zeros([hiddenSize, hiddenSize * 2])); // CRITICAL: Zero initialization like PyTorch reference
           this.bias = tf.variable(tf.zeros([hiddenSize * 2]));
 
@@ -1058,8 +1065,8 @@
           }
           this.epsilon = tf.variable(tf.tensor1d(epsilonInit));
 
-          // Harmonic Identity - normalized properly
-          this.diagnosticHarmonics = tf.variable(tf.randomUniform([hiddenSize, harmonics.length], 0.5, 1.5));
+          // Harmonic Identity - Fixed: uniform [0.0, 1.0] matching Python
+          this.diagnosticHarmonics = tf.variable(tf.randomUniform([hiddenSize, harmonics.length], 0.0, 1.0));
 
           // Phase Pre-Partitioning
           const spread = (2.0 * Math.PI) / hiddenSize;
@@ -1081,13 +1088,21 @@
             const standardPart = tf.tanh(xGate);
 
             // Phase accumulation
-            const phiShift = tf.mul(tf.sigmoid(phiGate), Math.PI * this.spinMultiplier);
-            let phiNext = tf.add(hPrev, phiShift);
-
-            // Quantization Sieve
-            const qGrid = Math.PI / 4;
-            const qSieve = tf.mul(tf.round(tf.div(phiNext, qGrid)), qGrid);
-            phiNext = tf.add(phiNext, tf.mul(tf.sub(qSieve, phiNext), this.quantizationStrength));
+            let phiNext;
+            if (this.useBinaryAlignment) {
+              // GEOMETRIC ALIGNMENT (Mogura Axiom - Decoding)
+              const incomingBit = tf.slice(x, [0, 0], [-1, 1]);
+              phiNext = tf.add(tf.mul(hPrev, 0.5), tf.mul(incomingBit, Math.PI));
+            } else {
+              // Pure Accumulation with Persistence Decay
+              const phiShift = tf.mul(tf.sigmoid(phiGate), Math.PI * this.spinMultiplier);
+              phiNext = tf.add(tf.mul(hPrev, this.persistence), phiShift);
+              
+              // Quantization Sieve
+              const qGrid = Math.PI / 4;
+              const qSieve = tf.mul(tf.round(tf.div(phiNext, qGrid)), qGrid);
+              phiNext = tf.add(phiNext, tf.mul(tf.sub(qSieve, phiNext), this.quantizationStrength));
+            }
 
             // Modulo wrap
             phiNext = tf.mod(phiNext, 2.0 * Math.PI * this.spinMultiplier);
@@ -1105,6 +1120,11 @@
 
             const confidence = tf.div(tf.abs(hCos), this.harmonics.length);
             let output = tf.mul(standardPart, tf.add(1.0, tf.mul(this.epsilon, hCos)));
+            
+            // Binary alignment output adjustment (matching Python)
+            if (this.useBinaryAlignment) {
+              output = tf.add(output, tf.mul(hCos, 0.1));
+            }
 
             return {
               output: tf.keep(output),
@@ -1135,12 +1155,15 @@
           this.useBinaryAlignment = useBinaryAlignment;
           this.modelType = "uit_v1.0";
 
-          this.layer = new UITNeuronCell(inputSize, hiddenSize, harmonics, spinMultiplier, 0.125, useBinaryAlignment);
+          this.layer = new UITNeuronCell(inputSize, hiddenSize, harmonics, spinMultiplier, 0.125, useBinaryAlignment, 1.0);
 
           // Readout: [Standard Output, Cosine Identity, Sine Identity]
-          this.readout1 = tf.variable(tf.randomNormal([hiddenSize * 3, hiddenSize], 0, Math.sqrt(2 / (hiddenSize * 3))));
+          // Use Kaiming uniform initialization (matching PyTorch)
+          const readout1Bound = Math.sqrt(3.0) * Math.sqrt(2.0 / (hiddenSize * 3));
+          this.readout1 = tf.variable(tf.randomUniform([hiddenSize * 3, hiddenSize], -readout1Bound, readout1Bound));
           this.readout1Bias = tf.variable(tf.zeros([hiddenSize]));
-          this.readout2 = tf.variable(tf.randomNormal([hiddenSize, outputSize], 0, Math.sqrt(2 / hiddenSize)));
+          const readout2Bound = Math.sqrt(3.0) * Math.sqrt(2.0 / hiddenSize);
+          this.readout2 = tf.variable(tf.randomUniform([hiddenSize, outputSize], -readout2Bound, readout2Bound));
           this.readout2Bias = tf.variable(tf.zeros([outputSize]));
 
           this.phase = null;
@@ -2136,10 +2159,6 @@
           yTest.push([par]);
         }
 
-        console.log(
-          `Generated ${xTrain.length} train, ${xTest.length} test samples`
-        );
-
         return {
           train: { x: tf.tensor2d(xTrain), y: tf.tensor2d(yTrain) },
           test: { x: tf.tensor2d(xTest), y: tf.tensor2d(yTest) },
@@ -2210,7 +2229,6 @@
           yTest.push(oneHot);
         }
 
-        console.log('ASCII Decoder: 2000 train, 500 test (3D format)');
         return {
           train: { x: tf.tensor3d(xTrain), y: tf.tensor2d(yTrain) },
           test: { x: tf.tensor3d(xTest), y: tf.tensor2d(yTest) },
@@ -2268,20 +2286,31 @@
 
         // Create model based on selection
         if (modelType === "round_v0.8") {
-        model = new ROUNDModel(inputSize, hiddenSize, outputSize, true, 20);
+          model = new ROUNDModel(inputSize, hiddenSize, outputSize, true, 20);
+          log(`Created ROUND v0.8: Spinor=true, Steps=20`, false);
         } else if (modelType === "uit_v1.0") {
           const harmonicsStr = document.getElementById("harmonics-select").value;
           const harmonics = JSON.parse(harmonicsStr);
           const spinMultiplier = 1.0; // CRITICAL: Use 1.0 (2π range) not 2.0 (4π spinor)
           const useBinaryAlignment = document.getElementById("binary-alignment").value === "true";
+          const quantization = parseFloat(document.getElementById("quantization").value);
           model = new UITModel(inputSize, hiddenSize, outputSize, harmonics, spinMultiplier, useBinaryAlignment);
+          log(`Created UIT-ROUND v1.0: Harmonics=${harmonicsStr}, Spin=${spinMultiplier}, BinaryAlign=${useBinaryAlignment}, Quant=${quantization}`, false);
         } else if (modelType === "gru") {
           model = new GRUBaseline(inputSize, hiddenSize, outputSize);
+          log(`Created GRU Baseline`, false);
         }
 
         const datasets = generateTaskData(taskName);
         trainData = datasets.train;
         testData = datasets.test;
+        
+        // Log data generation details
+        if (taskName === "ascii_decoder") {
+          log(`Generated ASCII data: ${trainData.x.shape[0]} train, ${testData.x.shape[0]} test (3D format: [batch, seq=8, features=1])`, false);
+        } else {
+          log(`Generated ${taskName} data: ${trainData.x.shape[0]} train, ${testData.x.shape[0]} test`, false);
+        }
 
         const lr = currentLR;
         if (optimizer) optimizer = null;
@@ -2321,6 +2350,16 @@
         document.getElementById("save-checkpoint-btn").onclick = async () => {
           await saveCheckpoint();
         };
+        
+        document.getElementById("download-current-btn").onclick = async () => {
+          if (epoch > 0 || hist.acc.length > 0) {
+            log(`Saving current state and downloading...`, true);
+            const checkpoint = await saveCheckpoint();
+            downloadCheckpoint(checkpoint);
+          } else {
+            logWarning('No training data to save. Train first or load a checkpoint.');
+          }
+        };
         document.getElementById("benchmark-btn").onclick = async () => {
           await runBenchmark(false);
         };
@@ -2328,10 +2367,14 @@
           await runBenchmark(true);
         };
 
-        log(
-          `Initialized: ${modelType}, ${hiddenSize}H, LR=${lr}, Task=${taskName}`,
-          true
-        );
+        logPhase(`INITIALIZATION: ${modelType.toUpperCase()} MODEL`);
+        log(`Config: Hidden=${hiddenSize}H, LR=2^${Math.round(Math.log2(lr))}, Task=${taskName}`, true);
+        log(`Input size: ${inputSize} | Output size: ${outputSize}`, false);
+        log(`Training data: ${trainData.x.shape[0]} samples | Test data: ${testData.x.shape[0]} samples`, false);
+        
+        // Log optimizer setup
+        log(`Optimizer: Adam (LR=2^${Math.round(Math.log2(lr))})`, false);
+        logSuccess(`Initialization complete. Ready for training.`);
 
         // Update display elements for epoch 0
         document.getElementById("graph-epoch").textContent = 0;
@@ -2671,7 +2714,15 @@
         }
 
         if (isTraining) {
-          log(`Training started (${model.modelType})...`, true);
+          const taskName = document.getElementById("task").value;
+          const modelType = document.getElementById("model-select").value;
+          const hiddenSize = parseInt(document.getElementById("hidden").value);
+          const lockStr = parseFloat(document.getElementById("lock-strength").value);
+          const lockDelay = parseInt(document.getElementById("lock-delay").value);
+          
+          logPhase(`TRAINING PHASE: ${modelType.toUpperCase()} | Task: ${taskName} | Hidden: ${hiddenSize}H`);
+          log(`Config: LR=2^${Math.round(Math.log2(currentLR))}, Lock=${lockStr.toFixed(2)}, Delay=${lockDelay}`, true);
+          log(`Starting training from E${epoch}...`, true);
           trainLoop();
         } else {
           log(`Training paused at E${epoch}`, true);
@@ -2837,18 +2888,30 @@
           document.getElementById("graph-delta").style.color = delta >= 0 ? "#44ff88" : "#ff4444";
         }
 
+      // Enhanced epoch logging matching Python style
       if (epoch % 5 === 0) {
         drawTimelineMinimap();
-        if (accuracy >= 0.99) {
-          log(
-            `E${epoch}: Converged! Acc=${(accuracy * 100).toFixed(1)}%`,
-            true
-          );
-        } else if (epoch % 50 === 0) {
-          log(
-            `E${epoch}: Acc=${(accuracy * 100).toFixed(1)}%, Loss=${taskLoss.toFixed(3)}, Lock=${lockLoss.toFixed(3)}`
-          );
+        
+        // Get confidence if UIT model
+        let confidence = null;
+        if (model.modelType === 'uit_v1.0' && model.layer) {
+          // UIT models expose confidence through layer
+          // For now, we'll use a placeholder or calculate from phase coherence
+          confidence = 0; // Placeholder - would need to expose from model
         }
+        
+        if (accuracy >= 0.99) {
+          logLocked(`CONVERGED AT E${epoch}`);
+          logSuccess(`E${epoch}: Converged! Acc=${(accuracy * 100).toFixed(2)}% | Task=${taskLoss.toFixed(4)} | Lock=${lockLoss.toFixed(4)}`);
+        } else if (epoch % 50 === 0) {
+          // Format matching Python: "Epoch {epoch:4d} | Acc: {acc:7.2%} | Task: {task:8.4f} | Lock: {lock:8.4f}"
+          logEpoch(epoch, accuracy, taskLoss, lockLoss, confidence);
+        }
+      }
+      
+      // Log lock activation when it kicks in
+      if (epoch === delayThreshold && delayThreshold > 0) {
+        log(`Lock loss activated at E${epoch} (strength=${lockStr.toFixed(2)})`, true, "success");
       }
 
       // --- ALWAYS update convergence time if we have true convergence ---
@@ -2862,10 +2925,8 @@
         // Stop if checkbox is checked
         if (document.getElementById("stop-on-convergence").checked) {
           stopTraining();
-          log(
-            `Training stopped: Converged at E${epoch} with ${(accuracy * 100).toFixed(2)}% accuracy`,
-            true
-          );
+          logLocked(`TRAINING STOPPED: CONVERGED AT E${epoch}`);
+          logSuccess(`Final: Acc=${(accuracy * 100).toFixed(2)}% | Task=${taskLoss.toFixed(4)} | Lock=${lockLoss.toFixed(4)}`);
         }
       }
         
@@ -2931,16 +2992,15 @@
 
             checkpoints.push(checkpoint);
             updateCheckpointList();
-            log(
-              `Auto-saved checkpoint ${checkpoint.id} before reset (E${epoch}, Acc=${(checkpoint.accuracy * 100).toFixed(1)}%)`,
-              true
-            );
+            logSuccess(`Auto-saved checkpoint ${checkpoint.id} before reset`);
+            log(`Epoch: ${epoch} | Acc: ${(checkpoint.accuracy * 100).toFixed(2)}%`, false);
           } catch (err) {
-            log(`Warning: Could not save checkpoint before reset: ${err.message}`, true);
+            logWarning(`Could not save checkpoint before reset: ${err.message}`);
           }
         }
 
-        log("Resetting model...", true);
+        logPhase(`RESET: MODEL REINITIALIZATION`);
+        log("Resetting model and clearing history...", true);
 
         // Reset all metrics and history
         Object.keys(hist).forEach(key => {
@@ -3431,15 +3491,80 @@
         expressions: [] // Array of {expr: string, color: string, enabled: boolean}
       };
 
-      function log(msg, important = false) {
+      // Enhanced logging system matching Python WorkflowLogger
+      function log(msg, important = false, type = "info") {
         const logContent = document.getElementById("log-content");
         const entry = document.createElement("div");
         entry.style.margin = "2px 0";
-        entry.style.color = important ? "var(--text)" : "var(--dim)";
-        entry.style.fontWeight = important ? "600" : "normal";
-        entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        
+        const timestamp = new Date().toLocaleTimeString();
+        
+        // Style based on type
+        let color = "var(--dim)";
+        let fontWeight = "normal";
+        let prefix = "";
+        
+        if (type === "phase") {
+          color = "var(--accent)";
+          fontWeight = "700";
+          prefix = "--- ";
+        } else if (type === "success") {
+          color = "#44ff88";
+          fontWeight = "600";
+        } else if (type === "warning") {
+          color = "#ffaa44";
+          fontWeight = "600";
+        } else if (type === "error") {
+          color = "#ff4444";
+          fontWeight = "600";
+        } else if (type === "locked") {
+          color = "#44ff88";
+          fontWeight = "700";
+          prefix = "--- [";
+        } else if (important) {
+          color = "var(--text)";
+          fontWeight = "600";
+        }
+        
+        entry.style.color = color;
+        entry.style.fontWeight = fontWeight;
+        entry.style.fontFamily = "JetBrains Mono, monospace";
+        entry.textContent = `[${timestamp}] ${prefix}${msg}${type === "locked" ? "] ---" : ""}`;
         logContent.appendChild(entry);
         logContent.scrollTop = logContent.scrollHeight;
+      }
+      
+      // Convenience functions for structured logging
+      function logPhase(msg) {
+        log(msg, true, "phase");
+      }
+      
+      function logSuccess(msg) {
+        log(msg, true, "success");
+      }
+      
+      function logWarning(msg) {
+        log(msg, true, "warning");
+      }
+      
+      function logError(msg) {
+        log(msg, true, "error");
+      }
+      
+      function logLocked(msg) {
+        log(msg, true, "locked");
+      }
+      
+      function logEpoch(epoch, acc, taskLoss, lockLoss, conf = null) {
+        const accStr = (acc * 100).toFixed(2).padStart(6) + "%";
+        const taskStr = taskLoss.toFixed(4).padStart(8);
+        const lockStr = lockLoss.toFixed(4).padStart(8);
+        
+        let msg = `E${epoch.toString().padStart(4)} | Acc: ${accStr} | Task: ${taskStr} | Lock: ${lockStr}`;
+        if (conf !== null) {
+          msg += ` | Conf: ${conf.toFixed(4).padStart(8)}`;
+        }
+        log(msg, false, "info");
       }
 
       function updateConvergenceInfo() {
@@ -3853,12 +3978,10 @@
 
         checkpoints.push(checkpoint);
         updateCheckpointList();
-        log(
-          `Checkpoint ${checkpoint.id} saved (${config.model}, E${epoch}, Acc=${(
-            checkpoint.accuracy * 100
-          ).toFixed(1)}%)`,
-          true
-        );
+        logSuccess(`Checkpoint ${checkpoint.id} saved`);
+        log(`Model: ${config.model} | Epoch: ${epoch} | Acc: ${(checkpoint.accuracy * 100).toFixed(2)}%`, true);
+        log(`History: ${hist.acc.length} epochs | Phase history: ${phaseHistory.length} snapshots`, false);
+        log(`Tip: Click the 💾 button next to the checkpoint in the list, or use ⬇️ to download current state`, false);
         return checkpoint;
       }
 
@@ -3875,192 +3998,258 @@
         checkpoints.reverse().forEach((cp) => {
           const item = document.createElement("div");
           item.style.cssText =
-            "padding: 8px; margin: 4px 0; background: rgba(255,255,255,0.05); border-radius: 3px; cursor: pointer; border: 1px solid transparent;";
+            "padding: 8px; margin: 4px 0; background: rgba(255,255,255,0.05); border-radius: 3px; border: 1px solid transparent;";
           item.innerHTML = `
-              <div style="font-weight: 600; color: var(--accent);">CP #${
-                cp.id
-              }</div>
-              <div style="font-size: 0.85em; margin-top: 2px;">E${
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <div style="font-weight: 600; color: var(--accent);">CP #${
+                  cp.id
+                }</div>
+                <button onclick="event.stopPropagation(); downloadCheckpoint(checkpoints.find(c => c.id === ${cp.id}))" 
+                  style="padding: 3px 8px; font-size: 0.85em" title="Download checkpoint to file">
+                  ⬇️
+                </button>
+              </div>
+              <div style="font-size: 0.85em; margin-top: 2px; cursor: pointer;">E${
                 cp.epoch
               } | Acc: ${(cp.accuracy * 100).toFixed(1)}%</div>
-              <div style="font-size: 0.75em; color: var(--dim); margin-top: 2px;">${new Date(
+              <div style="font-size: 0.75em; color: var(--dim); margin-top: 2px; cursor: pointer;">${new Date(
                 cp.timestamp
               ).toLocaleTimeString()}</div>
             `;
-          item.onmouseenter = () => (item.style.borderColor = "var(--accent)");
-          item.onmouseleave = () => (item.style.borderColor = "transparent");
-          item.onclick = () => loadCheckpoint(cp);
+          item.onmouseenter = () => {
+            item.style.borderColor = "var(--accent)";
+            item.style.background = "rgba(255,255,255,0.08)";
+          };
+          item.onmouseleave = () => {
+            item.style.borderColor = "transparent";
+            item.style.background = "rgba(255,255,255,0.05)";
+          };
+          // Make the main area clickable for loading, but exclude the download button
+          item.onclick = (e) => {
+            if (e.target.tagName !== 'BUTTON' && !e.target.closest('button')) {
+              loadCheckpoint(cp);
+            }
+          };
           list.appendChild(item);
         });
         checkpoints.reverse();
       }
 
       async function loadCheckpoint(cp) {
-        log(`Loading checkpoint ${cp.id} (${cp.config.model})...`, true);
+        try {
+          logPhase(`LOADING CHECKPOINT #${cp.id}`);
+          log(`Model: ${cp.config.model} | Epoch: ${cp.epoch} | Acc: ${(cp.accuracy * 100).toFixed(2)}%`, true);
 
-        // Restore UI configuration
-        document.getElementById("model-select").value = cp.config.model;
-        document.getElementById("task").value = cp.config.task;
-        document.getElementById("hidden").value = cp.config.hidden;
-        document.getElementById("hidden-val").textContent = cp.config.hidden;
-        document.getElementById("lock-strength").value = cp.config.lock;
-        document.getElementById("lock-val").textContent = cp.config.lock.toFixed(2);
-        
-        // Restore lock delay if present (default to 500 for old checkpoints)
-        const lockDelay = cp.config.lockDelay !== undefined ? cp.config.lockDelay : 500;
-        document.getElementById("lock-delay").value = lockDelay;
-        document.getElementById("lock-delay-val").textContent = lockDelay;
-
-        // Update LR slider
-        currentLR = cp.config.lr;
-        const power = Math.round(Math.log2(currentLR));
-        document.getElementById("lr-slider").value = power;
-        document.getElementById("lr-display").textContent = power;
-        document.getElementById("lr-val").textContent = currentLR.toFixed(6);
-
-        // Show/hide UIT params based on model
-        const uitParams = document.getElementById("uit-params");
-        if (cp.config.model === "uit_v1.0") {
-          uitParams.style.display = "block";
-          if (cp.config.harmonics) {
-            document.getElementById("harmonics-select").value = JSON.stringify(cp.config.harmonics);
+          // Validate checkpoint has required fields
+          if (!cp.config || !cp.weights) {
+            throw new Error("Checkpoint is missing required configuration or weights");
           }
-          if (cp.config.quantization !== undefined) {
-            document.getElementById("quantization").value = cp.config.quantization;
-            document.getElementById("quant-val").textContent = cp.config.quantization.toFixed(3);
-          }
-          if (cp.config.useBinaryAlignment !== undefined) {
-            document.getElementById("binary-alignment").value = cp.config.useBinaryAlignment.toString();
-          }
-        } else {
-          uitParams.style.display = "none";
-        }
 
-        // Recreate model with exact config
-        const taskConfig = getTaskConfig(cp.config.task);
-        if (model) model.dispose();
-
-        if (cp.config.model === "round_v0.8") {
-          model = new ROUNDModel(taskConfig.inputSize, cp.config.hidden, taskConfig.outputSize, true, 20);
-        } else if (cp.config.model === "uit_v1.0") {
-          model = new UITModel(
-            taskConfig.inputSize,
-            cp.config.hidden,
-            taskConfig.outputSize,
-            cp.config.harmonics || [1, 2, 4, 8],
-            cp.config.spinMultiplier || 2.0,
-            cp.config.useBinaryAlignment || false
-          );
-        } else if (cp.config.model === "gru") {
-          model = new GRUBaseline(taskConfig.inputSize, cp.config.hidden, taskConfig.outputSize);
-        }
-
-        // Restore weights
-        model.importWeights(cp.weights);
-
-        // Restore data
-        const datasets = generateTaskData(cp.config.task);
-        trainData = datasets.train;
-        testData = datasets.test;
-
-        // Restore history (handle old checkpoints that may not have all fields)
-        hist.acc = (cp.history.acc || []).slice();
-        hist.task = (cp.history.task || []).slice();
-        hist.lock = (cp.history.lock || []).slice();
-        hist.total = (cp.history.total || []).slice();
-        hist.delta = (cp.history.delta || []).slice();
-        hist.phaseMean = (cp.history.phaseMean || []).slice();
-        hist.phaseStd = (cp.history.phaseStd || []).slice();
-        hist.phaseMin = (cp.history.phaseMin || []).slice();
-        hist.phaseMax = (cp.history.phaseMax || []).slice();
-        hist.activeNeurons = (cp.history.activeNeurons || []).slice();
-        hist.lockedNeurons = (cp.history.lockedNeurons || []).slice();
-        hist.confidence = (cp.history.confidence || []).slice();
-        hist.converged = (cp.history.converged || []).slice();
-        epoch = cp.epoch;
-
-        // Restore phase history and rebuild trajectories
-        if (cp.phaseHistory && cp.phaseHistory.length > 0) {
-          phaseHistory = cp.phaseHistory.slice();
-          neuronTrails.forEach(trail => trail.length = 0);
+          // Restore UI configuration FIRST
+          document.getElementById("model-select").value = cp.config.model;
+          document.getElementById("task").value = cp.config.task;
+          document.getElementById("hidden").value = cp.config.hidden;
+          document.getElementById("hidden-val").textContent = cp.config.hidden;
+          document.getElementById("lock-strength").value = cp.config.lock;
+          document.getElementById("lock-val").textContent = cp.config.lock.toFixed(2);
           
-          // Rebuild trajectory from saved phase history
-          phaseHistory.forEach(phases => {
-            if (phases && phases.length > 0) {
-              phases.forEach((phi, i) => {
-                if (i < neuronTrails.length) {
-                  const locking = Math.sin(phi / 2) ** 2;
-                  const theta = locking * Math.PI;
-                  neuronTrails[i].push({ theta, phi });
-                }
-              });
+          // Restore lock delay if present (default to 500 for old checkpoints)
+          const lockDelay = cp.config.lockDelay !== undefined ? cp.config.lockDelay : 500;
+          document.getElementById("lock-delay").value = lockDelay;
+          document.getElementById("lock-delay-val").textContent = lockDelay;
+
+          // Update LR slider
+          currentLR = cp.config.lr;
+          const power = Math.round(Math.log2(currentLR));
+          document.getElementById("lr-slider").value = power;
+          document.getElementById("lr-display").textContent = power;
+          document.getElementById("lr-val").textContent = currentLR.toFixed(6);
+
+          // Show/hide UIT params based on model
+          const uitParams = document.getElementById("uit-params");
+          if (cp.config.model === "uit_v1.0") {
+            uitParams.style.display = "block";
+            if (cp.config.harmonics) {
+              document.getElementById("harmonics-select").value = JSON.stringify(cp.config.harmonics);
             }
-          });
-
-          // Trim trails to max length
-          neuronTrails.forEach(trail => {
-            if (trail.length > trailLength) {
-              trail.splice(0, trail.length - trailLength);
+            if (cp.config.quantization !== undefined) {
+              document.getElementById("quantization").value = cp.config.quantization;
+              document.getElementById("quant-val").textContent = cp.config.quantization.toFixed(3);
             }
-          });
+            if (cp.config.useBinaryAlignment !== undefined) {
+              document.getElementById("binary-alignment").value = cp.config.useBinaryAlignment.toString();
+            }
+          } else {
+            uitParams.style.display = "none";
+          }
+
+          // Recreate model with exact config from checkpoint
+          const taskConfig = getTaskConfig(cp.config.task);
+          if (model) {
+            model.dispose();
+            model = null;
+          }
+
+          log(`Recreating model: ${cp.config.model}, Hidden=${cp.config.hidden}H, Input=${taskConfig.inputSize}, Output=${taskConfig.outputSize}`, false);
+
+          if (cp.config.model === "round_v0.8") {
+            model = new ROUNDModel(taskConfig.inputSize, cp.config.hidden, taskConfig.outputSize, true, 20);
+          } else if (cp.config.model === "uit_v1.0") {
+            model = new UITModel(
+              taskConfig.inputSize,
+              cp.config.hidden,
+              taskConfig.outputSize,
+              cp.config.harmonics || [1, 2, 4, 8],
+              cp.config.spinMultiplier || 1.0, // Use 1.0 for UIT (2π range)
+              cp.config.useBinaryAlignment || false
+            );
+          } else if (cp.config.model === "gru") {
+            model = new GRUBaseline(taskConfig.inputSize, cp.config.hidden, taskConfig.outputSize);
+          } else {
+            throw new Error(`Unknown model type: ${cp.config.model}`);
+          }
+
+          // Restore weights with error handling
+          log(`Loading weights into model...`, false);
+          try {
+            model.importWeights(cp.weights);
+            logSuccess(`Weights loaded successfully`);
+          } catch (weightError) {
+            // Log detailed error about shape mismatch
+            logError(`Failed to load weights: ${weightError.message}`);
+            log(`Checkpoint config: Model=${cp.config.model}, Hidden=${cp.config.hidden}, Task=${cp.config.task}`, false);
+            log(`Current model config: Model=${cp.config.model}, Hidden=${model.hiddenSize}, Input=${taskConfig.inputSize}, Output=${taskConfig.outputSize}`, false);
+            throw weightError; // Re-throw to be caught by outer catch
+          }
+
+          // Restore data
+          const datasets = generateTaskData(cp.config.task);
+          trainData = datasets.train;
+          testData = datasets.test;
+
+          // Restore history (handle old checkpoints that may not have all fields)
+          hist.acc = (cp.history.acc || []).slice();
+          hist.task = (cp.history.task || []).slice();
+          hist.lock = (cp.history.lock || []).slice();
+          hist.total = (cp.history.total || []).slice();
+          hist.delta = (cp.history.delta || []).slice();
+          hist.phaseMean = (cp.history.phaseMean || []).slice();
+          hist.phaseStd = (cp.history.phaseStd || []).slice();
+          hist.phaseMin = (cp.history.phaseMin || []).slice();
+          hist.phaseMax = (cp.history.phaseMax || []).slice();
+          hist.activeNeurons = (cp.history.activeNeurons || []).slice();
+          hist.lockedNeurons = (cp.history.lockedNeurons || []).slice();
+          hist.confidence = (cp.history.confidence || []).slice();
+          hist.converged = (cp.history.converged || []).slice();
+          epoch = cp.epoch;
+
+          // Restore phase history and rebuild trajectories
+          if (cp.phaseHistory && cp.phaseHistory.length > 0) {
+            phaseHistory = cp.phaseHistory.slice();
+            neuronTrails.forEach(trail => trail.length = 0);
+            
+            // Rebuild trajectory from saved phase history
+            phaseHistory.forEach(phases => {
+              if (phases && phases.length > 0) {
+                phases.forEach((phi, i) => {
+                  if (i < neuronTrails.length) {
+                    const locking = Math.sin(phi / 2) ** 2;
+                    const theta = locking * Math.PI;
+                    neuronTrails[i].push({ theta, phi });
+                  }
+                });
+              }
+            });
+
+            // Trim trails to max length
+            neuronTrails.forEach(trail => {
+              if (trail.length > trailLength) {
+                trail.splice(0, trail.length - trailLength);
+              }
+            });
+          }
+
+          // Restore optimizer
+          if (optimizer) optimizer = null;
+          optimizer = tf.train.adam(cp.config.lr);
+
+          // Update graph displays
+          document.getElementById("graph-epoch").textContent = epoch;
+          document.getElementById("graph-acc").textContent =
+            (cp.accuracy * 100).toFixed(2) + "%";
+          if (hist.task.length > 0) {
+            document.getElementById("graph-loss").textContent =
+              hist.task[hist.task.length - 1].toFixed(4);
+            document.getElementById("graph-lock").textContent =
+              hist.lock[hist.lock.length - 1].toFixed(4);
+          }
+
+          // Update timeline state
+          currentTimelineEpoch = epoch - 1;
+          timelineMode = "live";
+          
+          // Update epoch display
+          const epochDisplay = document.getElementById("timeline-epoch-display");
+          if (epochDisplay) {
+            epochDisplay.textContent = `E${currentTimelineEpoch}`;
+          }
+          updateTimelineButtonStates();
+
+          // Update all visualizations
+          drawTimelineMinimap();
+          updateVisuals();
+
+          logSuccess(`Checkpoint ${cp.id} loaded successfully`);
+          log(`Restored to E${epoch} | Acc: ${(cp.accuracy * 100).toFixed(2)}% | History: ${hist.acc.length} epochs`, false);
+        } catch (err) {
+          logError(`Failed to load checkpoint ${cp.id}: ${err.message}`);
+          log(`Error details: ${err.stack || 'No stack trace available'}`, false);
+          
+          // Try to restore UI to a safe state
+          try {
+            // Reinitialize with current settings if checkpoint load failed
+            log(`Attempting to restore UI to current configuration...`, false);
+            await init();
+            logWarning(`UI restored to current configuration. Checkpoint load failed.`);
+          } catch (initErr) {
+            logError(`Failed to restore UI: ${initErr.message}`);
+          }
         }
-
-        // Restore optimizer
-        if (optimizer) optimizer = null;
-        optimizer = tf.train.adam(cp.config.lr);
-
-        // Update graph displays
-        document.getElementById("graph-epoch").textContent = epoch;
-        document.getElementById("graph-acc").textContent =
-          (cp.accuracy * 100).toFixed(2) + "%";
-        if (hist.task.length > 0) {
-          document.getElementById("graph-loss").textContent =
-            hist.task[hist.task.length - 1].toFixed(4);
-          document.getElementById("graph-lock").textContent =
-            hist.lock[hist.lock.length - 1].toFixed(4);
-        }
-
-        // Update timeline state
-        currentTimelineEpoch = epoch - 1;
-        timelineMode = "live";
-        
-        // Update epoch display
-        const epochDisplay = document.getElementById("timeline-epoch-display");
-        if (epochDisplay) {
-          epochDisplay.textContent = `E${currentTimelineEpoch}`;
-        }
-        updateTimelineButtonStates();
-
-        // Update all visualizations
-        drawTimelineMinimap();
-        updateVisuals();
-
-        log(`Checkpoint ${cp.id} loaded successfully`, true);
       }
 
       async function runBenchmark(withTraining = false) {
-        log(`Starting benchmark (${withTraining ? 'with' : 'without'} training)...`, true);
-        
         const taskName = document.getElementById("task").value;
+        const modelType = document.getElementById("model-select").value;
         const isMultiClass = taskName === "ascii_decoder";
         const startEpoch = epoch;
+        
+        logPhase(`BENCHMARK: ${modelType.toUpperCase()} vs BASELINE | Task: ${taskName.toUpperCase()}`);
+        log(`Starting benchmark (${withTraining ? 'with' : 'without'} training)...`, true);
 
         if (withTraining) {
           // Train for 100 more epochs
-          log('Training for 100 epochs...', true);
+          logPhase(`BENCHMARK TRAINING PHASE: 100 EPOCHS`);
           isTraining = true;
+          let trainingEpochs = 0;
           for (let i = 0; i < 100; i++) {
             await step();
-            if (!isTraining) break; // User interrupted
+            trainingEpochs++;
+            if (!isTraining) {
+              logWarning(`Training interrupted by user at E${epoch}`);
+              break; // User interrupted
+            }
           }
           stopTraining();
+          log(`Benchmark training complete: ${trainingEpochs} epochs`, true);
         }
 
         // Generate fresh test data
-        log('Generating fresh test data...', true);
+        log(`Generating fresh test data (${taskName})...`, true);
         const freshData = generateTaskData(taskName);
+        log(`Test set size: ${freshData.test.x.shape[0]} samples`, false);
         
         // Evaluate on fresh test data
+        log(`Evaluating model on fresh test data...`, true);
         const pred = model.predict(freshData.test.x);
         let acc;
         if (isMultiClass) {
@@ -4077,11 +4266,11 @@
         acc.dispose();
         pred.dispose();
 
-        log(`Benchmark accuracy: ${(accuracy * 100).toFixed(2)}%`, true);
+        logSuccess(`Benchmark accuracy: ${(accuracy * 100).toFixed(2)}%`);
 
         // Run full validation if applicable
         if (['xor', 'parity4', 'parity8'].includes(taskName)) {
-          log('Running full validation...', true);
+          logPhase(`FULL VALIDATION: ${taskName.toUpperCase()}`);
           await validateFullSpace(taskName);
         }
 
@@ -4099,12 +4288,17 @@
           }
         };
 
-        log(`Benchmark complete: ${JSON.stringify(report, null, 2)}`, true);
+        logPhase(`BENCHMARK COMPLETE`);
+        log(`Model: ${report.model} | Task: ${report.task} | Acc: ${(report.accuracy * 100).toFixed(2)}%`, true);
+        log(`Total Epochs: ${report.totalEpochs} | Training Epochs: ${report.epochsTraining}`, false);
+        log(`Config: Hidden=${report.config.hidden}H, LR=2^${Math.round(Math.log2(report.config.lr))}`, false);
         
         // Auto-save checkpoint if accuracy improved
         if (hist.acc.length > 0 && accuracy > hist.acc[hist.acc.length - 1]) {
-          log('Accuracy improved! Saving checkpoint...', true);
+          logSuccess('Accuracy improved! Auto-saving checkpoint...');
           await saveCheckpoint();
+        } else if (hist.acc.length > 0) {
+          log(`Accuracy: ${(accuracy * 100).toFixed(2)}% (previous: ${(hist.acc[hist.acc.length - 1] * 100).toFixed(2)}%)`, false);
         }
       }
 
@@ -4112,6 +4306,13 @@
         let totalCorrect = 0;
         let totalInputs = 0;
         const errors = [];
+        
+        let spaceSize = 0;
+        if (taskName === 'xor') spaceSize = 4;
+        else if (taskName === 'parity4') spaceSize = 16;
+        else if (taskName === 'parity8') spaceSize = 256;
+        
+        log(`Validating full ${taskName} space (${spaceSize} inputs)...`, true);
 
         if (taskName === 'xor') {
           const allInputs = [[0,0], [0,1], [1,0], [1,1]];
@@ -4180,29 +4381,43 @@
         }
 
         const finalAcc = ((totalCorrect / totalInputs) * 100).toFixed(4);
-        log(`Full validation: ${finalAcc}% (${totalCorrect}/${totalInputs} correct)`, true);
+        if (finalAcc === "100.0000") {
+          logSuccess(`Full validation: ${finalAcc}% (${totalCorrect}/${totalInputs} correct) - PERFECT`);
+        } else {
+          log(`Full validation: ${finalAcc}% (${totalCorrect}/${totalInputs} correct)`, true);
+        }
         
         if (errors.length > 0 && errors.length <= 10) {
-          log(`Errors found:`, true);
+          logWarning(`Errors found (${errors.length}):`);
           errors.forEach(e => {
-            log(`  Input ${e.input}: pred=${e.predicted}, actual=${e.actual}`);
+            log(`  Input ${JSON.stringify(e.input)}: pred=${e.predicted}, actual=${e.actual}`, false);
           });
         } else if (errors.length > 10) {
-          log(`  ${errors.length} errors (too many to display)`, true);
+          logWarning(`  ${errors.length} errors found (too many to display)`);
         }
 
         return { accuracy: finalAcc, correct: totalCorrect, wrong: errors.length };
       }
 
       function downloadCheckpoint(cp) {
-        const dataStr = JSON.stringify(cp, null, 2);
-        const blob = new Blob([dataStr], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `checkpoint_${cp.id}_e${cp.epoch}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
+        if (!cp) {
+          logError("No checkpoint provided for download");
+          return;
+        }
+        try {
+          const dataStr = JSON.stringify(cp, null, 2);
+          const blob = new Blob([dataStr], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          const timestamp = new Date(cp.timestamp).toISOString().replace(/[:.]/g, '-').slice(0, -5);
+          a.download = `checkpoint_${cp.config.model}_${cp.config.task}_e${cp.epoch}_${timestamp}.json`;
+          a.click();
+          URL.revokeObjectURL(url);
+          logSuccess(`Checkpoint ${cp.id} downloaded: ${a.download}`);
+        } catch (err) {
+          logError(`Failed to download checkpoint: ${err.message}`);
+        }
       }
 
       // Convergence zone interactions
@@ -4297,12 +4512,30 @@
         reader.onload = async (event) => {
           try {
             const cp = JSON.parse(event.target.result);
+            
+            // Validate checkpoint structure
+            if (!cp.config || !cp.weights) {
+              logError(`Invalid checkpoint file: missing config or weights`);
+              return;
+            }
+            
+            // Check if checkpoint ID already exists
+            if (checkpoints.find(c => c.id === cp.id)) {
+              logWarning(`Checkpoint ${cp.id} already exists. Adding as new checkpoint.`);
+              cp.id = nextCheckpointId++;
+            } else {
+              nextCheckpointId = Math.max(nextCheckpointId, cp.id + 1);
+            }
+            
             checkpoints.push(cp);
-            nextCheckpointId = Math.max(nextCheckpointId, cp.id + 1);
             updateCheckpointList();
+            logSuccess(`Checkpoint file loaded. Attempting to restore...`);
             await loadCheckpoint(cp);
           } catch (err) {
-            log(`Error loading checkpoint: ${err.message}`, true);
+            logError(`Error loading checkpoint file: ${err.message}`);
+            if (err.stack) {
+              log(`Stack trace: ${err.stack}`, false);
+            }
           }
         };
         reader.readAsText(file);
